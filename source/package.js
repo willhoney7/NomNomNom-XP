@@ -5,11 +5,15 @@ enyo.depends(
 	//style
 	"css/App.css",
 
+	//components
 
-	//js
+	//pages
 	"js/loginPage.js",
 	"js/gridPage.js",
 	"js/articlePage.js",
+	"js/tourPage.js",
+	"js/settingsPage.js",
 
+	//app
 	"js/App.js"
 );

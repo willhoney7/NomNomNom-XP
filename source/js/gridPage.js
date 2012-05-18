@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "Page",
 	fit: true,
 	components:[
-		{content: "this is the grid WORLD"}
+		{content: "this is the grid"}
 	],
 
 	showingChanged: function(previousValue) {

@@ -3,10 +3,15 @@ enyo.kind({
 	fit: true,
 	components:[
 		{kind: "Book", components: [
+			//always load these
 			{name: "loadingPage", content: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
 			{kind: "gridPage"},
-			{kind: "articlePage"}
+			{kind: "articlePage"},
+
+			//load these lazy, because they might not always be needed
+			{name: "tourPage", kind: "tourPage", lazy: true},
+			{name: "settingsPage", kind: "settingsPage", lazy: true}
 		]},
 	],
 	create: function () {
@@ -49,10 +54,12 @@ enyo.kind({
 			this.showLoginPage();
 	},
 	loggedIn: function(inSender, inEvent) {
-		this.showGridPage();
 
-		if(inEvent.showTour){
+		if(inEvent && inEvent.showTour){
+			this.showTourPage();
 			//showTour
+		} else {
+			this.showGridPage();
 		}
 		console.log("Logged in");
 	},
@@ -65,6 +72,9 @@ enyo.kind({
 	},
 	showArticlePage: function() {
 		this.$.book.pageName("articlePage");
+	},
+	showTourPage: function () {
+		this.$.book.pageName("tourPage");
 	},
 
 	

@@ -7,7 +7,7 @@ enyo.kind({
 	},
 	components:[
 		{content: "Please log in, chump."},
-		{kind: "Button", ontap: "loggedIn"}
+		{kind: "Button", content: "HAX log in", ontap: "loggedIn"}
 	],
 	create: function(){
 		this.inherited(arguments);
@@ -37,6 +37,7 @@ enyo.kind({
 			Yes: this.bubble("onLogin", {showTour: true});
 			No: this.bubble("onLogin");
 		*/
-		this.bubble("onLogin");
+		this.bubble("onLogin", {showTour: true});
+		//this.bubble("onLogin");
 	}
 });
