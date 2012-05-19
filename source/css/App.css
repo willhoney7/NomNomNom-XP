@@ -1,10 +1,29 @@
-/*
-	Put anything you reference with "url()" in ../assets/
-	This way, you can minify your application, and just remove the "source" folder for production
-*/
-#app {
-	margin: 16px;
-	border-radius: 4px;
-	background-color: silver;
-	padding: 16px;
-}
+.enyo-page {
+  /*height: 100%;
+  width: 100%;*/ }
+
+.centered {
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 0;
+  height: 0; }
+
+@media screen and (min-width: 400px) {
+  .loginGroup, .onyx-button {
+    width: 300px; } }
+@media screen and (min-width: 500px) {
+  .loginGroup, .onyx-button {
+    width: 400px; } }
+.loginGroup .onyx-button, .onyx-button .onyx-button {
+  width: 100%;
+  margin: 5px 0; }
+
+.errorMessage {
+  text-align: center;
+  color: #cc3333;
+  font-size: 14px;
+  margin-top: 5px; }

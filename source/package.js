@@ -1,4 +1,8 @@
 enyo.depends(
+	//enyo extras
+	"$lib/onyx",
+	"$lib/layout/fittable",
+
 	//vendors
 	"vendors/book/",
 

@@ -6,7 +6,7 @@ enyo.kind({
 			//always load these
 			{name: "loadingPage", content: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
-			{kind: "gridPage"},
+			{kind: "gridPage", onViewArticles: "showArticlePage"},
 			{kind: "articlePage"},
 
 			//load these lazy, because they might not always be needed
@@ -51,9 +51,12 @@ enyo.kind({
 		//	this.showGridPage();
 		//else
 			this.showLoginPage();*/
-			this.showLoginPage();
+			
+		this.showLoginPage();
 	},
 	loggedIn: function(inSender, inEvent) {
+
+		console.log("Logged in");
 
 		if(inEvent && inEvent.showTour){
 			this.showTourPage();
@@ -61,7 +64,9 @@ enyo.kind({
 		} else {
 			this.showGridPage();
 		}
-		console.log("Logged in");
+
+		//testing
+		//this.showArticlePage(this, {articles: ["dog", "cat"]});
 	},
 
 	showLoginPage: function() {
@@ -70,8 +75,13 @@ enyo.kind({
 	showGridPage: function() {
 		this.$.book.pageName("gridPage");
 	},
-	showArticlePage: function() {
+	showArticlePage: function(inSender, inEvent) {
+		if(!inEvent || !inEvent.articles){
+			console.error("Error Displaying Articles");
+			return;
+		}
 		this.$.book.pageName("articlePage");
+		this.$.articlePage.setArticles(inEvent.articles);
 	},
 	showTourPage: function () {
 		this.$.book.pageName("tourPage");

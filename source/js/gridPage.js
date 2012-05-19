@@ -2,8 +2,12 @@ enyo.kind({
 	name: "gridPage",
 	kind: "Page",
 	fit: true,
+	handler: {
+		onViewArticles: ""
+	},
 	components:[
-		{content: "this is the grid"}
+		{content: "this is the grid"},
+		{}
 	],
 
 	showingChanged: function(previousValue) {

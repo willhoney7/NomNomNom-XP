@@ -7,3 +7,6 @@
 [submodule "lib/layout"]
 	path = lib/layout
 	url = https://github.com/enyojs/layout.git
+[submodule "source/vendors/google-reader"]
+	path = source/vendors/google-reader
+	url = git@github.com:Tibfib/Google-Reader-Library

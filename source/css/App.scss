@@ -1,0 +1,37 @@
+$red: #cc3333;
+
+.enyo-page {
+	/*height: 100%;
+	width: 100%;*/
+}
+.centered {
+	margin: auto;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	width: 0;
+	height: 0;
+}
+
+.loginGroup, .onyx-button {
+	@media screen and (min-width: 400px) {
+		width: 300px;
+	}
+	@media screen and (min-width: 500px) {
+		width: 400px;
+	}
+	.onyx-button {
+		width: 100%;
+		margin: 5px 0;
+	}
+}
+
+
+.errorMessage {
+	text-align: center;
+	color: $red;
+	font-size: 14px;
+	margin-top: 5px;
+}

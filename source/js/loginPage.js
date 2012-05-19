@@ -6,8 +6,28 @@ enyo.kind({
 		onLogin: ""
 	},
 	components:[
-		{content: "Please log in, chump."},
-		{kind: "Button", content: "HAX log in", ontap: "loggedIn"}
+		
+		{classes: "centered loginGroup", components: [
+			{kind: "onyx.Groupbox", components: [
+				{kind: "onyx.GroupboxHeader", content: "Log into Google Reader"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "onyx.Input", placeholder: "Email Address"}
+				]},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "onyx.Input", type: "password", placeholder: "Password"}
+				]},
+				
+			]},
+			{kind: "enyo.GroupItem", components: [
+				{name: "errorMessage", classes: "errorMessage", content: ""},
+				{kind: "onyx.Button", content: "Log in"}
+			]}
+		]},
+		
+			//{fit: true, kind: "Button", content: "HAX log in", ontap: "loggedIn", style: "text-align: center"},
+	
+		
+
 	],
 	create: function(){
 		this.inherited(arguments);
@@ -37,7 +57,7 @@ enyo.kind({
 			Yes: this.bubble("onLogin", {showTour: true});
 			No: this.bubble("onLogin");
 		*/
-		this.bubble("onLogin", {showTour: true});
-		//this.bubble("onLogin");
+		//this.bubble("onLogin", {showTour: true});
+		this.bubble("onLogin");
 	}
 });
