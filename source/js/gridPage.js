@@ -76,6 +76,25 @@ enyo.kind({
 	loadFeedsFromOnline: function(){
 		reader.loadFeeds(enyo.bind(this, function (subs){
 			console.log("New Subs loaded from online", subs);
+			reader.getItems(subs[0].id, enyo.bind(this, 
+				function(unreadArticles){
+
+					console.log("GOT ALL UNREAD ARTICLES", unreadArticles.length);
+					console.log("an article", unreadArticles[0])
+					;
+					reader.getItems(reader.TAGS['read'], enyo.bind(this, 
+						function(readArticles){
+							console.log("readArticles", readArticles);
+
+							databaseHelper.saveArticles(unreadArticles, readArticles, function(){
+								console.log("success");
+							})
+
+						}), {n: 50, ot: moment().subtract("days", 3).unix()}
+					);
+				}), {n: subs[0].count}
+			);
+
 			if(!_.isEqual(subs, this.gridItems)){
 				databaseHelper.saveSubs(subs);
 				this.buildGrid(subs)	

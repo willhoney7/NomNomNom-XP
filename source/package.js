@@ -8,6 +8,7 @@ enyo.depends(
 	"vendors/book/",
 	"vendors/underscore-min.js",
 	"vendors/underscore.string.min.js",
+	"vendors/moment.min.js",
 	"vendors/Base64.js",
 	"vendors/google-reader/localStorageWrapper.js",
 	"vendors/google-reader/google-reader.js",
