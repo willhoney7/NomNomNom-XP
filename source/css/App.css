@@ -1,29 +1,148 @@
-.enyo-page {
-  /*height: 100%;
-  width: 100%;*/ }
+/* Variables for themes */
+/* Classes used throughout */
+.abs {
+  position: absolute; }
+
+.floatRight {
+  float: right; }
+
+.floatLeft {
+  float: left; }
+
+.truncating-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
 
 .centered {
-  margin: auto;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  width: 0;
-  height: 0; }
+  margin: 10px; }
+  @media screen and (min-width: 650px) {
+    .centered {
+      width: 300px;
+      margin: auto;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      width: 0;
+      height: 0; } }
 
+.loading {
+  font-size: 26px;
+  margin: 20px;
+  text-align: center; }
+
+/* 
+ *	Login Stuff
+ */
 @media screen and (min-width: 400px) {
-  .loginGroup, .onyx-button {
+  .loginGroup {
     width: 300px; } }
 @media screen and (min-width: 500px) {
-  .loginGroup, .onyx-button {
+  .loginGroup {
     width: 400px; } }
-.loginGroup .onyx-button, .onyx-button .onyx-button {
-  width: 100%;
-  margin: 5px 0; }
+
+/* CHECK FOR CROSS PLATFORM COMPATIBILITY */
+.onyx-popup > * {
+  margin: 10px 5px; }
+
+.onyx-popup .onyx-button {
+  width: 47.5%; }
 
 .errorMessage {
   text-align: center;
   color: #cc3333;
   font-size: 14px;
   margin-top: 5px; }
+
+/* Grid Page Stuff */
+.onyx-toolbar .onyx-icon-button {
+  /* Might work */ }
+  @media screen and (min-width: 650px) {
+    .onyx-toolbar .onyx-icon-button {
+      margin-left: 10px;
+      margin-right: 10px; } }
+.onyx-toolbar .center {
+  text-align: center;
+  width: 100%; }
+
+.grid {
+  padding-left: 5px;
+  padding-top: 5px;
+  background: #666666 url("../../assets/grid-background.png") repeat top left; }
+
+.iPad .grid-item .unread, .iPhone .grid-item .unread {
+  bottom: 79px; }
+.iPad .grid-item .icon, .iPhone .grid-item .icon {
+  bottom: 90px; }
+
+.grid-item {
+  margin: 5px;
+  padding-top: 5px;
+  height: 88px;
+  float: left;
+  text-align: center;
+  font-family: 'Helvetica Neue', 'Nimbus Sans L', Arial, sans-serif;
+  color: white;
+  /*border: 1px red solid;*/ }
+  @media screen and (min-width: 650px) {
+    .grid-item {
+      width: 110px; } }
+  @media screen and (max-width: 650px) {
+    .grid-item {
+      width: 93px; } }
+  .grid-item .unread {
+    position: relative;
+    font-size: 15px;
+    font-weight: bold;
+    bottom: 72px; }
+  .grid-item .icon {
+    position: relative;
+    bottom: 80px; }
+  .grid-item .title {
+    padding-top: 2px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 16px; }
+  .grid-item:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px; }
+
+.list {
+  z-index: -1;
+  margin-top: 54px;
+  /*height of toolbar*/ }
+  .list .item {
+    border-bottom: 1px solid silver;
+    padding: 12px 20px;
+    background-color: #eee;
+    font-size: 16px; }
+    .list .item .unreadIndicator {
+      width: 5px;
+      height: 34px;
+      float: left;
+      position: relative;
+      bottom: 8px;
+      right: 10px;
+      background-color: #ff7800; }
+  .list .divider {
+    background-color: #666;
+    color: white;
+    font-weight: normal;
+    font-size: 14px;
+    margin: 0;
+    padding: 5px 25px; }
+
+.settingsList, .addFeedList {
+  margin: 20px auto; }
+  @media screen and (min-width: 650px) {
+    .settingsList, .addFeedList {
+      max-width: 500px; } }
+
+.onyx-button.full {
+  width: 100%;
+  margin: 5px 0; }

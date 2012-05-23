@@ -6,33 +6,35 @@ enyo.kind({
 		onLogin: ""
 	},
 	components:[
-		
 		{classes: "centered loginGroup", components: [
 			{kind: "onyx.Groupbox", components: [
 				{kind: "onyx.GroupboxHeader", content: "Log into Google Reader"},
 				{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.Input", placeholder: "Email Address"}
+					{name: "username", kind: "onyx.Input", placeholder: "Email Address"}
 				]},
 				{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.Input", type: "password", placeholder: "Password"}
+					{name: "password", kind: "onyx.Input", type: "password", placeholder: "Password"}
 				]},
 				
 			]},
 			{kind: "enyo.GroupItem", components: [
 				{name: "errorMessage", classes: "errorMessage", content: ""},
-				{kind: "onyx.Button", content: "Log in"}
-			]}
-		]},
-		
-			//{fit: true, kind: "Button", content: "HAX log in", ontap: "loggedIn", style: "text-align: center"},
-	
-		
+				{kind: "onyx.Button", content: "Log in", ontap: "attemptLogin", classes: "full"}
+			]},
+			{name: "popup", kind: "onyx.Popup", centered: true, modal: true, floating: true, components: [
+				{name: "popupText", content: "Logged in successfully! Would you like to view the tour? We highly recommend it."},
+				//@TODO: Classes
+				{kind: "onyx.Button", content: "Yes!", ontap: "showFeeds", name: "showTour"},
+				{kind: "onyx.Button", classes: "onyx-negative", content: "No, I'm silly.", ontap: "showFeeds"},
+			]},
 
+		]}	
+		
 	],
 	create: function(){
 		this.inherited(arguments);
-		//showLogin Textfields
 
+		//@TODO: GET THIS WORKING X-PLAT
 	},
 	showingChanged: function(previousValue) {
 		this.inherited(arguments);
@@ -40,9 +42,30 @@ enyo.kind({
 		if(this.getShowing() && previousValue !== undefined){
 			//ACTIVATED
 			console.log("loginPage activated");
+			this.resized();
 		}
 	},
 	attemptLogin: function () {
+		this.$.errorMessage.setContent("");
+
+		reader.login(
+			this.$.username.getValue(), 
+			this.$.password.getValue(), 
+			enyo.bind(this, function(){
+			//success
+				console.log("succes 1");
+				reader.getToken(
+					enyo.bind(this, function(){
+						//success
+						console.log("succes 2");
+						this.loggedIn();
+
+					}), 
+					enyo.bind(this, this.errorLogin)
+				);
+			}), 
+			enyo.bind(this, this.errorLogin)
+		);
 		/*
 		get entered data
 			getAuthHeader(username, passs)
@@ -51,13 +74,22 @@ enyo.kind({
 					onFail: errorLogin()
 				onFail: errorLogin()
 		*/
+		//this.loggedIn();
 	},
 	loggedIn: function(){
-		/*prompt("Wanna view the tour?")
-			Yes: this.bubble("onLogin", {showTour: true});
-			No: this.bubble("onLogin");
-		*/
-		//this.bubble("onLogin", {showTour: true});
-		this.bubble("onLogin");
+		//this.$.popupText.setContent(navigator.appVersion);
+		this.$.popup.show();
+	},
+
+	errorLogin: function(error){
+		console.log("ERROR", error);
+		this.$.errorMessage.setContent(error);
+	},
+
+	showFeeds: function(inSender, inEvent) {
+		this.$.popup.hide();
+
+		var opt = (inSender.name && inSender.name === "showTour") ? {showTour: true} : null;
+		this.bubble("onLogin", opt);
 	}
 });

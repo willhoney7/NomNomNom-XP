@@ -4,55 +4,59 @@ enyo.kind({
 	components:[
 		{kind: "Book", components: [
 			//always load these
-			{name: "loadingPage", content: "loading"},
+			{name: "loadingPage", content: "Loading...", classes: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
-			{kind: "gridPage", onViewArticles: "showArticlePage"},
-			{kind: "articlePage"},
+			{kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
+			{kind: "articlePage", onShowGridPage: "showGridPage"},
 
 			//load these lazy, because they might not always be needed
-			{name: "tourPage", kind: "tourPage", lazy: true},
-			{name: "settingsPage", kind: "settingsPage", lazy: true}
+			{name: "tourPage", kind: "tourPage", lazy: true, onShowGridPage: "showGridPage"},
+			{name: "addFeedPage", kind: "addFeedPage", lazy: true, onShowGridPage: "showGridPage"},
+			{name: "settingsPage", kind: "settingsPage", lazy: true, onShowGridPage: "showGridPage"}
 		]},
 	],
 	create: function () {
 		this.inherited(arguments);
+
+		window.document.getElementsByTagName("body")[0].className += " " + getPlatform();
+
+		databaseHelper.loadDb();
 	},
 	rendered: function () {
 		this.inherited(arguments);
 
 		//can't call this on create
 		this.checkLogin();
+
 	},
 	checkLogin: function(){
-		/*
-		if (storedAuthHeader) {
-			getToken()
-				onSuccess: this.showLoginPage();
-				onFail: 
-					if(OS == iOS){
-						getPassFromKeychain();
-							onSuccess: getAuthHeader();
-								onSuccess: getToken();
-									onSuccess: showLoginPage();
+		if (reader.hasAuth()) {
+			//if(hasService){}
+				reader.getToken(
+					enyo.bind(this, this.loggedIn),
+					enyo.bind(this, function(){
+						/*if(OS == iOS){
+							getPassFromKeychain();
+								onSuccess: getAuthHeader();
+									onSuccess: getToken();
+										onSuccess: showLoginPage();
+										onFail: promptLogin();
 									onFail: promptLogin();
 								onFail: promptLogin();
-							onFail: promptLogin();
-					} else {
-						promptLogin();
-					}
+						} else {*/
+							this.showLoginPage();
+						//}
+					})
+				)
+			//} else {
+				//show grid. we should have it cached. when service comes later, the lib knows to re ask for a token.
+			//}
 		} else {
 			//technically the password shouldn't be saved if the authHeader isn't there... so remove?
-			promptLogin();
+			this.showLoginPage();
 		}
 
-
-
-		//if (loggedIn)
-		//	this.showGridPage();
-		//else
-			this.showLoginPage();*/
-			
-		this.showLoginPage();
+		//this.showLoginPage();
 	},
 	loggedIn: function(inSender, inEvent) {
 
@@ -86,6 +90,12 @@ enyo.kind({
 	showTourPage: function () {
 		this.$.book.pageName("tourPage");
 	},
+	showSettingsPage: function () {
+		this.$.book.pageName("settingsPage");
+	},
+	showAddFeedPage: function () {
+		this.$.book.pageName("addFeedPage");
+	}
 
 	
 });

@@ -733,6 +733,24 @@
 	margin-bottom: 0 !important;
 }
 
+/* /Users/Will/Development/Cross Platform/Apps/NomNomNom XP/src/enyo/tools/../../lib/layout/list/source/List.css */
+
+.enyo-list {
+	position: relative;
+}
+
+.enyo-list-port {
+	overflow: hidden;
+	position: relative;
+	height: 10000000px;
+}
+
+.enyo-list-page {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
 /* ../source/vendors/book/book.css */
 
 /*
@@ -792,6 +810,62 @@
 @-ms-keyframes enyo-book-pop-out-animation {
 	from   { opacity: 0; }
 	to { opacity: 0; display: none; -webkit-transform: scale(1.3); -moz-transform: scale(1.3); -ms-transform: scale(1.3); }
+}
+
+/*
+ * SLADE
+ */
+ /* next */
+@-webkit-keyframes enyo-book-sladenext-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(50%,0%); -moz-transform: translate(50%,0%); -ms-transform: translate(50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+@-moz-keyframes enyo-book-sladenext-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(50%,0%); -moz-transform: translate(50%,0%); -ms-transform: translate(50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+@-ms-keyframes enyo-book-sladenext-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(50%,0%); -moz-transform: translate(50%,0%); -ms-transform: translate(50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+
+@-webkit-keyframes enyo-book-sladenext-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(-50%, 0%); -moz-transform: translate(-50%, 0%); -ms-transform: translate(-50%, 0%); display: none; }
+}
+@-moz-keyframes enyo-book-sladenext-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(-50%, 0%); -moz-transform: translate(-50%, 0%); -ms-transform: translate(-50%, 0%); display: none; }
+}
+@-ms-keyframes enyo-book-sladenext-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(-50%, 0%); -moz-transform: translate(-50%, 0%); -ms-transform: translate(-50%, 0%); display: none; }
+}
+ /* back */
+@-webkit-keyframes enyo-book-sladeback-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(-50%,0%); -moz-transform: translate(-50%,0%); -ms-transform: translate(-50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+@-moz-keyframes enyo-book-sladeback-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(-50%,0%); -moz-transform: translate(-50%,0%); -ms-transform: translate(-50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+@-ms-keyframes enyo-book-sladeback-in-animation {
+	from   { opacity: 0; -webkit-transform: translate(-50%,0%); -moz-transform: translate(-50%,0%); -ms-transform: translate(-50%,0%); display: block; }
+	to { opacity: 1; -webkit-transform: translate(0%,0%); -moz-transform: translate(0%,0%); -ms-transform: translate(0%,0%); }
+}
+
+@-webkit-keyframes enyo-book-sladeback-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(50%, 0%); -moz-transform: translate(50%, 0%); -ms-transform: translate(50%, 0%); display: none; }
+}
+@-moz-keyframes enyo-book-sladeback-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(50%, 0%); -moz-transform: translate(50%, 0%); -ms-transform: translate(50%, 0%); display: none; }
+}
+@-ms-keyframes enyo-book-sladeback-out-animation {
+	from   { opacity: 1; -webkit-transform: translate(0%, 0%); -moz-transform: translate(0%, 0%); -ms-transform: translate(0%, 0%); }
+	to { opacity: 0; -webkit-transform: translate(50%, 0%); -moz-transform: translate(50%, 0%); -ms-transform: translate(50%, 0%); display: none; }
 }
 
 
@@ -868,6 +942,80 @@
 	-ms-animation-fill-mode: forwards;
 }
 
+
+.enyo-book-sladenext-in {
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	-ms-animation-duration: 0.5s;
+	
+	-webkit-animation-name: enyo-book-sladenext-in-animation;
+	-moz-animation-name: enyo-book-sladenext-in-animation;
+	-ms-animation-name: enyo-book-sladenext-in-animation;
+	
+	-webkit-animation-direction: normal;
+	-moz-animation-direction: normal;
+	-ms-animation-direction: normal;
+	
+	-webkit-animation-fill-mode: forwards;
+	-moz-animation-fill-mode: forwards;
+	-ms-animation-fill-mode: forwards;
+}
+
+.enyo-book-sladenext-out {
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	-ms-animation-duration: 0.5s;
+	
+	-webkit-animation-name: enyo-book-sladenext-out-animation;
+	-moz-animation-name: enyo-book-sladenext-out-animation;
+	-ms-animation-name: enyo-book-sladenext-out-animation;
+	
+	-webkit-animation-direction: normal;
+	-moz-animation-direction: normal;
+	-ms-animation-direction: normal;
+	
+	-webkit-animation-fill-mode: forwards;
+	-moz-animation-fill-mode: forwards;
+	-ms-animation-fill-mode: forwards;
+}
+
+.enyo-book-sladeback-in {
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	-ms-animation-duration: 0.5s;
+	
+	-webkit-animation-name: enyo-book-sladeback-in-animation;
+	-moz-animation-name: enyo-book-sladeback-in-animation;
+	-ms-animation-name: enyo-book-sladeback-in-animation;
+	
+	-webkit-animation-direction: normal;
+	-moz-animation-direction: normal;
+	-ms-animation-direction: normal;
+	
+	-webkit-animation-fill-mode: forwards;
+	-moz-animation-fill-mode: forwards;
+	-ms-animation-fill-mode: forwards;
+}
+
+.enyo-book-sladeback-out {
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	-ms-animation-duration: 0.5s;
+	
+	-webkit-animation-name: enyo-book-sladeback-out-animation;
+	-moz-animation-name: enyo-book-sladeback-out-animation;
+	-ms-animation-name: enyo-book-sladeback-out-animation;
+	
+	-webkit-animation-direction: normal;
+	-moz-animation-direction: normal;
+	-ms-animation-direction: normal;
+	
+	-webkit-animation-fill-mode: forwards;
+	-moz-animation-fill-mode: forwards;
+	-ms-animation-fill-mode: forwards;
+}
+
+
 .enyo-book-simple-in {
 	opacity: 1;
 	display: block;
@@ -886,11 +1034,135 @@
 
 /* ../source/css/App.css */
 
-/*
-	Put anything you reference with "url(../source/css)" in ../assets/
-	This way, you can minify your application, and just remove the "source" folder for production
-*/
-#app {
-	
-}
+/* Variables for themes */
+/* Classes used throughout */
+.abs {
+  position: absolute; }
+
+.floatRight {
+  float: right; }
+
+.floatLeft {
+  float: left; }
+
+.truncating-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
+
+.centered {
+  margin: 10px; }
+  @media screen and (min-width: 650px) {
+    .centered {
+      width: 300px;
+      margin: auto;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      width: 0;
+      height: 0; } }
+
+/* 
+ *	Login Stuff
+ */
+@media screen and (min-width: 400px) {
+  .loginGroup {
+    width: 300px; } }
+@media screen and (min-width: 500px) {
+  .loginGroup {
+    width: 400px; } }
+.loginGroup .onyx-button {
+  width: 100%;
+  margin: 5px 0; }
+
+/* CHECK FOR CROSS PLATFORM COMPATIBILITY */
+.onyx-popup > * {
+  margin: 10px 5px; }
+
+.onyx-popup .onyx-button {
+  width: 47.5%; }
+
+.errorMessage {
+  text-align: center;
+  color: #cc3333;
+  font-size: 14px;
+  margin-top: 5px; }
+
+/* Grid Page Stuff */
+.onyx-toolbar .onyx-icon-button {
+  /* Might work */ }
+  @media screen and (min-width: 650px) {
+    .onyx-toolbar .onyx-icon-button {
+      margin-left: 10px;
+      margin-right: 10px; } }
+.onyx-toolbar .center {
+  text-align: center;
+  width: 100%; }
+
+.grid {
+  margin-left: 5px;
+  margin-top: 5px; }
+
+.iPad .grid-item .unread, .iPhone .grid-item .unread {
+  bottom: 55px; }
+.iPad .grid-item .icon, .iPhone .grid-item .icon {
+  bottom: 100px; }
+
+.grid-item {
+  margin: 5px;
+  padding-top: 5px;
+  height: 88px;
+  float: left;
+  /*color: white;*/
+  font-family: 'Helvetica Neue', 'Nimbus Sans L', Arial, sans-serif;
+  font-size: 16px;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  /*border: 1px red solid;*/ }
+  @media screen and (min-width: 650px) {
+    .grid-item {
+      width: 110px; } }
+  @media screen and (max-width: 650px) {
+    .grid-item {
+      width: 93px; } }
+  .grid-item .unread {
+    position: relative;
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    bottom: 45px; }
+  .grid-item .icon {
+    position: relative;
+    bottom: 90px; }
+  .grid-item .title {
+    padding-top: 2px; }
+
+.list {
+  z-index: -1;
+  margin-top: 54px;
+  /*height of toolbar*/ }
+  .list .item {
+    border-bottom: 1px solid silver;
+    padding: 12px 20px;
+    background-color: #eee;
+    font-size: 16px; }
+    .list .item .unreadIndicator {
+      width: 5px;
+      height: 34px;
+      float: left;
+      position: relative;
+      bottom: 8px;
+      right: 10px;
+      background-color: #ff7800; }
+  .list .divider {
+    background-color: #666;
+    color: white;
+    font-weight: normal;
+    font-size: 14px;
+    margin: 0;
+    padding: 5px 25px; }
 
