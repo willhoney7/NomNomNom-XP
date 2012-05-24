@@ -63,9 +63,6 @@
     .onyx-toolbar .onyx-icon-button {
       margin-left: 10px;
       margin-right: 10px; } }
-.onyx-toolbar .center {
-  text-align: center;
-  width: 100%; }
 
 .grid {
   padding-left: 5px;
@@ -118,15 +115,19 @@
   /*height of toolbar*/ }
   .list .item {
     border-bottom: 1px solid silver;
-    padding: 12px 20px;
+    padding: 10px 20px 5px 20px;
     background-color: #eee;
-    font-size: 16px; }
+    font-size: 16px;
+    max-height: 78px;
+    min-height: 60px; }
     .list .item .unreadIndicator {
       width: 5px;
-      height: 34px;
+      /*@TODO: work on this more. I want this to stretch.*/
+      min-height: 44px;
+      height: 100%;
       float: left;
       position: relative;
-      bottom: 8px;
+      bottom: 3px;
       right: 10px;
       background-color: #ff7800; }
   .list .divider {
@@ -136,6 +137,33 @@
     font-size: 14px;
     margin: 0;
     padding: 5px 25px; }
+  .list .articleTitle {
+    max-height: 36px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    /*white-space: nowrap;*/ }
+  .list .articleTime {
+    float: right;
+    color: #888;
+    font-size: 14px;
+    padding-left: 5px; }
+  .list .articleSubtitle {
+    color: #888;
+    font-size: 14px;
+    padding: 5px 0px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap; }
+
+.subTitle {
+  /*margin: auto;*/
+  text-align: center;
+  width: 100%;
+  /*@TODO: CHANGE THIS WHEN WE CHANGE THE INCLUDE READ BUTTON */
+  padding: 0px 160px 0px 90px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
 
 .settingsList, .addFeedList {
   margin: 20px auto; }

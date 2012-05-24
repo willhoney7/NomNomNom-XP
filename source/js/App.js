@@ -31,7 +31,7 @@ enyo.kind({
 	},
 	checkLogin: function(){
 		if (reader.hasAuth()) {
-			//if(hasService){}
+			if(navigator.onLine){
 				reader.getToken(
 					enyo.bind(this, this.loggedIn),
 					enyo.bind(this, function(){
@@ -48,9 +48,10 @@ enyo.kind({
 						//}
 					})
 				)
-			//} else {
+			} else {
+				this.showGridPage();
 				//show grid. we should have it cached. when service comes later, the lib knows to re ask for a token.
-			//}
+			}
 		} else {
 			//technically the password shouldn't be saved if the authHeader isn't there... so remove?
 			this.showLoginPage();
@@ -80,12 +81,13 @@ enyo.kind({
 		this.$.book.pageName("gridPage");
 	},
 	showArticlePage: function(inSender, inEvent) {
-		if(!inEvent || !inEvent.articles){
+		if(!inEvent || !inEvent.articles || !inEvent.sub){
 			console.error("Error Displaying Articles");
 			return;
 		}
 		this.$.book.pageName("articlePage");
-		this.$.articlePage.setArticles(inEvent.articles);
+		this.$.articlePage.loadArticles(inEvent.sub, inEvent.articles);
+		
 	},
 	showTourPage: function () {
 		this.$.book.pageName("tourPage");

@@ -58,7 +58,8 @@ enyo.kind({
 			this.buildGrid(subs);
 		}));
 
-		this.loadFeedsFromOnline();
+		//this.loadFeedsFromOnline();
+
 		/*//get our array
 		this.gridItems = [
 			{dog: "fido"},{dog: "bob"},{dog: "gary"},{dog: "spencer"},{dog: "carl"},{dog: "cary"},{dog: "peter"},{dog: "jerry"},
@@ -75,32 +76,32 @@ enyo.kind({
 	},
 	loadFeedsFromOnline: function(){
 		reader.loadFeeds(enyo.bind(this, function (subs){
-			console.log("New Subs loaded from online", subs);
+			console.log("New Subs loaded from online");
+
 			reader.getItems(subs[0].id, enyo.bind(this, 
 				function(unreadArticles){
 
-					console.log("GOT ALL UNREAD ARTICLES", unreadArticles.length);
-					console.log("an article", unreadArticles[0])
-					;
 					reader.getItems(reader.TAGS['read'], enyo.bind(this, 
 						function(readArticles){
-							console.log("readArticles", readArticles);
 
-							databaseHelper.saveArticles(unreadArticles, readArticles, function(){
-								console.log("success");
-							})
+							databaseHelper.saveArticles(unreadArticles, readArticles, enyo.bind(this, function(){
+								console.log("articles saved! time to move on");
+
+								if(!_.isEqual(subs, this.gridItems)){
+									databaseHelper.saveSubs(subs);
+									this.buildGrid(subs)	
+								} else {
+									console.log("Subs are the same");
+								}
+							}));
 
 						}), {n: 50, ot: moment().subtract("days", 3).unix()}
 					);
-				}), {n: subs[0].count}
+				}), {n: subs[0].count, xt: reader.TAGS['read']}
 			);
 
-			if(!_.isEqual(subs, this.gridItems)){
-				databaseHelper.saveSubs(subs);
-				this.buildGrid(subs)	
-			} else {
-				console.log("Subs are the same");
-			}
+
+			
 		}));
 	},
 
@@ -112,13 +113,37 @@ enyo.kind({
 	},
 
 	loadGridItem: function (inSender, inEnvent) {
-		console.log(inSender.getItem());
-		var fakeArticlesArray = [];
+		console.log("loading this sub", inSender.getItem());
+		var opts = {};
+		if(inSender.getItem().isFeed){
+			opts.feed = inSender.getItem().id;
+		} else if (inSender.getItem().isLabel) {
+			opts.feed = [];
+			_.each(inSender.getItem().feeds, function(feed){
+				opts.feed.push(feed.id);
+			});
+		} else if (inSender.getItem().isAll){
+			//do nothing
+		}
+		//console.log("opts", opts);
+		databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
+			if(articles.length < inSender.getItem().count){
+				console.log("Uh oh, cache failed", articles);
+				reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
+					this.bubble("onViewArticles", {articles: loadedArticles});
+				}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+			} else {
+				console.log("Articles loaded from cache", articles.length);
+				this.bubble("onViewArticles", {sub: inSender.getItem(), articles: buildArticlesArray(articles)});
+			}
+		}));
+
+		/*var fakeArticlesArray = [];
 		
 		for (var i = 0; i < 80; i++) {
 			fakeArticlesArray.push({title: inSender.getItem().dog + Math.round(Math.random()*200), date: "4/" + Math.round(i/2) + "/12"});
 		};
-		this.bubble("onViewArticles", {articles: fakeArticlesArray});
+		this.bubble("onViewArticles", {articles: fakeArticlesArray});*/
 	},
 
 	
@@ -134,7 +159,7 @@ enyo.kind({
 	},
 	components: [
 		{kind: "enyo.Image", src: ""},
-		{kind: "enyo.Control", classes: "title"},
+		{kind: "enyo.Control", classes: "title", allowHtml: true},
 		{name: "icon", kind: "Image", classes: "icon"},
 		{name: "unread", classes: "unread"}
 	],

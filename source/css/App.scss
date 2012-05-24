@@ -91,10 +91,6 @@ $red: #cc3333;
 			}
 		}
 	}
-	.center {
-		text-align: center;
-		width: 100%;
-	}
 }
 
 .grid {
@@ -171,16 +167,20 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 
 	.item {
 		border-bottom: 1px solid silver;
-		padding: 12px 20px;
+		padding: 10px 20px 5px 20px;
 		background-color: #eee;
 		font-size: 16px;
+		max-height: 78px;
+		min-height: 60px;
 
 		.unreadIndicator {
 			width: 5px;
-			height: 34px;
+			/*@TODO: work on this more. I want this to stretch.*/
+			min-height: 44px;
+			height: 100%;
 			float: left;
 			position: relative;
-			bottom: 8px;
+			bottom: 3px;
 			right: 10px;
 			background-color: #ff7800;
 		}
@@ -195,6 +195,37 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 		padding: 5px 25px;
 
 	}
+
+	.articleTitle {
+		max-height: 36px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		/*white-space: nowrap;*/
+	}
+
+	.articleTime {
+		float: right;
+		color: #888;
+		font-size: 14px;
+		padding-left: 5px;
+	}
+
+	.articleSubtitle {
+		color: #888;
+		font-size: 14px;
+		padding: 5px 0px;
+		@include truncated-text;
+	}
+
+}
+
+.subTitle {
+	/*margin: auto;*/
+ 	text-align: center;
+	width: 100%;
+	/*@TODO: CHANGE THIS WHEN WE CHANGE THE INCLUDE READ BUTTON */
+	padding: 0px 160px 0px 90px;
+	@include truncated-text;
 }
 
 .settingsList, .addFeedList {
