@@ -26,6 +26,7 @@ enyo.depends(
 	"js/loginPage.js",
 	"js/gridPage.js",
 	"js/articlePage.js",
+	"js/articleViewPage.js",
 	"js/settingsPage.js",
 	"js/addFeedPage.js",
 	"js/tourPage.js",

@@ -2,7 +2,7 @@ enyo.kind({
 	name: "addFeedPage",
 	kind: "Page",
 	fit: true,
-		layoutKind: "FittableRowsLayout",
+	layoutKind: "FittableRowsLayout",
 	handlers: {
 		onShowGridPage: ""
 	},

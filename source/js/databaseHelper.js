@@ -5,8 +5,10 @@
 	databaseHelper.loadDb = function () {
 		db = window.openDatabase("nomnomnomXP_db", "1.0", "NomNomNomXP Database", 2000000);
 		db.transaction(function(tx){
+			//stx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, data, imgs)');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
+
 
 		}, databaseHelper.error, databaseHelper.success);
 	};
@@ -31,6 +33,41 @@
 			callback(result);
 		}
     };
+
+    function formatArticle (item) {
+    	var condensedItem = {
+			id: item.id,
+			title: item.title,
+			author: item.author,
+			url: (item.alternate && item.alternate[0]) ? item.alternate[0].href : item.origin.htmlUrl || item.origin.streamId,
+			feed: {
+				title: item.origin.title,
+				id: item.origin.streamId
+			},
+			updated: item.updated,
+			content: (item.summary) ? item.summary.content || "": (item.content) ? item.content.content || "" : "",
+			enclosure: item.enclosure,
+			read: false,
+			starred: false,
+			shared: false,
+			//_orig: _.clone(item) we may want to do this in the future
+		};
+		//condensedItem.strippedContent = htmlToText(condensedItem.content); in da future?
+		condensedItem.preview = _(htmlToText(condensedItem.content)).prune(50);
+
+		for (var i = 0; i < item.categories.length; i++) {
+			if(reader.correctId(item.categories[i]) === reader.TAGS['read']){
+				condensedItem.read = true;
+			} else if(reader.correctId(item.categories[i]) === reader.TAGS['star']){
+				condensedItem.starred = true;
+			} else if(reader.correctId(item.categories[i]) === reader.TAGS['share']){
+				condensedItem.shared = true;
+			}
+		};
+
+		return condensedItem;
+
+    }
 
     function addArticlesToDb(array, callback){
     	if(array.length === 0){
@@ -92,14 +129,14 @@
 			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, data, imgs)');
 			if(array.length > 1){
-				var string = "INSERT INTO ARTICLES SELECT '" + array[0].id + "' AS id, '" + array[0].origin.streamId + "' AS feed, '" + reader.isRead(array[0]) + "' AS read,  '" + Base64.encode(JSON.stringify(array[0])) + "' AS data, '' AS imgs";
+				var string = "INSERT INTO ARTICLES SELECT '" + array[0].id + "' AS id, '" + array[0].origin.streamId + "' AS feed, '" + reader.isRead(array[0]) + "' AS read,  '" + Base64.encode(JSON.stringify(formatArticle(array[0]))) + "' AS data, '' AS imgs";
 				for (var i = 1; i < array.length; i++) {
 					console.log("isRead", reader.isRead(array[i]));
-					string += " UNION SELECT '" + array[i].id + "', '" + array[i].origin.streamId + "', '" + reader.isRead(array[i]) + "', '" + Base64.encode(JSON.stringify(array[i])) + "', ''";
+					string += " UNION SELECT '" + array[i].id + "', '" + array[i].origin.streamId + "', '" + reader.isRead(array[i]) + "', '" + Base64.encode(JSON.stringify(formatArticle(array[i]))) + "', ''";
 				};
 				//console.log(string);	
 			} else {
-				var string = 'INSERT INTO ARTICLES (id, feed, read, data, imgs) VALUES ("' + array[0].id + '", "' + array[0].origin.streamId + '", "' + reader.isRead(array[0]) + '", "' + Base64.encode(JSON.stringify(array[0])) + '", "")';
+				var string = 'INSERT INTO ARTICLES (id, feed, read, data, imgs) VALUES ("' + array[0].id + '", "' + array[0].origin.streamId + '", "' + reader.isRead(array[0]) + '", "' + Base64.encode(JSON.stringify(formatArticle(array[0]))) + '", "")';
 			}
 			
 			tx.executeSql(string);

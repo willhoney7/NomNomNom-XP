@@ -3,7 +3,8 @@ enyo.kind({
 	kind: "Page",
 	fit: true,
 	handlers: {
-		onShowGridPage: ""
+		onShowGridPage: "",
+		onViewArticle: ""
 	},
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
@@ -13,7 +14,7 @@ enyo.kind({
 		]},
 		{name: "list", kind: "List", rows: 0, multiSelect: false, classes: "enyo-fit list", onSetupRow: "setupRow", components: [
 			{name: "divider", classes: "divider"},
-			{name: "item", classes: "item enyo-border-box", components: [
+			{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
 				{name: "articleTime", classes: "articleTime"},
 				{name: "unreadIndicator", fit: true, classes: "unreadIndicator"},
 				{name: "articleTitle", classes: "articleTitle", allowHtml: true},
@@ -48,7 +49,6 @@ enyo.kind({
 	bubbleEvent: function(inSender, inEvent){
 		this.bubble(inSender.eventToBubble);
 	},
-
 
 
 	articles: [],
@@ -90,7 +90,7 @@ enyo.kind({
 			this.$.unreadIndicator.setShowing(!reader.isRead(item));
 			this.$.articleTime.setContent(moment.unix(item.updated).format("h:mm a"));
 
-			this.$.articleSubtitle.setContent("<b>" + item.origin.title + "</b> - " + _(htmlToText(item.summary.content)).prune(50));
+			this.$.articleSubtitle.setContent("<b>" + item.feed.title + "</b>" + ((item.preview && item.preview.length > 0) ? " - " + item.preview : ""));
 
 			if (!this.hideDivider) {
 				var date = moment.unix(item.updated).format("MMM Do");
@@ -99,6 +99,10 @@ enyo.kind({
 				this.$.divider.canGenerate = date != (prev &&  moment.unix(prev.updated).format("MMM Do"));
 			}
 		}
+	},
+
+	viewArticle: function(inSender, inEvent){
+		this.bubble("onViewArticle", {articles: this.articles, index: inEvent.index});
 	}
 
 

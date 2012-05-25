@@ -7,7 +7,8 @@ enyo.kind({
 			{name: "loadingPage", content: "Loading...", classes: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
 			{kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
-			{kind: "articlePage", onShowGridPage: "showGridPage"},
+			{kind: "articlePage", onShowGridPage: "showGridPage", onViewArticle: "showArticleViewPage"},
+			{kind: "articleViewPage", onShowArticlePage: "backToArticlePage"},
 
 			//load these lazy, because they might not always be needed
 			{name: "tourPage", kind: "tourPage", lazy: true, onShowGridPage: "showGridPage"},
@@ -87,8 +88,19 @@ enyo.kind({
 		}
 		this.$.book.pageName("articlePage");
 		this.$.articlePage.loadArticles(inEvent.sub, inEvent.articles);
-		
 	},
+	backToArticlePage: function (){
+		this.$.book.pageName("articlePage");
+	},
+	showArticleViewPage: function(inSender, inEvent){
+		if(!inEvent || !inEvent.articles || inEvent.index === undefined){
+			console.error("Error Viewing Articles");
+			return;
+		}
+		this.$.book.pageName("articleViewPage");
+		this.$.articleViewPage.viewArticles(inEvent.articles, inEvent.index);
+	},
+
 	showTourPage: function () {
 		this.$.book.pageName("tourPage");
 	},

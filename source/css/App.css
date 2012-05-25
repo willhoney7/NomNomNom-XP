@@ -174,3 +174,16 @@
 .onyx-button.full {
   width: 100%;
   margin: 5px 0; }
+
+.articleViewPage .articleContent {
+  font-size: 16px;
+  margin: 15px; }
+.articleViewPage .articleTitle {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 15px; }
+.articleViewPage .articleTime {
+  margin: 20px;
+  float: right;
+  color: #888;
+  font-size: 14px; }
