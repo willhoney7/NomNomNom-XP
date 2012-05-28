@@ -12,7 +12,7 @@ enyo.kind({
 			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 			{name: "includeReadButton", kind: "onyx.Button", content: "Include Read", ontap: "toggleIncludeUnread", classes: "abs", style: "right: 10px;"}
 		]},
-		{name: "list", kind: "List", rows: 0, multiSelect: false, classes: "enyo-fit list", onSetupRow: "setupRow", components: [
+		{name: "list", kind: "List", count: 0, multiSelect: false, classes: "enyo-fit list", onSetupItem: "setupItem", components: [
 			{name: "divider", classes: "divider"},
 			{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
 				{name: "articleTime", classes: "articleTime"},
@@ -68,7 +68,7 @@ enyo.kind({
 			return (1 - article.updated);
 		});
 
-		this.$.list.setRows(this.articles.length);
+		this.$.list.setCount(this.articles.length);
 		this.$.list.reset();
 	},
 	toggleIncludeUnread: function (inSender){
@@ -77,7 +77,7 @@ enyo.kind({
 		this.orderAndShowArticles();
 	},
 
-	setupRow: function(inSender, inEvent) {
+	setupItem: function(inSender, inEvent) {
 		// this is the row we're setting up
 		var i = inEvent.index;
 		var item = this.articles[i];

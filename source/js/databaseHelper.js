@@ -76,55 +76,6 @@
     	}
 
     	db.transaction(function(tx){
-		/*
-    		AppUtils.formatArticleArray = function(array){
-				var newArray = [];
-				_(array).each(function(article){
-					newArray.push(AppUtils.formatArticle(article));
-				});
-
-				return newArray;
-			};
-
-		var condensedItem = {
-			id: item.id,
-			title: item.title,
-			author: item.author,
-			url: (item.alternate && item.alternate[0]) ? item.alternate[0].href : item.origin.htmlUrl || item.origin.streamId,
-			feed: {
-				title: item.origin.title,
-				id: item.origin.streamId
-			},
-			updated: item.updated,
-			content: (item.summary) ? item.summary.content || "": (item.content) ? item.content.content || "" : "",
-			enclosure: item.enclosure,
-			read: false,
-			starred: false,
-			shared: false,
-			_orig: _.clone(item)
-		};
-
-		condensedItem.firstImageURL = $("<div>" + condensedItem.content + "</div>").find("img").first().attr("src");
-		condensedItem.condensedContent = htmlToText(condensedItem.content);
-
-		for(var i = 0; i < item.categories.length; i++){
-			if(readRegExp.test(item.categories[i])){
-				condensedItem.read = true;				
-			}
-			if(_(item.categories[i]).includes(reader.TAGS["star"].replace("user/-", ""))){
-				condensedItem.star = true;				
-			}
-			if(_(item.categories[i]).includes(reader.TAGS["share"].replace("user/-", ""))){
-				condensedItem.shared = true;				
-			}
-			if(_(item.categories[i]).includes(reader.TAGS["fresh"].replace("user/-", ""))){
-				condensedItem.fresh = true;				
-			}
-		};
-		
-		return condensedItem;
-	}*/
-
 			
 			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, data, imgs)');
