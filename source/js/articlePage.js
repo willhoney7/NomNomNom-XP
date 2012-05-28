@@ -8,19 +8,13 @@ enyo.kind({
 	},
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{kind: "onyx.Button", content: "Back", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", classes: "abs", style: "left: 10px;"},
+			{kind: "onyx.Button", content: "Grid", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", classes: "abs", style: "left: 10px;"},
 			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 			{name: "includeReadButton", kind: "onyx.Button", content: "Include Read", ontap: "toggleIncludeUnread", classes: "abs", style: "right: 10px;"}
 		]},
-		{name: "list", kind: "List", count: 0, multiSelect: false, classes: "enyo-fit list", onSetupItem: "setupItem", components: [
-			{name: "divider", classes: "divider"},
-			{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
-				{name: "articleTime", classes: "articleTime"},
-				{name: "unreadIndicator", fit: true, classes: "unreadIndicator"},
-				{name: "articleTitle", classes: "articleTitle", allowHtml: true},
-				{name: "articleSubtitle", classes: "articleSubtitle", allowHtml: true},
-			]}
-		]}
+
+		/**/
+		{kind: "ArticlePanel", classes: "enyo-fit", onSetupItem: "setupItem"}
 	],
 	
 		//for article card rendering
@@ -43,7 +37,14 @@ enyo.kind({
 
 		if(this.getShowing() && previousValue !== undefined){
 			//this.activate();
+			this.resized();
 		}
+	},
+
+	resized: function() {
+		this.inherited(arguments);
+
+		this.$.articlePanel.resized();
 	},
 
 	bubbleEvent: function(inSender, inEvent){
@@ -55,11 +56,74 @@ enyo.kind({
 	loadArticles: function(sub, articles){
 		console.log("LOAD DEM ARTICLES");
 		this.$.includeReadButton.addRemoveClass("active", AppPrefs.get("includeRead"));
+    	this.$.subTitle.setContent(sub.title);
+    	this.$.articlePanel.loadArticles(sub, articles);
+
+	},
+	toggleIncludeUnread: function (inSender){
+		AppPrefs.set("includeRead", !AppPrefs.get("includeRead"));
+		inSender.addRemoveClass("active", AppPrefs.get("includeRead"));
+		this.$.articlePanel.orderAndShowArticles();
+	},
+
+
+	
+});
+
+enyo.kind({
+	name: "ArticlePanel",
+	kind: "Panels",
+	fit: true,
+	classes: "articlePanel enyo-unselectable",
+	arrangerKind: "CarouselArranger",
+	handlers: {
+		onSetupItem: ""
+	},
+	components: [
+		{name: "left", classes: "articleList", components: [
+			{name: "list", kind: "List", count: 0, multiSelect: false, classes: "enyo-fit list", onSetupItem: "setupItem", components: [
+				{name: "divider", classes: "divider"},
+				{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
+					{name: "articleTime", classes: "articleTime"},
+					{name: "unreadIndicator", fit: true, classes: "unreadIndicator"},
+					{name: "articleTitle", classes: "articleTitle", allowHtml: true},
+					{name: "articleSubtitle", classes: "articleSubtitle", allowHtml: true},
+				]}
+			]}
+		]},
+		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
+			{kind: "enyo.Scroller", fit: true, components: [
+				{name: "articleViewTime", allowHtml: true, classes: "articleTime"},
+				{name: "articleViewTitle", allowHtml: true, classes: "articleTitle"},
+				{name: "articleViewContent", allowHtml: true, fit: true, classes: "articleContent"}
+			]},
+			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+				{kind: "onyx.Grabber"},
+				{kind: "onyx.Button", content: "v", ontap: "increaseIndex"},
+				{kind: "onyx.Button", content: "^", ontap: "decreaseIndex"},
+			]},
+		]}
+	],
+	rendered: function() {
+		this.size();
+		this.inherited(arguments);
+		
+	},
+	resizeHandler: function() {
+		this.size();
+		this.$.grabber.setShowing(window.innerWidth < 800);
+		this.inherited(arguments);
+	},
+	size: function() {
+		var b = this.$.left.getBounds();
+		this.$.body.applyStyle("width", (this.getBounds().width - b.width) + "px")
+	},
+	loadArticles: function(sub, articles){
+		console.log("LOAD DEM ARTICLES");
 		var obj = _.groupBy(articles, function(item){ return reader.isRead(item) });
     	this.unreadArticles = obj.false || [], this.readArticles = obj.true || [];
     	this.sub = sub;
 
-    	this.$.subTitle.setContent(sub.title);
     	this.orderAndShowArticles();
 	},
 	orderAndShowArticles: function(){
@@ -71,11 +135,6 @@ enyo.kind({
 		this.$.list.setCount(this.articles.length);
 		this.$.list.reset();
 	},
-	toggleIncludeUnread: function (inSender){
-		AppPrefs.set("includeRead", !AppPrefs.get("includeRead"));
-		inSender.addRemoveClass("active", AppPrefs.get("includeRead"));
-		this.orderAndShowArticles();
-	},
 
 	setupItem: function(inSender, inEvent) {
 		// this is the row we're setting up
@@ -83,7 +142,7 @@ enyo.kind({
 		var item = this.articles[i];
 		if(item){
 			// apply selection style if inSender (the list) indicates that this row is selected.
-			//this.$.item.addRemoveClass("onyx-selected", inSender.isSelected(i));
+			this.$.item.addRemoveClass("onyx-selected", (this.index === i));
 
 			//console.log(item);
 			this.$.articleTitle.setContent(item.title);
@@ -100,11 +159,28 @@ enyo.kind({
 			}
 		}
 	},
-
 	viewArticle: function(inSender, inEvent){
-		this.bubble("onViewArticle", {articles: this.articles, index: inEvent.index});
+		this.index = inEvent.index;
+		this.showCurrentArticle();
+		this.setIndex(1);
+	},
+
+	showCurrentArticle: function(){
+		this.$.articleViewTitle.setContent(this.articles[this.index].title);
+		this.$.articleViewContent.setContent(this.articles[this.index].content);		
+		this.$.articleViewTime.setContent(moment.unix(this.articles[this.index].updated).format("h:mm a"));
+	},
+
+	increaseIndex: function(){
+		if(this.articles[this.index + 1]){
+			this.index++;
+		}
+		this.showCurrentArticle();
+	},
+	decreaseIndex: function(){
+		if(this.articles[this.index - 1]){
+			this.index--;
+		}
+		this.showCurrentArticle();
 	}
-
-
-	
 });

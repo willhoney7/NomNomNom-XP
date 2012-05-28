@@ -17,6 +17,7 @@ enyo.kind({
 			{name: "articleContent", allowHtml: true, fit: true, classes: "articleContent"}
 		]},
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+			{kind: "onyx.Grabber"},
 			{kind: "onyx.Button", content: "v", ontap: "increaseIndex"},
 			{kind: "onyx.Button", content: "^", ontap: "decreaseIndex"},
 		]},
@@ -33,6 +34,11 @@ enyo.kind({
 			//this.activate();
 			this.resized();
 		}
+	},
+
+	resizeHandler: function() {
+		this.inherited(arguments);
+		this.$.grabber.setShowing((window.width < 800));
 	},
 
 	bubbleEvent: function(inSender, inEvent){

@@ -162,9 +162,7 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 }
 
 .list {
-	z-index: -1;
-	margin-top: 54px; /*height of toolbar*/
-
+	
 	.item {
 		border-bottom: 1px solid silver;
 		padding: 10px 20px 5px 20px;
@@ -241,22 +239,32 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 	margin: 5px 0;
 }
 
-.articleViewPage {
-	
-	.articleContent {
-		font-size: 16px;
-		margin: 15px;
-	}	
-	.articleTitle {
-		font-weight: bold;
-		font-size: 16px;
-		margin: 15px;
-	}
-	.articleTime {
-		margin: 20px;
-		float: right;
-		color: #888;
-		font-size: 14px;
-	}
-}
+.articlePanel {
+	z-index: -1;
+	margin-top: 54px; /*height of toolbar*/
 
+	
+	.articleList {
+		width: 350px;		
+	}
+	.articleView {
+		border-left: 1px #3A3A3A solid;
+
+		.articleContent {
+			font-size: 16px;
+			margin: 15px;
+		}	
+		.articleTitle {
+			font-weight: bold;
+			font-size: 16px;
+			margin: 15px;
+		}
+		.articleTime {
+			margin: 20px;
+			float: right;
+			color: #888;
+			font-size: 14px;
+		}
+	}
+	
+}

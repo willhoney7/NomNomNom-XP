@@ -3,6 +3,7 @@ enyo.depends(
 	"$lib/onyx/",
 	"$lib/layout/fittable/",
 	"$lib/layout/list/",
+	"$lib/layout/panels/",
 
 	//vendors
 	"vendors/book/",
