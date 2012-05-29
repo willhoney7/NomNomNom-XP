@@ -161,62 +161,6 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 
 }
 
-.list {
-	
-	.item {
-		border-bottom: 1px solid silver;
-		padding: 10px 20px 5px 20px;
-		background-color: #eee;
-		font-size: 16px;
-		max-height: 78px;
-		min-height: 60px;
-
-		.unreadIndicator {
-			width: 5px;
-			/*@TODO: work on this more. I want this to stretch.*/
-			min-height: 44px;
-			height: 100%;
-			float: left;
-			position: relative;
-			bottom: 3px;
-			right: 10px;
-			background-color: #ff7800;
-		}
-	}
-
-	.divider {
-		background-color: #666;
-		color: white;
-		font-weight: normal;
-		font-size: 14px;
-		margin: 0;
-		padding: 5px 25px;
-
-	}
-
-	.articleTitle {
-		max-height: 36px;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		/*white-space: nowrap;*/
-	}
-
-	.articleTime {
-		float: right;
-		color: #888;
-		font-size: 14px;
-		padding-left: 5px;
-	}
-
-	.articleSubtitle {
-		color: #888;
-		font-size: 14px;
-		padding: 5px 0px;
-		@include truncated-text;
-	}
-
-}
-
 .subTitle {
 	/*margin: auto;*/
  	text-align: center;
@@ -245,8 +189,66 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 
 	
 	.articleList {
-		width: 350px;		
+		width: 350px;	
+		
+		.article-selected {
+			background-color: rgba(10, 100, 255, 0.07)
+		}
+
+		.item {
+			border-bottom: 1px solid silver;
+			padding: 10px 12px 5px 20px;
+			/*background-color: #eee;*/
+			font-size: 16px;
+			max-height: 78px;
+			min-height: 60px;
+
+			.unreadIndicator {
+				width: 5px;
+				/*@TODO: work on this more. I want this to stretch.*/
+				min-height: 44px;
+				height: 100%;
+				float: left;
+				position: relative;
+				bottom: 3px;
+				right: 10px;
+				background-color: #ff7800;
+			}
+
+			.articleTitle {
+				max-height: 36px;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				/*white-space: nowrap;*/
+			}
+
+			.articleTime {
+				float: right;
+				color: #888;
+				font-size: 14px;
+				padding-left: 5px;
+			}
+
+			.articleSubtitle {
+				color: #888;
+				font-size: 14px;
+				padding: 5px 0px;
+				@include truncated-text;
+			}
+		}
+
+		.divider {
+			background-color: #666;
+			color: white;
+			font-weight: normal;
+			font-size: 14px;
+			margin: 0;
+			padding: 5px 25px;
+
+		}
+
 	}
+
 	.articleView {
 		border-left: 1px #3A3A3A solid;
 

@@ -1,7 +1,23 @@
 TODO
-Make article view page
-settings
-add feed
-spinners
+Flesh Out Article View Page
+	Services
+
+
+Settings
+	font sizes
+	article ordering
+	hide all
+	hide starred
+	hide read feeds
+
+Add Feed
+	Improve search
+
+Spinners
+	Canvas?
+
 starred?
+	Archive all? Most recent 50?
+
 shared?
+Deal with Empty Feeds

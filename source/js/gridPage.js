@@ -178,7 +178,7 @@ enyo.kind({
 		}
 		this.$.image.setSrc(getImagePath("grid-icon-" + img + ".png"));
 		this.$.control.setContent(this.getItem().title);
-		this.$.unread.setContent(this.getItem().count);
+		this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
 	}
 
 });

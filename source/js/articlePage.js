@@ -107,7 +107,7 @@ enyo.kind({
 	rendered: function() {
 		this.size();
 		this.inherited(arguments);
-		
+
 	},
 	resizeHandler: function() {
 		this.size();
@@ -135,16 +135,14 @@ enyo.kind({
 		this.$.list.setCount(this.articles.length);
 		this.$.list.reset();
 	},
-
 	setupItem: function(inSender, inEvent) {
 		// this is the row we're setting up
 		var i = inEvent.index;
 		var item = this.articles[i];
 		if(item){
 			// apply selection style if inSender (the list) indicates that this row is selected.
-			this.$.item.addRemoveClass("onyx-selected", (this.index === i));
+			this.$.item.addRemoveClass("article-selected", inSender.isSelected(i));//(this.articleIndex === i));
 
-			//console.log(item);
 			this.$.articleTitle.setContent(item.title);
 			this.$.unreadIndicator.setShowing(!reader.isRead(item));
 			this.$.articleTime.setContent(moment.unix(item.updated).format("h:mm a"));
@@ -158,28 +156,30 @@ enyo.kind({
 				this.$.divider.canGenerate = date != (prev &&  moment.unix(prev.updated).format("MMM Do"));
 			}
 		}
+
 	},
 	viewArticle: function(inSender, inEvent){
-		this.index = inEvent.index;
+		this.articleIndex = inEvent.index;
 		this.showCurrentArticle();
-		this.setIndex(1);
+		this.next();
 	},
 
 	showCurrentArticle: function(){
-		this.$.articleViewTitle.setContent(this.articles[this.index].title);
-		this.$.articleViewContent.setContent(this.articles[this.index].content);		
-		this.$.articleViewTime.setContent(moment.unix(this.articles[this.index].updated).format("h:mm a"));
+		this.$.articleViewTitle.setContent(this.articles[this.articleIndex].title);
+		this.$.articleViewContent.setContent(this.articles[this.articleIndex].content);		
+		this.$.articleViewTime.setContent(moment.unix(this.articles[this.articleIndex].updated).format("h:mm a"));
+		this.$.list.select(this.articleIndex, this.articles[this.articleIndex]);
 	},
 
 	increaseIndex: function(){
-		if(this.articles[this.index + 1]){
-			this.index++;
+		if(this.articles[this.articleIndex + 1]){
+			this.articleIndex++;
 		}
 		this.showCurrentArticle();
 	},
 	decreaseIndex: function(){
-		if(this.articles[this.index - 1]){
-			this.index--;
+		if(this.articles[this.articleIndex - 1]){
+			this.articleIndex--;
 		}
 		this.showCurrentArticle();
 	}
