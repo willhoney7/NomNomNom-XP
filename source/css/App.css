@@ -14,20 +14,6 @@
   overflow: hidden;
   white-space: nowrap; }
 
-.centered {
-  margin: 10px; }
-  @media screen and (min-width: 650px) {
-    .centered {
-      width: 300px;
-      margin: auto;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      width: 0;
-      height: 0; } }
-
 .loading {
   font-size: 26px;
   margin: 20px;
@@ -36,13 +22,15 @@
 /* 
  *	Login Stuff
  */
-@media screen and (min-width: 400px) {
-  .loginGroup {
-    width: 300px; } }
-@media screen and (min-width: 500px) {
-  .loginGroup {
-    width: 400px; } }
-
+/*.loginGroup {
+	@media screen and (min-width: 400px) {
+		width: 300px;
+	}
+	@media screen and (min-width: 500px) {
+		width: 400px;
+	}
+	
+}*/
 /* CHECK FOR CROSS PLATFORM COMPATIBILITY */
 .onyx-popup > * {
   margin: 10px 5px; }
@@ -56,6 +44,32 @@
   font-size: 14px;
   margin-top: 5px; }
 
+.settingsList, .addFeedList, .loginGroup {
+  margin: 20px auto;
+  padding: 0px 10px; }
+  @media screen and (min-width: 650px) {
+    .settingsList, .addFeedList, .loginGroup {
+      max-width: 500px; } }
+
+.onyx-groupbox {
+  margin-bottom: 15px; }
+
+.onyx-menu {
+  left: inherit;
+  right: 0; }
+
+.onyx-popup {
+  background: #eee;
+  color: black; }
+
+.onyx-popup-decorator {
+  padding: 10px; }
+
+.settingValue {
+  color: #888;
+  font-size: 14px;
+  line-height: 24px; }
+
 /* Grid Page Stuff */
 .onyx-toolbar .onyx-icon-button {
   /* Might work */ }
@@ -63,6 +77,9 @@
     .onyx-toolbar .onyx-icon-button {
       margin-left: 10px;
       margin-right: 10px; } }
+.onyx-toolbar .center {
+  width: 100%;
+  text-align: center; }
 
 .grid {
   padding-left: 5px;
@@ -119,12 +136,6 @@
   overflow: hidden;
   white-space: nowrap; }
 
-.settingsList, .addFeedList {
-  margin: 20px auto; }
-  @media screen and (min-width: 650px) {
-    .settingsList, .addFeedList {
-      max-width: 500px; } }
-
 .onyx-button.full {
   width: 100%;
   margin: 5px 0; }
@@ -137,6 +148,36 @@
     width: 350px; }
     .articlePanel .articleList .article-selected {
       background-color: rgba(10, 100, 255, 0.07); }
+    .articlePanel .articleList .item, .articlePanel .articleList .item.Medium {
+      font-size: 16px;
+      max-height: 78px;
+      min-height: 62px; }
+      .articlePanel .articleList .item .articleTime, .articlePanel .articleList .item .articleSubtitle, .articlePanel .articleList .item.Medium .articleTime, .articlePanel .articleList .item.Medium .articleSubtitle {
+        font-size: 14px; }
+      .articlePanel .articleList .item .articleTitle, .articlePanel .articleList .item.Medium .articleTitle {
+        max-height: 38px; }
+      .articlePanel .articleList .item .unreadIndicator, .articlePanel .articleList .item.Medium .unreadIndicator {
+        min-height: 44px; }
+    .articlePanel .articleList .item.Small {
+      font-size: 14px;
+      max-height: 72px;
+      min-height: 58px; }
+      .articlePanel .articleList .item.Small .articleTime, .articlePanel .articleList .item.Small .articleSubtitle {
+        font-size: 12px; }
+      .articlePanel .articleList .item.Small .articleTitle {
+        max-height: 32px; }
+      .articlePanel .articleList .item.Small .unreadIndicator {
+        min-height: 40px; }
+    .articlePanel .articleList .item.Large {
+      font-size: 18px;
+      max-height: 84px;
+      min-height: 66px; }
+      .articlePanel .articleList .item.Large .articleTime, .articlePanel .articleList .item.Large .articleSubtitle {
+        font-size: 16px; }
+      .articlePanel .articleList .item.Large .articleTitle {
+        max-height: 44px; }
+      .articlePanel .articleList .item.Large .unreadIndicator {
+        min-height: 48px; }
     .articlePanel .articleList .item {
       border-bottom: 1px solid silver;
       padding: 10px 12px 5px 20px;
@@ -147,7 +188,6 @@
       .articlePanel .articleList .item .unreadIndicator {
         width: 5px;
         /*@TODO: work on this more. I want this to stretch.*/
-        min-height: 44px;
         height: 100%;
         float: left;
         position: relative;
@@ -155,18 +195,15 @@
         right: 10px;
         background-color: #ff7800; }
       .articlePanel .articleList .item .articleTitle {
-        max-height: 36px;
         text-overflow: ellipsis;
         overflow: hidden;
         /*white-space: nowrap;*/ }
       .articlePanel .articleList .item .articleTime {
         float: right;
         color: #888;
-        font-size: 14px;
         padding-left: 5px; }
       .articlePanel .articleList .item .articleSubtitle {
         color: #888;
-        font-size: 14px;
         padding: 5px 0px;
         text-overflow: ellipsis;
         overflow: hidden;

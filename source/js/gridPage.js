@@ -27,6 +27,9 @@ enyo.kind({
 	create: function () {
 		this.inherited(arguments);
 	},
+	rendered: function () {
+		this.inherited(arguments);
+	},
 
 	showingChanged: function(previousValue) {
 		this.inherited(arguments);
@@ -52,24 +55,30 @@ enyo.kind({
 	},
 
 	gridItems: [],
+	loadGridFromOnline: function(){
+		console.log("LOADING GRIDS FROM ONLINE");
+
+		reader.loadFeeds(enyo.bind(this, function (subs){
+			if(!_.isEqual(subs, this.gridItems)){
+				databaseHelper.saveSubs(subs);
+				this.buildGrid(subs)	
+			} else {
+				console.log("Subs are the same");
+			}
+		}));
+	},
+
 	loadGrid: function(){
 		databaseHelper.loadSubs(enyo.bind(this, function(subs){
-			console.log("SUBS LOADED FROM DB")
+			console.log("SUBS LOADED FROM DB");
 			this.buildGrid(subs);
 		}));
 
 		//this.loadFeedsFromOnline();
-
-		/*//get our array
-		this.gridItems = [
-			{dog: "fido"},{dog: "bob"},{dog: "gary"},{dog: "spencer"},{dog: "carl"},{dog: "cary"},{dog: "peter"},{dog: "jerry"},
-			{dog: "fido"},{dog: "bob"},{dog: "gary"},{dog: "spencer"},{dog: "carl"},{dog: "cary"},{dog: "peter"},{dog: "jerry"},
-			{dog: "fido"},{dog: "bob"},{dog: "gary"},{dog: "spencer"},{dog: "carl"},{dog: "cary"},{dog: "peter"},{dog: "jerry"},
-		];*/
-
 	}, 
 	buildGrid: function(items){
 		this.gridItems = items;
+		reader.setFeeds(this.gridItems);
 		this.$.grid.setCount(this.gridItems.length);
 		this.$.grid.build();			
 
@@ -80,28 +89,28 @@ enyo.kind({
 
 			reader.getItems(subs[0].id, enyo.bind(this, 
 				function(unreadArticles){
-
 					reader.getItems(reader.TAGS['read'], enyo.bind(this, 
 						function(readArticles){
+							reader.getItems(reader.TAGS['star'], enyo.bind(this, 
+								function(starredArticles){
+									console.log(starredArticles);
+									databaseHelper.saveArticles({unread: unreadArticles, read: readArticles, starred: starredArticles}, enyo.bind(this, function(){
+										console.log("articles saved! time to move on");
 
-							databaseHelper.saveArticles(unreadArticles, readArticles, enyo.bind(this, function(){
-								console.log("articles saved! time to move on");
+										if(!_.isEqual(subs, this.gridItems)){
+											databaseHelper.saveSubs(subs);
+											this.buildGrid(subs)	
+										} else {
+											console.log("Subs are the same");
+										}
+									}));								
 
-								if(!_.isEqual(subs, this.gridItems)){
-									databaseHelper.saveSubs(subs);
-									this.buildGrid(subs)	
-								} else {
-									console.log("Subs are the same");
-								}
-							}));
-
-						}), {n: 50, ot: moment().subtract("days", 3).unix()}
+								}), undefined
+							);
+						}), {n: 50, ot: moment().subtract("days", 10).unix()}
 					);
 				}), {n: subs[0].count, xt: reader.TAGS['read']}
 			);
-
-
-			
 		}));
 	},
 
@@ -124,7 +133,10 @@ enyo.kind({
 			});
 		} else if (inSender.getItem().isAll){
 			//do nothing
-		}
+		} else if(inSender.getItem().isSpecial && !inSender.getItem().isAll){
+			//only special feed we have now is starred
+			opts.starred = true;
+		} 
 		//console.log("opts", opts);
 		databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
 			if(articles.length < inSender.getItem().count){
@@ -178,7 +190,9 @@ enyo.kind({
 		}
 		this.$.image.setSrc(getImagePath("grid-icon-" + img + ".png"));
 		this.$.control.setContent(this.getItem().title);
-		this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
+		if(this.getItem().count){
+			this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
+		}
 	}
 
 });

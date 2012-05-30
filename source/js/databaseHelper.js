@@ -5,8 +5,8 @@
 	databaseHelper.loadDb = function () {
 		db = window.openDatabase("nomnomnomXP_db", "1.0", "NomNomNomXP Database", 2000000);
 		db.transaction(function(tx){
-			//stx.executeSql('DROP TABLE IF EXISTS ARTICLES');
-			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, data, imgs)');
+			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
 
 
@@ -29,12 +29,15 @@
     	}, databaseHelper.error);
     	
 		function querySuccess(tx, results) {
-			var result = JSON.parse(Base64.decode(results.rows.item(0).data));
-			callback(result);
+			if(results.rows.length > 0){
+				var result = JSON.parse(Base64.decode(results.rows.item(0).data));
+			}
+			callback(result || []);
 		}
     };
 
     function formatArticle (item) {
+
     	var condensedItem = {
 			id: item.id,
 			title: item.title,
@@ -49,7 +52,7 @@
 			enclosure: item.enclosure,
 			read: false,
 			starred: false,
-			shared: false,
+			shared: false
 			//_orig: _.clone(item) we may want to do this in the future
 		};
 		//condensedItem.strippedContent = htmlToText(condensedItem.content); in da future?
@@ -78,16 +81,17 @@
     	db.transaction(function(tx){
 			
 			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
-			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, data, imgs)');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
 			if(array.length > 1){
-				var string = "INSERT INTO ARTICLES SELECT '" + array[0].id + "' AS id, '" + array[0].origin.streamId + "' AS feed, '" + reader.isRead(array[0]) + "' AS read,  '" + Base64.encode(JSON.stringify(formatArticle(array[0]))) + "' AS data, '' AS imgs";
+				console.log(array[0]);
+				var string = "INSERT INTO ARTICLES SELECT '" + array[0].id + "' AS id, '" + (array[0].origin.streamId) + "' AS feed, '" + reader.isRead(array[0]) + "' AS read, '" + reader.isStarred(array[0]) + "' AS starred,  '" + Base64.encode(JSON.stringify(formatArticle(array[0]))) + "' AS data, '' AS imgs";
 				for (var i = 1; i < array.length; i++) {
 					console.log("isRead", reader.isRead(array[i]));
-					string += " UNION SELECT '" + array[i].id + "', '" + array[i].origin.streamId + "', '" + reader.isRead(array[i]) + "', '" + Base64.encode(JSON.stringify(formatArticle(array[i]))) + "', ''";
+					string += " UNION SELECT '" + array[i].id + "', '" + (array[i].origin.streamId) + "', '" + reader.isRead(array[i]) + "','" + reader.isStarred(array[i]) + "', '" + Base64.encode(JSON.stringify(formatArticle(array[i]))) + "', ''";
 				};
 				//console.log(string);	
 			} else {
-				var string = 'INSERT INTO ARTICLES (id, feed, read, data, imgs) VALUES ("' + array[0].id + '", "' + array[0].origin.streamId + '", "' + reader.isRead(array[0]) + '", "' + Base64.encode(JSON.stringify(formatArticle(array[0]))) + '", "")';
+				var string = 'INSERT INTO ARTICLES (id, feed, read, starred, data, imgs) VALUES ("' + array[0].id + '", "' + (array[0].origin.streamId) + '", "' + reader.isRead(array[0]) + '","' + reader.isStarred(array[0]) + '", "' + Base64.encode(JSON.stringify(formatArticle(array[0]))) + '", "")';
 			}
 			
 			tx.executeSql(string);
@@ -118,6 +122,8 @@
 		}, databaseHelper.error, callback);
     }
 
+
+
     function getItemsNotInAnotherArray (originalArray, anotherArray) {
     	var processedArray = [];
     	_.each(originalArray, function(obj){
@@ -130,25 +136,57 @@
 		});
 		return processedArray;
     }
+    function getItemsInAnotherArray (originalArray, anotherArray) {
+    	var processedArray = [];
+    	_.each(originalArray, function(obj){
+			//check it if it exists
 
-    databaseHelper.saveArticles = function (unreadArticles, readArticles, callback) {
+			//we assume the property we want to check is .id
+			if(_.find(anotherArray, function(foundObj){ return foundObj.id === obj.id })){
+				processedArray.push(obj);
+			}
+		});
+		return processedArray;
+    }
+
+
+    databaseHelper.saveArticles = function (downloadedArticles, callback) {
     	//addArticlesToDb(readArticles);
     	//addArticlesToDb(unreadArticles);
 
     	databaseHelper.loadArticles(null, function(loadedArticles){
     		//console.log(JSON.stringify(loadedArticles));
+
+    		var savedUnreadArticles = [], 
+    			savedReadArticles = [],
+    			savedStarredArticles = [],
+    			unreadArticles = downloadedArticles.unread,
+    			readArticles = downloadedArticles.read,
+    			starredArticles = downloadedArticles.starred;
+
     		var obj = _.groupBy(loadedArticles, function(item){ return item.read });
-    		var savedUnreadArticles = obj.false || [], savedReadArticles = obj.true || [];
+    		_.each(loadedArticles, function(article){
+    			if(article.starred){
+    				savedStarredArticles.push(article);
+    			} else if(article.read){
+    				savedReadArticles.push(article);
+    			} else {
+    				savedUnreadArticles.push(article);
+    			}
+    		});
 
-    		//console.log("num of loaded unread articles", unreadArticles.length, "num of unread articles saved", savedUnreadArticles.length);
-    		//console.log(readArticles, savedReadArticles);
-    		//console.log("num of loaded read articles", readArticles.length, "num of read articles saved", savedReadArticles.length);
-
+    		console.log("Saved", savedStarredArticles, savedReadArticles, savedUnreadArticles);
+    		console.log("Loaded", starredArticles, readArticles, unreadArticles);
+    		
+    		//add starred articles NOT saved
+    		var starredToAdd = [].concat(getItemsNotInAnotherArray(starredArticles, savedStarredArticles));	
+    								//remove items that are saved that are no longer starred                       remove items that are already saved as unread articles or read articles
+    		var starredToRemove = [].concat(getItemsNotInAnotherArray(savedStarredArticles, starredArticles), getItemsInAnotherArray(starredArticles, savedUnreadArticles), getItemsInAnotherArray(starredArticles, savedReadArticles));
+    		
     		var arrayToAdd, arrayToRemove;
     		
-    		
-    		arrayToAdd = [].concat(getItemsNotInAnotherArray(unreadArticles, savedUnreadArticles), getItemsNotInAnotherArray(readArticles, savedReadArticles));
-    		arrayToRemove = [].concat(getItemsNotInAnotherArray(savedUnreadArticles, unreadArticles), getItemsNotInAnotherArray(savedReadArticles, readArticles));
+    		arrayToAdd = [].concat(getItemsNotInAnotherArray(unreadArticles, savedUnreadArticles), getItemsNotInAnotherArray(readArticles, savedReadArticles), starredToAdd);
+    		arrayToRemove = [].concat(getItemsNotInAnotherArray(savedUnreadArticles, unreadArticles), getItemsNotInAnotherArray(savedReadArticles, readArticles), starredToRemove);
 
     		//console.log("adding these to the db", arrayToAdd.length);
     		//console.log("removing these from the db", arrayToRemove.length);	
@@ -157,7 +195,7 @@
     			addArticlesToDb(arrayToAdd, callback);
     		});
     	
-    	})
+    	});
     	//if empty
     		//save ALL unread articles
     		//save past 3? days read articles
@@ -225,6 +263,41 @@
 			//var result = JSON.parse(Base64.decode(results.rows.item(0).data));
 			//callback(result);
 		}
+    };
+
+    databaseHelper.markArticlesRead = function(array, callback) {
+
+    	db.transaction(function(tx){
+			
+			var string = "UPDATE ARTICLES SET read = 'true' WHERE";
+			var keyArray = [];
+				_(array).each(function(article){
+					keyArray.push(article.id);
+				});
+
+			string += buildOrString("id", keyArray);
+ 
+			console.log(string);
+
+			tx.executeSql(string);
+
+		}, databaseHelper.error, callback);
+
+    	/*databaseHelper.loadArticles(null, function(loadedArticles){
+    		//console.log(JSON.stringify(loadedArticles));
+    		var obj = _.groupBy(loadedArticles, function(item){ return item.read });
+    		var savedUnreadArticles = obj.false || [], savedReadArticles = obj.true || [];
+
+    		var arrayToAdd, arrayToRemove;
+    		
+    		arrayToAdd = getItemsNotInAnotherArray(readArticles, savedReadArticles);
+    		arrayToRemove = [].concat(getItemsNotInAnotherArray(savedReadArticles, readArticles), readArticles);
+    		
+    		removeArticlesFromDb(arrayToRemove, function(){
+    			addArticlesToDb(arrayToAdd, callback);
+    		});
+    	
+    	})*/
     };
 
    	databaseHelper.test = function (){

@@ -4,6 +4,7 @@ Flesh Out Article View Page
 
 
 Settings
+	Folders open articles/open feeds
 	font sizes
 	article ordering
 	hide all
@@ -21,3 +22,5 @@ starred?
 
 shared?
 Deal with Empty Feeds
+
+Tooltips

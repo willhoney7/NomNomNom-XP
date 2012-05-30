@@ -22,22 +22,6 @@ $red: #cc3333;
 	@include truncated-text;
 }
 
-
-.centered {
-	margin: 10px;
-	@media screen and (min-width: 650px) {
-		width: 300px;
-		margin: auto;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		left: 0;
-		width: 0;
-		height: 0;
-	}
-}
-
 .loading {
 	font-size: 26px;
 	margin: 20px;
@@ -50,7 +34,7 @@ $red: #cc3333;
  *	Login Stuff
  */
 
-.loginGroup {
+/*.loginGroup {
 	@media screen and (min-width: 400px) {
 		width: 300px;
 	}
@@ -58,7 +42,7 @@ $red: #cc3333;
 		width: 400px;
 	}
 	
-}
+}*/
 
 /* CHECK FOR CROSS PLATFORM COMPATIBILITY */
 
@@ -79,6 +63,37 @@ $red: #cc3333;
 	margin-top: 5px;
 }
 
+.settingsList, .addFeedList, .loginGroup {
+	margin: 20px auto;
+	padding: 0px 10px;
+
+	@media screen and (min-width: 650px) {
+		max-width: 500px; 
+	}
+}
+
+.onyx-groupbox {
+	margin-bottom: 15px;
+}
+.onyx-menu {
+	left: inherit;
+	right: 0;
+}
+.onyx-popup {
+	background: #eee;
+	color: black;
+}
+.onyx-popup-decorator {
+	padding: 10px;
+}
+
+.settingValue {
+	color: #888;
+	font-size: 14px;
+	line-height: 24px;
+}
+
+
 /* Grid Page Stuff */
 
 .onyx-toolbar {
@@ -91,6 +106,10 @@ $red: #cc3333;
 			}
 		}
 	}
+	.center {
+		width: 100%;
+		text-align: center;
+	}
 }
 
 .grid {
@@ -101,6 +120,7 @@ $red: #cc3333;
 
 $unreadDisplaceY: 72px;
 $iconDisplaceY: $unreadDisplaceY + 8px;
+
 .iPad, .iPhone, {
 	.grid-item {
 		.unread {
@@ -170,18 +190,30 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 	@include truncated-text;
 }
 
-.settingsList, .addFeedList {
-	margin: 20px auto;
-
-	@media screen and (min-width: 650px) {
-		max-width: 500px; 
-	}
-}
 
 .onyx-button.full {
 	width: 100%;
 	margin: 5px 0;
 }
+
+@mixin articleItem($baseFontSize) {
+
+	font-size: $baseFontSize;
+	max-height: ($baseFontSize * 2) + ($baseFontSize - 2px) + 32px; //64px;
+	min-height: ($baseFontSize) + ($baseFontSize - 2px) + 32px; //48px;
+
+	.articleTime, .articleSubtitle {
+		font-size: $baseFontSize - 2px;
+	}
+	.articleTitle {
+		max-height: $baseFontSize * 2 + ($baseFontSize - 10px)
+	}	
+
+	.unreadIndicator {
+		min-height: $baseFontSize * 2 + 12px;
+	}
+}
+
 
 .articlePanel {
 	z-index: -1;
@@ -195,6 +227,16 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 			background-color: rgba(10, 100, 255, 0.07)
 		}
 
+		.item, .item.Medium {
+			@include articleItem(16px);
+		}
+		.item.Small {
+			@include articleItem(14px);
+		}
+		.item.Large {
+			@include articleItem(18px);
+		}
+
 		.item {
 			border-bottom: 1px solid silver;
 			padding: 10px 12px 5px 20px;
@@ -203,10 +245,10 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 			max-height: 78px;
 			min-height: 60px;
 
+
 			.unreadIndicator {
 				width: 5px;
 				/*@TODO: work on this more. I want this to stretch.*/
-				min-height: 44px;
 				height: 100%;
 				float: left;
 				position: relative;
@@ -216,7 +258,6 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 			}
 
 			.articleTitle {
-				max-height: 36px;
 				text-overflow: ellipsis;
 				overflow: hidden;
 				/*white-space: nowrap;*/
@@ -225,13 +266,11 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 			.articleTime {
 				float: right;
 				color: #888;
-				font-size: 14px;
 				padding-left: 5px;
 			}
 
 			.articleSubtitle {
 				color: #888;
-				font-size: 14px;
 				padding: 5px 0px;
 				@include truncated-text;
 			}

@@ -1,9 +1,8 @@
 enyo.depends(
 	//enyo extras
 	"$lib/onyx/",
-	"$lib/layout/fittable/",
-	"$lib/layout/list/",
-	"$lib/layout/panels/",
+	"$lib/layout/", 
+	"$lib/onyx/source/wip-package.js",	//@TODO <--
 
 	//vendors
 	"vendors/book/",
@@ -27,7 +26,6 @@ enyo.depends(
 	"js/loginPage.js",
 	"js/gridPage.js",
 	"js/articlePage.js",
-	"js/articleViewPage.js",
 	"js/settingsPage.js",
 	"js/addFeedPage.js",
 	"js/tourPage.js",

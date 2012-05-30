@@ -40,7 +40,9 @@ function buildArticlesArray (array) {
 	}
  
 	var preferences = enyo.mixin({
-		"includeRead": true //or false
+		"includeRead": true, //or false
+		"articleContrast": "Normal",
+		"articleFontSize": "Medium"
 	}, JSON.parse(localStorage["preferences"]));
  
  

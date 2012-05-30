@@ -6,7 +6,7 @@ enyo.kind({
 		onLogin: ""
 	},
 	components:[
-		{classes: "centered loginGroup", components: [
+		{classes: "loginGroup", components: [
 			{kind: "onyx.Groupbox", components: [
 				{kind: "onyx.GroupboxHeader", content: "Log into Google Reader"},
 				{kind: "onyx.InputDecorator", components: [

@@ -8,7 +8,7 @@ enyo.kind({
 	},
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{kind: "onyx.Button", content: "Grid", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", classes: "abs", style: "left: 10px;"},
+			{kind: "onyx.Button", content: "Grid", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px;"},
 			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 			{name: "includeReadButton", kind: "onyx.Button", content: "Include Read", ontap: "toggleIncludeUnread", classes: "abs", style: "right: 10px;"}
 		]},
@@ -36,7 +36,7 @@ enyo.kind({
 		this.inherited(arguments);
 
 		if(this.getShowing() && previousValue !== undefined){
-			//this.activate();
+			this.activate();
 			this.resized();
 		}
 	},
@@ -47,8 +47,12 @@ enyo.kind({
 		this.$.articlePanel.resized();
 	},
 
+	activate: function () {
+		this.$.articlePanel.refreshSettings();
+	},
+
 	bubbleEvent: function(inSender, inEvent){
-		this.bubble(inSender.eventToBubble);
+		this.bubble(inSender.eventToBubble, inSender.opts);
 	},
 
 
@@ -80,8 +84,8 @@ enyo.kind({
 		onSetupItem: ""
 	},
 	components: [
-		{name: "left", classes: "articleList", components: [
-			{name: "list", kind: "List", count: 0, multiSelect: false, classes: "enyo-fit list", onSetupItem: "setupItem", components: [
+		{name: "left", classes: "articleList", layoutKind: "FittableRowsLayout", components: [
+			{name: "list", kind: "List", count: 0, multiSelect: false, fit: true, classes: "list", onSetupItem: "setupItem", components: [
 				{name: "divider", classes: "divider"},
 				{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
 					{name: "articleTime", classes: "articleTime"},
@@ -89,7 +93,10 @@ enyo.kind({
 					{name: "articleTitle", classes: "articleTitle", allowHtml: true},
 					{name: "articleSubtitle", classes: "articleSubtitle", allowHtml: true},
 				]}
-			]}
+			]},
+			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+				{kind: "onyx.Button", content: "CHECK", ontap: "markAllRead"},
+			]},		
 		]},
 		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
 			{kind: "enyo.Scroller", fit: true, components: [
@@ -118,6 +125,10 @@ enyo.kind({
 		var b = this.$.left.getBounds();
 		this.$.body.applyStyle("width", (this.getBounds().width - b.width) + "px")
 	},
+	refreshSettings: function(){
+		this.$.list.refresh();
+	},
+
 	loadArticles: function(sub, articles){
 		console.log("LOAD DEM ARTICLES");
 		var obj = _.groupBy(articles, function(item){ return reader.isRead(item) });
@@ -142,6 +153,7 @@ enyo.kind({
 		if(item){
 			// apply selection style if inSender (the list) indicates that this row is selected.
 			this.$.item.addRemoveClass("article-selected", inSender.isSelected(i));//(this.articleIndex === i));
+			this.$.item.setClasses("item enyo-border-box " + AppPrefs.get("articleFontSize"));
 
 			this.$.articleTitle.setContent(item.title);
 			this.$.unreadIndicator.setShowing(!reader.isRead(item));
@@ -165,10 +177,17 @@ enyo.kind({
 	},
 
 	showCurrentArticle: function(){
-		this.$.articleViewTitle.setContent(this.articles[this.articleIndex].title);
-		this.$.articleViewContent.setContent(this.articles[this.articleIndex].content);		
-		this.$.articleViewTime.setContent(moment.unix(this.articles[this.articleIndex].updated).format("h:mm a"));
-		this.$.list.select(this.articleIndex, this.articles[this.articleIndex]);
+		var item = this.articles[this.articleIndex];
+
+		this.$.articleViewTitle.setContent(item.title);
+		this.$.articleViewContent.setContent(item.content);		
+		this.$.articleViewTime.setContent(moment.unix(item.updated).format("h:mm a"));
+		this.$.list.select(this.articleIndex, item);
+
+		reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
+			item.read = true;
+			console.log("marked read", this.articles);
+		}));
 	},
 
 	increaseIndex: function(){
@@ -182,5 +201,28 @@ enyo.kind({
 			this.articleIndex--;
 		}
 		this.showCurrentArticle();
-	}
+	},
+
+	markAllRead: function () {
+		reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
+			
+			_(this.unreadArticles).each(function(item){
+				item.read = true;
+			});
+
+			databaseHelper.markArticlesRead(this.unreadArticles, enyo.bind(this, function(){
+				console.log("read articles saved methinks");
+
+				_.each(this.unreadArticles, function(article){
+					reader.decrementUnreadCount(article.feed.id, 1);
+				});
+
+				databaseHelper.saveSubs(reader.getFeeds());
+
+			}));
+
+			this.$.list.refresh();
+
+		}));	
+	},
 });

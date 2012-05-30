@@ -9,7 +9,7 @@ enyo.kind({
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 			{kind: "onyx.Button", content: "Back", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", classes: "abs"},
-			{content: "Add Feed", classes: "center", style: "text-align: center"}
+			{content: "Add Feed", classes: "center"}
 		]},
 		{classes: "addFeedList", components: [
 			{kind: "onyx.Groupbox", components: [

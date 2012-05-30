@@ -8,7 +8,6 @@ enyo.kind({
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
 			{kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
 			{kind: "articlePage", onShowGridPage: "showGridPage", onViewArticle: "showArticleViewPage"},
-			{kind: "articleViewPage", onShowArticlePage: "backToArticlePage"},
 
 			//load these lazy, because they might not always be needed
 			{name: "tourPage", kind: "tourPage", lazy: true, onShowGridPage: "showGridPage"},
@@ -78,7 +77,7 @@ enyo.kind({
 	showLoginPage: function() {
 		this.$.book.pageName("loginPage");
 	},
-	showGridPage: function() {
+	showGridPage: function(inSender, inEvent) {
 		this.$.book.pageName("gridPage");
 	},
 	showArticlePage: function(inSender, inEvent) {
