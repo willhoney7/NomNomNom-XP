@@ -12,7 +12,7 @@ enyo.kind({
 			//load these lazy, because they might not always be needed
 			{name: "tourPage", kind: "tourPage", lazy: true, onShowGridPage: "showGridPage"},
 			{name: "addFeedPage", kind: "addFeedPage", lazy: true, onShowGridPage: "showGridPage"},
-			{name: "settingsPage", kind: "settingsPage", lazy: true, onShowGridPage: "showGridPage"}
+			{name: "settingsPage", kind: "settingsPage", lazy: true, onShowGridPage: "showGridPage", onLogOut: "showLoginPage"}
 		]},
 	],
 	create: function () {
@@ -33,7 +33,7 @@ enyo.kind({
 		if (reader.hasAuth()) {
 			if(navigator.onLine){
 				reader.getToken(
-					enyo.bind(this, this.loggedIn),
+					enyo.bind(this, this.showGridPage),
 					enyo.bind(this, function(){
 						/*if(OS == iOS){
 							getPassFromKeychain();
@@ -69,6 +69,8 @@ enyo.kind({
 		} else {
 			this.showGridPage();
 		}
+
+		this.$.gridPage.loadFeedsFromOnline();
 
 		//testing
 		//this.showArticlePage(this, {articles: ["dog", "cat"]});

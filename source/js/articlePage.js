@@ -49,6 +49,7 @@ enyo.kind({
 
 	activate: function () {
 		this.$.articlePanel.refreshSettings();
+		this.$.articlePanel.clearCurrentArticle();
 	},
 
 	bubbleEvent: function(inSender, inEvent){
@@ -71,7 +72,6 @@ enyo.kind({
 	},
 
 
-	
 });
 
 enyo.kind({
@@ -130,7 +130,7 @@ enyo.kind({
 	},
 
 	loadArticles: function(sub, articles){
-		console.log("LOAD DEM ARTICLES");
+
 		var obj = _.groupBy(articles, function(item){ return reader.isRead(item) });
     	this.unreadArticles = obj.false || [], this.readArticles = obj.true || [];
     	this.sub = sub;
@@ -182,12 +182,36 @@ enyo.kind({
 		this.$.articleViewTitle.setContent(item.title);
 		this.$.articleViewContent.setContent(item.content);		
 		this.$.articleViewTime.setContent(moment.unix(item.updated).format("h:mm a"));
+
+		if(stringToBool(item.read) === false){
+
+			item.read = true;
+			reader.background.markRead(item, function(){
+				publish("refreshGrid");
+			});
+
+			/*reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
+				console.log("marked read", item);
+
+				databaseHelper.markArticlesRead([item], enyo.bind(this, function(){
+					console.log("read articles saved methinks");
+
+					reader.decrementUnreadCount(item.feed.id, 1);
+
+					databaseHelper.saveSubs(reader.getFeeds());
+
+				}));
+
+			}));*/
+		} 
+
 		this.$.list.select(this.articleIndex, item);
 
-		reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
-			item.read = true;
-			console.log("marked read", this.articles);
-		}));
+	},
+	clearCurrentArticle: function () {
+		this.$.articleViewTitle.setContent("");
+		this.$.articleViewContent.setContent("");		
+		this.$.articleViewTime.setContent("");	
 	},
 
 	increaseIndex: function(){
@@ -206,7 +230,7 @@ enyo.kind({
 	markAllRead: function () {
 		reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
 			
-			_(this.unreadArticles).each(function(item){
+			_(this.articles).each(function(item){
 				item.read = true;
 			});
 

@@ -10,12 +10,14 @@ enyo.depends(
 	"vendors/underscore.string.min.js",
 	"vendors/moment.min.js",
 	"vendors/Base64.js",
+	"vendors/minpubsub.js",
 	"vendors/google-reader/localStorageWrapper.js",
 	"vendors/google-reader/google-reader.js",
 
 	//utils
-	"js/utils.js",
-	"js/databaseHelper.js",
+	"js/helpers/utils.js",
+	"js/helpers/databaseHelper.js",
+	"js/helpers/background.js",
 
 	//style
 	"css/App.css",

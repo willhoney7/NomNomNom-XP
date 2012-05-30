@@ -24,10 +24,19 @@ function getPlatform () {
 	}
 }
 
+function stringToBool (str) {
+	return (/^true$/i).test(str);
+};
+
 function buildArticlesArray (array) {
 	var newArray = [];
+
 	_.each(array, function(obj){
-		newArray.push(JSON.parse(Base64.decode(obj.data)));
+		var toAdd = JSON.parse(Base64.decode(obj.data));
+			toAdd.read = obj.read;
+			toAdd.starred = obj.starred;
+
+		newArray.push(toAdd);
 	});
 	return newArray;
 }

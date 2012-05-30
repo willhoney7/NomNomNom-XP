@@ -26,6 +26,10 @@ enyo.kind({
 
 	create: function () {
 		this.inherited(arguments);
+
+		subscribe("refreshGrid", enyo.bind(this, function(arg){
+        	this.loadGrid();
+    	}));
 	},
 	rendered: function () {
 		this.inherited(arguments);
@@ -84,13 +88,17 @@ enyo.kind({
 
 	},
 	loadFeedsFromOnline: function(){
+		console.log("LOADING FEEDS FROM ONLINE");
+
 		reader.loadFeeds(enyo.bind(this, function (subs){
 			console.log("New Subs loaded from online");
 
 			reader.getItems(subs[0].id, enyo.bind(this, 
 				function(unreadArticles){
+					console.log("GOT ITEMS");
 					reader.getItems(reader.TAGS['read'], enyo.bind(this, 
 						function(readArticles){
+							console.log("GOT MORE ITEMS");
 							reader.getItems(reader.TAGS['star'], enyo.bind(this, 
 								function(starredArticles){
 									console.log(starredArticles);

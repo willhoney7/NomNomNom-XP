@@ -13,6 +13,17 @@
 		}, databaseHelper.error, databaseHelper.success);
 	};
 
+	databaseHelper.dumpData = function () {
+
+		db.transaction(function(tx){
+			tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
+			tx.executeSql('DROP TABLE IF EXISTS SUBS');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
+
+		}, databaseHelper.error, databaseHelper.success);
+	};
+
 	databaseHelper.saveSubs = function (subs) {
 		//@TODO: we can reduce the subs object's size.
 		var data = Base64.encode(JSON.stringify(subs));
@@ -22,6 +33,7 @@
 			tx.executeSql('DELETE FROM SUBS');
 			tx.executeSql('INSERT INTO SUBS (data) VALUES (\''+ data + '\')');
 		}, databaseHelper.error, databaseHelper.success);
+
     };
     databaseHelper.loadSubs = function (callback) {
     	db.transaction(function(tx){
@@ -50,23 +62,10 @@
 			updated: item.updated,
 			content: (item.summary) ? item.summary.content || "": (item.content) ? item.content.content || "" : "",
 			enclosure: item.enclosure,
-			read: false,
-			starred: false,
-			shared: false
 			//_orig: _.clone(item) we may want to do this in the future
 		};
 		//condensedItem.strippedContent = htmlToText(condensedItem.content); in da future?
 		condensedItem.preview = _(htmlToText(condensedItem.content)).prune(50);
-
-		for (var i = 0; i < item.categories.length; i++) {
-			if(reader.correctId(item.categories[i]) === reader.TAGS['read']){
-				condensedItem.read = true;
-			} else if(reader.correctId(item.categories[i]) === reader.TAGS['star']){
-				condensedItem.starred = true;
-			} else if(reader.correctId(item.categories[i]) === reader.TAGS['share']){
-				condensedItem.shared = true;
-			}
-		};
 
 		return condensedItem;
 

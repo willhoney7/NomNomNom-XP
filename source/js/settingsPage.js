@@ -4,7 +4,8 @@ enyo.kind({
 	fit: true,
 	layoutKind: "FittableRowsLayout",
 	handlers: {
-		onShowGridPage: ""
+		onShowGridPage: "",
+		onLogOut: ""
 	},
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
@@ -67,6 +68,13 @@ enyo.kind({
 			}
 		})
 	},
-	
+
+	logOut: function() {
+		reader.logout();
+		databaseHelper.dumpData();
+		this.bubble("onLogOut");
+
+	},
+		
 });
 
