@@ -2,14 +2,13 @@ TODO
 
 Flesh Out Article View Page
 	Services
-
+	Mark Starred
 
 Settings
 	Folders open articles/open feeds
 	font sizes
 	article ordering
-	hide all
-	hide starred
+
 	hide read feeds
 
 Add Feed
@@ -18,10 +17,6 @@ Add Feed
 Spinners
 	Canvas?
 
-starred?
-	Archive all? Most recent 50?
-
-shared?
-Deal with Empty Feeds
-
 Tooltips
+
+OFFLINE QUEUE

@@ -1,45 +1,73 @@
 //utils.js
+(function(){
+	window.AppUtils = {};
 
-function getImagePath (imageName) {
-	//based on device dimensions, we need to get the proper image size.
+	AppUtils.getImagePath  = function(imageName) {
+		//based on device dimensions, we need to get the proper image size.
 
-	//will require lots of testing.
+		//will require lots of testing.
 
-	return "assets/" + imageName;
+		return "assets/" + imageName;
 
-};
+	};
 
-function getPlatform () {
-	var plat = navigator.appVersion;
-	if(navigator.appVersion.indexOf("iPhone") !== -1){
-		return "iPhone";
-	} else if(navigator.appVersion.indexOf("iPad") !== -1){
-		return "iPad";
-	} else if(navigator.appVersion.indexOf("Chrome") !== -1){
-		return "Chrome";
-	} else if(navigator.appVersion.indexOf("Safari") !== -1){
-		return "Safari";
-	} else {
-		return "Browser";
+	AppUtils.getPlatform = function () {
+		var plat = navigator.appVersion;
+		if(navigator.appVersion.indexOf("iPhone") !== -1){
+			return "iPhone";
+		} else if(navigator.appVersion.indexOf("iPad") !== -1){
+			return "iPad";
+		} else if(navigator.appVersion.indexOf("Chrome") !== -1){
+			return "Chrome";
+		} else if(navigator.appVersion.indexOf("Safari") !== -1){
+			return "Safari";
+		} else {
+			return "Browser";
+		}
 	}
-}
 
-function stringToBool (str) {
-	return (/^true$/i).test(str);
-};
+	AppUtils.testInternetConnection = function (callback){
+		//quick and dirty
+		if(navigator.onLine && navigator.onLine === true){
+			var i = new Image();
+				i.onload = function(){ callback(true) };
+				i.onerror = function(){ callback(false) };
 
-function buildArticlesArray (array) {
-	var newArray = [];
+			//use a favicon since it is around 1 kb.
+			i.src = "http://www.google.com/s2/favicons?domain_url=" + escape("http://www.google.com") + "&d=" + escape(Date());	
+		} else {
+			callback(false);
+		}
+	};
 
-	_.each(array, function(obj){
-		var toAdd = JSON.parse(Base64.decode(obj.data));
-			toAdd.read = obj.read;
-			toAdd.starred = obj.starred;
+	var newHumane = humane.create();
+	AppUtils.wrapWithInternetTest = function (func) {
+		AppUtils.testInternetConnection(function(hasInternet){
+			if(hasInternet){
+				func();
+			} else {
+				newHumane.log("No Internet Connection...");
+			}
+		});
+	};
 
-		newArray.push(toAdd);
-	});
-	return newArray;
-}
+	AppUtils.stringToBool = function (str) {
+		return (/^true$/i).test(str);
+	};
+
+	AppUtils.buildArticlesArray = function (array) {
+		var newArray = [];
+
+		_.each(array, function(obj){
+			var toAdd = JSON.parse(Base64.decode(obj.data));
+				toAdd.read = obj.read;
+				toAdd.starred = obj.starred;
+
+			newArray.push(toAdd);
+		});
+		return newArray;
+	}
+})();
 
 (function(){
 	window.AppPrefs = {};

@@ -82,10 +82,10 @@
 			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
 			if(array.length > 1){
-				console.log(array[0]);
+				//console.log(array[0]);
 				var string = "INSERT INTO ARTICLES SELECT '" + array[0].id + "' AS id, '" + (array[0].origin.streamId) + "' AS feed, '" + reader.isRead(array[0]) + "' AS read, '" + reader.isStarred(array[0]) + "' AS starred,  '" + Base64.encode(JSON.stringify(formatArticle(array[0]))) + "' AS data, '' AS imgs";
 				for (var i = 1; i < array.length; i++) {
-					console.log("isRead", reader.isRead(array[i]));
+					//console.log("isRead", reader.isRead(array[i]));
 					string += " UNION SELECT '" + array[i].id + "', '" + (array[i].origin.streamId) + "', '" + reader.isRead(array[i]) + "','" + reader.isStarred(array[i]) + "', '" + Base64.encode(JSON.stringify(formatArticle(array[i]))) + "', ''";
 				};
 				//console.log(string);	
@@ -174,8 +174,8 @@
     			}
     		});
 
-    		console.log("Saved", savedStarredArticles, savedReadArticles, savedUnreadArticles);
-    		console.log("Loaded", starredArticles, readArticles, unreadArticles);
+    		//console.log("Saved", savedStarredArticles, savedReadArticles, savedUnreadArticles);
+    		//console.log("Loaded", starredArticles, readArticles, unreadArticles);
     		
     		//add starred articles NOT saved
     		var starredToAdd = [].concat(getItemsNotInAnotherArray(starredArticles, savedStarredArticles));	

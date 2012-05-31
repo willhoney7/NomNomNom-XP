@@ -17,9 +17,9 @@ enyo.kind({
 
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 			{content: "NomNomNomXP", classes: "truncating-text"},
-			{kind: "onyx.IconButton", classes: "floatRight", src: getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
-			{kind: "onyx.IconButton", classes: "floatRight", src: getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
-			{kind: "onyx.IconButton", classes: "floatRight", src: getImagePath("menu-icon-new.png"), ontap: "bubbleEvent", eventToBubble: "onShowAddFeedPage"}
+			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
+			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
+			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-new.png"), ontap: "bubbleEvent", eventToBubble: "onShowAddFeedPage"}
 		]},
 		
 	],
@@ -61,15 +61,19 @@ enyo.kind({
 	gridItems: [],
 	loadGridFromOnline: function(){
 		console.log("LOADING GRIDS FROM ONLINE");
+		
+		AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
-		reader.loadFeeds(enyo.bind(this, function (subs){
-			if(!_.isEqual(subs, this.gridItems)){
-				databaseHelper.saveSubs(subs);
-				this.buildGrid(subs)	
-			} else {
-				console.log("Subs are the same");
-			}
-		}));
+			reader.loadFeeds(enyo.bind(this, function (subs){
+				if(!_.isEqual(subs, this.gridItems)){
+					databaseHelper.saveSubs(subs);
+					this.buildGrid(subs)	
+				} else {
+					console.log("Subs are the same");
+				}
+			}));
+
+		}))
 	},
 
 	loadGrid: function(){
@@ -88,37 +92,47 @@ enyo.kind({
 
 	},
 	loadFeedsFromOnline: function(){
-		console.log("LOADING FEEDS FROM ONLINE");
+		AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
-		reader.loadFeeds(enyo.bind(this, function (subs){
-			console.log("New Subs loaded from online");
+			humane.log("Loading Subscriptions...", {timeout: 50000});
 
-			reader.getItems(subs[0].id, enyo.bind(this, 
-				function(unreadArticles){
-					console.log("GOT ITEMS");
-					reader.getItems(reader.TAGS['read'], enyo.bind(this, 
-						function(readArticles){
-							console.log("GOT MORE ITEMS");
-							reader.getItems(reader.TAGS['star'], enyo.bind(this, 
-								function(starredArticles){
-									console.log(starredArticles);
-									databaseHelper.saveArticles({unread: unreadArticles, read: readArticles, starred: starredArticles}, enyo.bind(this, function(){
-										console.log("articles saved! time to move on");
+			//console.log("LOADING FEEDS FROM ONLINE");
 
-										if(!_.isEqual(subs, this.gridItems)){
-											databaseHelper.saveSubs(subs);
-											this.buildGrid(subs)	
-										} else {
-											console.log("Subs are the same");
-										}
-									}));								
+			reader.loadFeeds(enyo.bind(this, function (subs){
+				//console.log("New Subs loaded from online");
+				
+				humane.remove();
+				humane.log("Loading Articles...", {timeout: 5000000});
+				
+				reader.getItems(subs[0].id, enyo.bind(this, 
+					function(unreadArticles){
+						//console.log("GOT ITEMS");
+						reader.getItems(reader.TAGS['read'], enyo.bind(this, 
+							function(readArticles){
+								//console.log("GOT MORE ITEMS");
+								reader.getItems(reader.TAGS['star'], enyo.bind(this, 
+									function(starredArticles){
+										//console.log(starredArticles);
+										databaseHelper.saveArticles({unread: unreadArticles, read: readArticles, starred: starredArticles}, enyo.bind(this, function(){
+											//console.log("articles saved! time to move on");
+											humane.remove();
 
-								}), undefined
-							);
-						}), {n: 50, ot: moment().subtract("days", 10).unix()}
-					);
-				}), {n: subs[0].count, xt: reader.TAGS['read']}
-			);
+											if(!_.isEqual(subs, this.gridItems)){
+												databaseHelper.saveSubs(subs);
+												this.buildGrid(subs)	
+											} else {
+												console.log("Subs are the same");
+											}
+										}));								
+
+									}), undefined
+								);
+							}), {n: 50, ot: moment().subtract("days", 10).unix()}
+						);
+					}), {n: subs[0].count, xt: reader.TAGS['read']}
+				);
+			}));
+
 		}));
 	},
 
@@ -147,14 +161,23 @@ enyo.kind({
 		} 
 		//console.log("opts", opts);
 		databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
+			if(articles.length === 0){
+				humane.log("No Articles to Show", {timeout: 1500});
+				return;
+			}
 			if(articles.length < inSender.getItem().count){
 				console.log("Uh oh, cache failed", articles);
-				reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
-					this.bubble("onViewArticles", {articles: loadedArticles});
-				}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+
+				AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
+
+					reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
+						this.bubble("onViewArticles", {articles: loadedArticles, sub: inSender.getItem()});
+					}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+
+				}));
 			} else {
 				console.log("Articles loaded from cache", articles.length);
-				this.bubble("onViewArticles", {sub: inSender.getItem(), articles: buildArticlesArray(articles)});
+				this.bubble("onViewArticles", {sub: inSender.getItem(), articles: AppUtils.buildArticlesArray(articles)});
 			}
 		}));
 
@@ -196,7 +219,7 @@ enyo.kind({
 			img = "feed";
 			this.$.icon.setSrc(reader.getIconForFeed(this.getItem().id.replace(/feed\//, "")));
 		}
-		this.$.image.setSrc(getImagePath("grid-icon-" + img + ".png"));
+		this.$.image.setSrc(AppUtils.getImagePath("grid-icon-" + img + ".png"));
 		this.$.control.setContent(this.getItem().title);
 		if(this.getItem().count){
 			this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);

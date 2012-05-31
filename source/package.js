@@ -5,6 +5,8 @@ enyo.depends(
 	"$lib/onyx/source/wip-package.js",	//@TODO <--
 
 	//vendors
+	"vendors/humane-original.css",
+	"vendors/humane.min.js",
 	"vendors/book/",
 	"vendors/underscore-min.js",
 	"vendors/underscore.string.min.js",

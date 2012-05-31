@@ -18,7 +18,7 @@ enyo.kind({
 	create: function () {
 		this.inherited(arguments);
 
-		window.document.getElementsByTagName("body")[0].className += " " + getPlatform();
+		window.document.getElementsByTagName("body")[0].className += " " + AppUtils.getPlatform();
 
 		databaseHelper.loadDb();
 	},
@@ -31,27 +31,30 @@ enyo.kind({
 	},
 	checkLogin: function(){
 		if (reader.hasAuth()) {
-			if(navigator.onLine){
-				reader.getToken(
-					enyo.bind(this, this.showGridPage),
-					enyo.bind(this, function(){
-						/*if(OS == iOS){
-							getPassFromKeychain();
-								onSuccess: getAuthHeader();
-									onSuccess: getToken();
-										onSuccess: showLoginPage();
+			AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
+				if(hasInternet){
+					reader.getToken(
+						enyo.bind(this, this.showGridPage),
+						enyo.bind(this, function(){
+							/*if(OS == iOS){
+								getPassFromKeychain();
+									onSuccess: getAuthHeader();
+										onSuccess: getToken();
+											onSuccess: showLoginPage();
+											onFail: promptLogin();
 										onFail: promptLogin();
 									onFail: promptLogin();
-								onFail: promptLogin();
-						} else {*/
-							this.showLoginPage();
-						//}
-					})
-				)
-			} else {
-				this.showGridPage();
-				//show grid. we should have it cached. when service comes later, the lib knows to re ask for a token.
-			}
+							} else {*/
+								this.showLoginPage();
+							//}
+						})
+					)
+				} else {
+					this.showGridPage();
+					//show grid. we should have it cached. when service comes later, the lib knows to re ask for a token.
+				}
+			}));
+				
 		} else {
 			//technically the password shouldn't be saved if the authHeader isn't there... so remove?
 			this.showLoginPage();

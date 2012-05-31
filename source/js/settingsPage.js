@@ -24,14 +24,14 @@ enyo.kind({
 						{content: "Large", ontap: "setPreference", preference: "articleFontSize", menuName: "fontSizeMenu"},
 					]}
 				]},
-				{kind: "onyx.MenuDecorator", components: [
+				/*{kind: "onyx.MenuDecorator", components: [
 					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "contrastMenu", showPreferenceValue: "articleContrast"},
 					{kind: "enyo.Control", content: "Contrast", onclick: "requestMenuShow", menuName: "contrastMenu"},
 					{kind: "onyx.Menu", name: "contrastMenu", components: [
 						{content: "Normal", ontap: "setPreference", preference: "articleContrast", menuName: "contrastMenu"},
 						{content: "High", ontap: "setPreference", preference: "articleContrast", menuName: "contrastMenu"},
 					]}
-				]}
+				]}*/
 			]},
 			{kind: "onyx.Button", classes: "onyx-negative full", content: "Log Out", ontap: "logOut"}
 		]}

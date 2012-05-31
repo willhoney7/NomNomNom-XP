@@ -183,11 +183,19 @@ enyo.kind({
 		this.$.articleViewContent.setContent(item.content);		
 		this.$.articleViewTime.setContent(moment.unix(item.updated).format("h:mm a"));
 
-		if(stringToBool(item.read) === false){
+		if(AppUtils.stringToBool(item.read) === false){
 
-			item.read = true;
-			reader.background.markRead(item, function(){
-				publish("refreshGrid");
+			AppUtils.testInternetConnection(function(hasInternet){
+				if(hasInternet){
+					item.read = true;
+	
+					reader.background.markRead(item, function(){
+						publish("refreshGrid");
+					});
+				} else {
+					console.log("QUEUEING");
+				}
+			
 			});
 
 			/*reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
@@ -228,25 +236,35 @@ enyo.kind({
 	},
 
 	markAllRead: function () {
-		reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
+		AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
+			if(hasInternet){
+				reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
 			
-			_(this.articles).each(function(item){
-				item.read = true;
-			});
+					_(this.articles).each(function(item){
+						item.read = true;
+					});
 
-			databaseHelper.markArticlesRead(this.unreadArticles, enyo.bind(this, function(){
-				console.log("read articles saved methinks");
+					databaseHelper.markArticlesRead(this.unreadArticles, enyo.bind(this, function(){
+						console.log("read articles saved methinks");
 
-				_.each(this.unreadArticles, function(article){
-					reader.decrementUnreadCount(article.feed.id, 1);
-				});
+						_.each(this.unreadArticles, function(article){
+							reader.decrementUnreadCount(article.feed.id, 1);
+						});
 
-				databaseHelper.saveSubs(reader.getFeeds());
+						databaseHelper.saveSubs(reader.getFeeds());
 
-			}));
+					}));
 
-			this.$.list.refresh();
+					this.$.list.refresh();
 
-		}));	
+				}));	
+
+			} else {
+				console.log("QUEUEING");
+			}
+			
+
+		}));
+		
 	},
 });

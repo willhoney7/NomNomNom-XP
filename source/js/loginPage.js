@@ -48,24 +48,31 @@ enyo.kind({
 	attemptLogin: function () {
 		this.$.errorMessage.setContent("");
 
-		reader.login(
-			this.$.username.getValue(), 
-			this.$.password.getValue(), 
-			enyo.bind(this, function(){
-			//success
-				console.log("succes 1");
-				reader.getToken(
+		AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
+			if(hasInternet){
+				reader.login(
+					this.$.username.getValue(), 
+					this.$.password.getValue(), 
 					enyo.bind(this, function(){
-						//success
-						console.log("succes 2");
-						this.loggedIn();
+					//success
+						console.log("succes 1");
+						reader.getToken(
+							enyo.bind(this, function(){
+								//success
+								console.log("succes 2");
+								this.loggedIn();
 
+							}), 
+							enyo.bind(this, this.errorLogin)
+						);
 					}), 
 					enyo.bind(this, this.errorLogin)
 				);
-			}), 
-			enyo.bind(this, this.errorLogin)
-		);
+			} else {
+				this.$.errorMessage.setContent("No Internet Connection...");
+			}
+
+		}));
 		/*
 		get entered data
 			getAuthHeader(username, passs)
