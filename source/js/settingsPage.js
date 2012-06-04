@@ -12,79 +12,75 @@ enyo.kind({
 			{kind: "onyx.Button", content: "Back", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", classes: "abs"},
 			{content: "Settings", classes: "center"}
 		]},
-		{classes: "settingsList", components: [
-			{kind: "onyx.Groupbox", components: [
-				{kind: "onyx.GroupboxHeader", content: "Subscription Grid"},
-				{classes: "groupItem", components: [
-					{kind: "onyx.ToggleButton", onContent: "Yes", offContent: "No", classes: "floatRight", preference: "hideRead", setPreference: "hideRead", ontap: "setPreference"},
-					{kind: "enyo.Control", content: "Hide Read Feeds"},
-				]}	
-			]},
-			{kind: "onyx.Groupbox", components: [
-				{kind: "onyx.GroupboxHeader", content: "Reading Articles"},
-				{kind: "onyx.MenuDecorator", style: "z-index: 11;", components: [
-					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "fontSizeMenu", showPreferenceValue: "articleFontSize"},
-					{kind: "enyo.Control", content: "Font Size", onclick: "requestMenuShow", menuName: "fontSizeMenu"},
-					{kind: "onyx.Menu", name: "fontSizeMenu", components: [
-						{content: "Small", ontap: "setPreference", preference: "articleFontSize", menuName: "fontSizeMenu"},
-						{content: "Medium", ontap: "setPreference", preference: "articleFontSize", menuName: "fontSizeMenu"},
-						{content: "Large", ontap: "setPreference", preference: "articleFontSize", menuName: "fontSizeMenu"},
-					]}
-				]},
-				/*{kind: "onyx.MenuDecorator", components: [
-					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "contrastMenu", showPreferenceValue: "articleContrast"},
-					{kind: "enyo.Control", content: "Contrast", onclick: "requestMenuShow", menuName: "contrastMenu"},
-					{kind: "onyx.Menu", name: "contrastMenu", components: [
-						{content: "Normal", ontap: "setPreference", preference: "articleContrast", menuName: "contrastMenu"},
-						{content: "High", ontap: "setPreference", preference: "articleContrast", menuName: "contrastMenu"},
-					]}
-				]}*/
-				{kind: "onyx.MenuDecorator", components: [
-					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "articleSortMenu", showPreferenceValue: "articleSort"},
-					{kind: "enyo.Control", content: "Article Sort", onclick: "requestMenuShow", menuName: "articleSortMenu"},
-					{kind: "onyx.Menu", name: "articleSortMenu", components: [
-						{content: "Recent First", ontap: "setPreference", preference: "articleSort", menuName: "articleSortMenu"},
-						{content: "Oldest First", ontap: "setPreference", preference: "articleSort", menuName: "articleSortMenu"},
-					]}
-				]}
-			]},
-			{kind: "onyx.Button", classes: "onyx-negative full", content: "Log Out", ontap: "logOut"}
+
+		{name: "settingList", classes: "settingsList", components: []},
+	],
+	settings: [
+		{section: "Subscription Grid", items: [
+			{type: "toggle", description: "Hide Read Feeds", preference: "hideRead"},
+			{type: "select", description: "Tapping on Folders...", preference: "folderTap", options: ["Shows Feeds", "Shows Articles"]}
+		]},
+		{section: "Reading Articles", items: [
+			{type: "select", description: "Font Size", preference: "articleFontSize", options: ["Small", "Medium", "Large"]},
+			{type: "select", description: "Article Sort", preference: "articleSort", options: ["Recent First", "Oldest First"]}
+
 		]}
 	],
 	create: function(){
 		this.inherited(arguments);
+
+		_.each(this.settings, enyo.bind(this, function(setting){
+			var settingKinds = [{kind: "onyx.GroupboxHeader", content: setting.section}]; 
+			_.each(setting.items, function(item){
+				var toAdd = {classes: "groupItem", components: []};
+
+				switch (item.type){
+					case "toggle":
+						toAdd.components.push(
+							{kind: "onyx.ToggleButton", onContent: "Yes", offContent: "No", classes: "floatRight", value: AppPrefs.get(item.preference), preference: item.preference, ontap: "setPreference"},
+							{kind: "enyo.Control", content: item.description}
+						);
+						break;
+					case "select":
+						var options = [], selected = 0;
+
+						_.each(item.options, function(opt, index){
+							options.push({content: opt, value: opt});
+
+							if(opt === AppPrefs.get(item.preference)){
+								selected = index;
+							}
+						});
+
+						toAdd.components.push(
+							{kind: "Select", onchange: "setPreference", selected: selected, preference: item.preference, classes: "floatRight", components: options},
+							{kind: "enyo.Control", content: item.description}
+						);
+
+						break;
+				}
+
+				settingKinds.push(toAdd);
+			});
+
+			this.$.settingList.createComponent(
+				{kind: "onyx.Groupbox", components: settingKinds},
+				{owner: this}
+			);
+		}));
+
+		this.$.settingList.createComponent({kind: "onyx.Button", classes: "onyx-negative full", content: "Log Out", ontap: "logOut"}, {owner: this})
 	},
 	rendered: function () {
 		this.inherited(arguments);
-		
-		this.showPreferenceValues();
 	},
 	bubbleEvent: function(inSender, inEvent) {
 		this.bubble(inSender.eventToBubble);
 	},
 
-	requestMenuShow: function(inSender, inEvent) {
-		this.$[inSender.menuName].requestMenuShow();
-	},
-
 	setPreference: function(inSender, inEvent) {
-		
-		var value = (inSender.getValue() !== undefined) ? inSender.getValue() : inSender.getContent();
+		var value = inSender.type === "select" ? inSender.components[inSender.getSelected()].value : inSender.getValue();
 		AppPrefs.set(inSender.preference, value);
-
-		if(inSender.menuName){
-			this.$[inSender.menuName].requestHide();
-		}
-	},
-
-	showPreferenceValues: function () {
-		_.each(this.getComponents(), function(control){
-			if(control.showPreferenceValue){
-				control.setContent(AppPrefs.get(control.showPreferenceValue));
-			} else if(control.setPreference){
-				control.setValue(AppPrefs.get(control.setPreference));
-			}
-		});
 	},
 
 	logOut: function() {

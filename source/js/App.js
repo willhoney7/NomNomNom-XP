@@ -139,19 +139,90 @@ enyo.kind({
 		switch (data.action) {
 			case "markRead":
 				var item = data.data;
-				reader.setItemTag(item.feed.id, item.id, "read", true, function(){
+				console.log("FROM QUEUE, isREAD?", item.read)
+				reader.setItemTag(item.feed.id, item.id, "read", item.read, function(){
 
 					console.log("marked read", item);
 
 					databaseHelper.clearFromQueue(obj.id, callback);
 
+				}, function () {
+					console.log("Mark read from Queued Failed");
+					callback();
 				});
 				break;
 			case "markAllRead":
+				//We have to treat this a little differently.
+				//We have to mark each article read individually
+				//the api does not like it if we send more than 100 at a time... sooo we need to separate them out.
 
+				var articleSets = _(data.data).chain().groupBy(function(article, index){ 
+					return "set" + Math.floor(index/100); 
+				}).toArray().value();
+
+				var i = 0,
+					iterate = function() {
+						if (i < articleSets.length){
+							var subIds = [], articleIds = [];
+
+							_.each(articleSets[i], function(article, index){
+								subIds.push(article.feed.id);
+								articleIds.push(article.id);	
+							});
+
+							reader.setItemTag(subIds, articleIds, "read", true, function () {
+								console.log("WORKED?");
+								i++;
+								iterate();
+							
+							}, function () {
+								console.log("Mark all read from Queued Failed");
+								callback();
+							})
+						} else {
+							console.log("DONE! clearing from queue");
+							databaseHelper.clearFromQueue(obj.id, callback);
+
+						}
+					}
+
+				iterate();
+
+				//console.log(articlesObj);
+/*
+				console.log("articles", articles);
+				_.each(articles, function(article, index){
+					if(index < 100){
+						subIds.push(article.feed.id);
+						articleIds.push(article.id);	
+					}
+					
+				});
+
+				reader.setItemTag(subIds, articleIds, "read", true, function () {
+					console.log("WORKED?");
+					//databaseHelper.clearFromQueue(obj.id, callback);
+				
+				}, function () {
+					console.log("Mark all read from Queued Failed");
+					callback();
+				})*/
 				break;
 			case "markStarred":
+				var item = data.data;
 
+				console.log("FROM QUEUE, isStarred?", item.starred)
+
+				reader.setItemTag(item.feed.id, item.id, "star", item.starred, function(){
+
+					console.log("marked read", item);
+
+					databaseHelper.clearFromQueue(obj.id, callback);
+
+				}, function () {
+					console.log("Mark starred from Queued Failed");
+					callback();
+				});
 				break;
 		}
 	}

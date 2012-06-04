@@ -10,7 +10,6 @@ enyo.kind({
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 			{kind: "onyx.Button", content: "Grid", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px;"},
 			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
-			{name: "includeReadButton", kind: "onyx.Button", content: "Include Read", ontap: "toggleIncludeUnread", classes: "abs", style: "right: 10px;"}
 		]},
 
 		/**/
@@ -60,16 +59,10 @@ enyo.kind({
 	articles: [],
 	loadArticles: function(sub, articles){
 		console.log("LOAD DEM ARTICLES");
-		this.$.includeReadButton.addRemoveClass("active", AppPrefs.get("includeRead"));
     	this.$.subTitle.setContent(sub.title);
     	this.$.articlePanel.loadArticles(sub, articles);
 
-	},
-	toggleIncludeUnread: function (inSender){
-		AppPrefs.set("includeRead", !AppPrefs.get("includeRead"));
-		inSender.addRemoveClass("active", AppPrefs.get("includeRead"));
-		this.$.articlePanel.orderAndShowArticles();
-	},
+	}
 
 
 });
@@ -95,7 +88,9 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-				{kind: "onyx.Button", content: "CHECK", ontap: "markAllRead"},
+				{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-mark-read.png"), ontap: "markAllRead"},
+				{name: "includeReadButton", kind: "onyx.Button", content: "Include Read", ontap: "toggleIncludeUnread", classes: "abs", style: "right: 10px;"}
+
 			]},		
 		]},
 		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
@@ -105,9 +100,15 @@ enyo.kind({
 				{name: "articleViewContent", allowHtml: true, fit: true, classes: "articleContent"}
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-				{kind: "onyx.Grabber"},
-				{kind: "onyx.Button", content: "v", ontap: "increaseIndex"},
-				{kind: "onyx.Button", content: "^", ontap: "decreaseIndex"},
+				{kind: "onyx.Grabber", style: "position: absolute;"},
+				{classes: "center", style: "margin: inherit", components: [
+					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-mark-read.png"), ontap: ""},
+					{name: "starredIcon", kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-starred-outline.png"), ontap: "toggleStarred"},
+					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-down.png"), ontap: "increaseIndex"},
+					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-up.png"), ontap: "decreaseIndex"},
+					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-share.png"), ontap: ""}
+				]}
+				
 			]},
 		]}
 	],
@@ -131,11 +132,14 @@ enyo.kind({
 
 	loadArticles: function(sub, articles){
 
+    	this.$.includeReadButton.addRemoveClass("active", AppPrefs.get("includeRead"));
+
 		var obj = _.groupBy(articles, function(item){ return reader.isRead(item) });
     	this.unreadArticles = obj.false || [], this.readArticles = obj.true || [];
     	this.sub = sub;
 
     	this.orderAndShowArticles();
+
 	},
 	orderAndShowArticles: function(){
 		var toSort = AppPrefs.get("includeRead") ? this.unreadArticles.concat(this.readArticles) : this.unreadArticles;
@@ -186,36 +190,16 @@ enyo.kind({
 		this.$.articleViewTitle.setContent(item.title);
 		this.$.articleViewContent.setContent(item.content);		
 		this.$.articleViewTime.setContent(moment.unix(item.updated).format("h:mm a"));
+		this.$.starredIcon.setSrc(reader.isStarred(item) ? AppUtils.getImagePath("menu-icon-starred.png") : AppUtils.getImagePath("menu-icon-starred-outline.png"));
 
 		if(AppUtils.stringToBool(item.read) === false){
 
-			//AppUtils.testInternetConnection(function(hasInternet){
-				//if(hasInternet){
-					item.read = true;
-	
-					reader.background.markRead(item, function(){
-						publish("refreshGrid");
-					});
-				//} else {
-				//	console.log("QUEUEING");
-				//	databaseHelper.queue({action: "markRead", data: item});
-				//}
-			
-			//});
+			item.read = true;
 
-			/*reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
-				console.log("marked read", item);
+			reader.background.markRead(item, function(){
+				publish("refreshGrid");
+			});
 
-				databaseHelper.markArticlesRead([item], enyo.bind(this, function(){
-					console.log("read articles saved methinks");
-
-					reader.decrementUnreadCount(item.feed.id, 1);
-
-					databaseHelper.saveSubs(reader.getFeeds());
-
-				}));
-
-			}));*/
 		} 
 
 		this.$.list.select(this.articleIndex, item);
@@ -240,8 +224,24 @@ enyo.kind({
 		this.showCurrentArticle();
 	},
 
+	toggleStarred: function () {
+		var item = this.articles[this.articleIndex]
+		console.log("isStarred", reader.isStarred(item));
+
+		item.starred = !reader.isStarred(item);
+		reader.background.markStarred(item);
+
+		this.$.starredIcon.setSrc(reader.isStarred(item) ? AppUtils.getImagePath("menu-icon-starred.png") : AppUtils.getImagePath("menu-icon-starred-outline.png"));
+
+	},
+
 	markAllRead: function () {
-		AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
+		console.log(_.reject(this.articles, function(article) { return reader.isRead(article) }));
+		reader.background.markAllRead(this.sub, _.reject(this.articles, function(article) { return reader.isRead(article) }), enyo.bind(this, function(){
+			this.$.list.refresh();
+		}));
+
+		/*AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
 			if(hasInternet){
 				reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
 			
@@ -269,7 +269,13 @@ enyo.kind({
 			}
 			
 
-		}));
+		}));*/
 		
 	},
+
+	toggleIncludeUnread: function (inSender){
+		AppPrefs.set("includeRead", !AppPrefs.get("includeRead"));
+		inSender.addRemoveClass("active", AppPrefs.get("includeRead"));
+		this.orderAndShowArticles();
+	}
 });

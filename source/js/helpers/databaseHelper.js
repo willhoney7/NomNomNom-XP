@@ -101,7 +101,9 @@
 			
 			tx.executeSql(string);
 			
-		}, databaseHelper.error, callback);
+		}, function(er){
+			console.log("ADD ARTICLES FAILED", er);
+		}, callback);
     }
     function removeArticlesFromDb(array, callback){
     	if(array.length === 0){
@@ -169,34 +171,35 @@
     			readArticles = downloadedArticles.read,
     			starredArticles = downloadedArticles.starred;
 
-    		var obj = _.groupBy(loadedArticles, function(item){ return item.read });
     		_.each(loadedArticles, function(article){
-    			if(article.starred){
+    			if(reader.isStarred(article)){
     				savedStarredArticles.push(article);
-    			} else if(article.read){
+    			} else if(reader.isRead(article)){
     				savedReadArticles.push(article);
     			} else {
     				savedUnreadArticles.push(article);
     			}
     		});
 
-    		//console.log("Saved", savedStarredArticles, savedReadArticles, savedUnreadArticles);
-    		//console.log("Loaded", starredArticles, readArticles, unreadArticles);
-    		
+    		//console.log("savedReadArticles", savedReadArticles.length);
+    		//console.log("savedUnreadArticles", savedUnreadArticles.length);
+    		//console.log("savedStarredArticles", savedStarredArticles.length);
+
     		//add starred articles NOT saved
     		var starredToAdd = [].concat(getItemsNotInAnotherArray(starredArticles, savedStarredArticles));	
-    								//remove items that are saved that are no longer starred                       remove items that are already saved as unread articles or read articles
-    		var starredToRemove = [].concat(getItemsNotInAnotherArray(savedStarredArticles, starredArticles), getItemsInAnotherArray(starredArticles, savedUnreadArticles), getItemsInAnotherArray(starredArticles, savedReadArticles));
-    		
+    						
+    						//remove items that are saved that are no longer starred                       remove items that are already saved as unread articles or read articles
+    		var starredToRemove = [].concat(getItemsNotInAnotherArray(savedStarredArticles, starredArticles), getItemsInAnotherArray(starredArticles, savedUnreadArticles), getItemsInAnotherArray(starredArticles, savedReadArticles), getItemsInAnotherArray(starredArticles, readArticles), getItemsInAnotherArray(starredArticles, unreadArticles));
+    		console.log("starredToRemove", starredToRemove);
     		var arrayToAdd, arrayToRemove;
     		
     		arrayToAdd = [].concat(getItemsNotInAnotherArray(unreadArticles, savedUnreadArticles), getItemsNotInAnotherArray(readArticles, savedReadArticles), starredToAdd);
     		arrayToRemove = [].concat(getItemsNotInAnotherArray(savedUnreadArticles, unreadArticles), getItemsNotInAnotherArray(savedReadArticles, readArticles), starredToRemove);
 
-    		//console.log("adding these to the db", arrayToAdd.length);
-    		//console.log("removing these from the db", arrayToRemove.length);	
+    		console.log("removing these from the db", arrayToRemove.length);	
 
     		removeArticlesFromDb(arrayToRemove, function(){
+	    		console.log("adding these to the db", arrayToAdd.length);
     			addArticlesToDb(arrayToAdd, callback);
     		});
     	
@@ -303,6 +306,20 @@
     		});
     	
     	})*/
+    };
+
+     databaseHelper.markArticleStarred = function(item, callback) {
+
+    	db.transaction(function(tx){
+			
+			var string = "UPDATE ARTICLES SET starred = '" + item.starred + "' WHERE id = '" + item.id + "'";
+ 
+			console.log(string);
+
+			tx.executeSql(string);
+
+		}, databaseHelper.error, callback);
+
     };
 
     databaseHelper.queue = function (opts) {

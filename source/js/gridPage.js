@@ -11,15 +11,20 @@ enyo.kind({
 	components:[
 		{kind: "enyo.Scroller", fit: true, horizontal: false, classes: "grid", components: [
 			{name: "grid", kind: enyo.Repeater, fit: true, count: 0, onSetupItem: "setupGridItem", components: [
-			    {kind: "gridItem", ontap: "loadGridItem"}
+			    {kind: "gridItem", ontap: "loadGridItem", onLoadFeed: "loadFeedItem"}
 			]},
 		]},
 
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{content: "NomNomNomXP", classes: "truncating-text"},
+			{name: "titleBar", content: "NomNomNomXP", classes: "truncating-text"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-new.png"), ontap: "bubbleEvent", eventToBubble: "onShowAddFeedPage"}
+		]},
+		{name: "editToolbar", kind: "onyx.Toolbar", showing: false, classes: "onyx-toolbar-inline", components: [
+			{content: "NomNomNomXP", classes: "truncating-text"},
+			{kind: "onyx.Button", content: "Exit", classes: "floatRight", ontap: "exitEditMode"},
+			
 		]},
 		
 	],
@@ -131,7 +136,7 @@ enyo.kind({
 
 									}), undefined
 								);
-							}), {n: 50, ot: moment().subtract("days", 10).unix()}
+							}), {n: 50, ot: moment().subtract("days", 10).unix(), xt: reader.TAGS["star"]}
 						);
 					}), {n: subs[0].count, xt: reader.TAGS['read']}
 				);
@@ -150,40 +155,46 @@ enyo.kind({
 	loadGridItem: function (inSender, inEnvent) {
 		console.log("loading this sub", inSender.getItem());
 		var opts = {};
-		if(inSender.getItem().isFeed){
-			opts.feed = inSender.getItem().id;
-		} else if (inSender.getItem().isLabel) {
-			opts.feed = [];
-			_.each(inSender.getItem().feeds, function(feed){
-				opts.feed.push(feed.id);
-			});
-		} else if (inSender.getItem().isAll){
-			//do nothing
-		} else if(inSender.getItem().isSpecial && !inSender.getItem().isAll){
-			//only special feed we have now is starred
-			opts.starred = true;
-		} 
-		//console.log("opts", opts);
-		databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
-			if(articles.length === 0){
-				humane.log("No Articles to Show", {timeout: 1500});
-				return;
-			}
-			if(articles.length < inSender.getItem().count){
-				console.log("Uh oh, cache failed", articles);
+		if(!inSender.getItem().isLabel || AppPrefs.get("folderTap") === "Show Articles" || inSender.getItem().forceArticles){
 
-				AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
+			if(inSender.getItem().isFeed){
+				opts.feed = inSender.getItem().id;
+			} else if (inSender.getItem().isLabel) {
+				opts.feed = [];
+				_.each(inSender.getItem().feeds, function(feed){
+					opts.feed.push(feed.id);
+				});
+			} else if (inSender.getItem().isAll){
+				//do nothing
+			} else if(inSender.getItem().isSpecial && !inSender.getItem().isAll){
+				//only special feed we have now is starred
+				opts.starred = true;
+			} 
+			//console.log("opts", opts);
+			databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
+				if(articles.length === 0){
+					humane.log("No Articles to Show", {timeout: 1500});
+					return;
+				}
+				if(articles.length < inSender.getItem().count){
+					console.log("Uh oh, cache failed", articles);
 
-					reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
-						this.bubble("onViewArticles", {articles: loadedArticles, sub: inSender.getItem()});
-					}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+					AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
-				}));
-			} else {
-				console.log("Articles loaded from cache", articles.length);
-				this.bubble("onViewArticles", {sub: inSender.getItem(), articles: AppUtils.buildArticlesArray(articles)});
-			}
-		}));
+						reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
+							this.bubble("onViewArticles", {articles: loadedArticles, sub: inSender.getItem()});
+						}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+
+					}));
+				} else {
+					console.log("Articles loaded from cache", articles.length);
+					this.bubble("onViewArticles", {sub: inSender.getItem(), articles: AppUtils.buildArticlesArray(articles)});
+				}
+			}));
+		} else {
+			//this is a folder.
+			inSender.openFolder();
+		}
 
 		/*var fakeArticlesArray = [];
 		
@@ -192,6 +203,24 @@ enyo.kind({
 		};
 		this.bubble("onViewArticles", {articles: fakeArticlesArray});*/
 	},
+	//this is for feeds in folders
+	loadFeedItem: function(inSender, obj) {
+		this.loadGridItem({getItem: function() {
+			return obj;
+		}});
+	},
+
+	enterEditMode: function (){
+		var items = _.reject(subs, function(sub){
+			return (sub.isSpecial);
+		}) 
+
+		this.$.grid.setCount(items.length);
+		this.$.grid.build();
+
+		this.$.titleBar.setContent("Edit Mode");
+
+	}
 
 	
 });
@@ -204,11 +233,18 @@ enyo.kind({
 	published: {
 		item: {}
 	},
+	handler: {
+		onLoadFeed: ""
+	},
 	components: [
 		{kind: "enyo.Image", src: ""},
 		{kind: "enyo.Control", classes: "title", allowHtml: true},
 		{name: "icon", kind: "Image", classes: "icon"},
-		{name: "unread", classes: "unread"}
+		{name: "unread", classes: "unread"},
+		{kind: "onyx.MenuDecorator", components: [
+			{kind: "onyx.Menu", name: "menu", modal: false, classes: "folderMenu", style: "", components: []}
+		]}
+
 	],
 	itemChanged: function(inSender, inOldItem) {
 		var img;
@@ -219,6 +255,25 @@ enyo.kind({
 			
 		} else if (this.getItem().isLabel){
 			img = "folder";
+			var feeds = [];
+			if(this.getItem().feeds.length > 0){
+				var item = _(this.getItem()).clone();
+					item.content = "All Articles";
+					item.ontap = "loadGridItem";
+					item.forceArticles = true;
+
+				feeds.push(item);
+			}
+			_.each(this.getItem().feeds, function(feed){
+				feeds.push({isFeed: true, title: feed.title, id: feed.id, ontap: "loadGridItem", components: [
+					{kind: enyo.Image, classes: "folderFeedIcon floatLeft abs", src: reader.getIconForFeed(feed.id.replace(/feed\//, ""))},
+					{content: feed.title, classes: "folderFeedTitle"}
+				]});
+			});
+			this.$.menu.destroyComponents();
+			this.$.menu.createComponents(feeds, {owner: this});
+			this.render();
+			
 		} else {
 			img = "feed";
 			this.$.icon.setSrc(reader.getIconForFeed(this.getItem().id.replace(/feed\//, "")));
@@ -228,6 +283,13 @@ enyo.kind({
 		if(this.getItem().count){
 			this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
 		}
-	}
+	},
+	openFolder: function(){
+		this.$.menu.requestMenuShow();
+	},
+	loadGridItem: function(inSender, inEvent){
+		this.bubble("onLoadFeed", inSender);
+		return true;
+	},
 
 });

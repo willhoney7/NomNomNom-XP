@@ -19,9 +19,6 @@
   margin: 20px;
   text-align: center; }
 
-.onyx-menu-item:hover {
-  background-color: rgba(10, 100, 255, 0.07); }
-
 /* 
  *	Login Stuff
  */
@@ -61,17 +58,34 @@
   left: inherit;
   right: 0; }
 
-.onyx-popup {
-  background: #eee;
-  color: black; }
+.onyx-popup > .onyx-menu-item {
+  margin: 0px; }
 
+.onyx-menu, .onyx.onyx-menu {
+  min-width: 200px; }
+
+.folderMenu {
+  position: relative;
+  right: 60px;
+  bottom: 30px; }
+
+.folderFeedTitle {
+  font-size: 14px;
+  padding: 0 10px 0 25px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
+
+/* @TODO: Does this screw other stuff up?*/
+.enyo-children-inline > *, .enyo-tool-decorator > * {
+  display: block; }
+
+/*.onyx-popup {
+	background: #eee;
+	color: black;
+}*/
 .onyx-popup-decorator {
   padding: 10px; }
-
-.settingValue {
-  color: #888;
-  font-size: 14px;
-  line-height: 24px; }
 
 .groupItem {
   padding: 10px; }
@@ -141,7 +155,7 @@
   text-align: center;
   width: 100%;
   /*@TODO: CHANGE THIS WHEN WE CHANGE THE INCLUDE READ BUTTON */
-  padding: 0px 160px 0px 90px;
+  padding: 0px 10px 0px 85px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap; }

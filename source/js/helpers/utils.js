@@ -92,7 +92,8 @@
 		"articleContrast": "Normal",
 		"articleFontSize": "Medium",
 		"articleSort": "Recent First",
-		"hideRead": false
+		"hideRead": false,
+		"folderTap": "Shows Feeds"
 	}, JSON.parse(localStorage["preferences"]));
  
  
