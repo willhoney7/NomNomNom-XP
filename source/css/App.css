@@ -19,6 +19,9 @@
   margin: 20px;
   text-align: center; }
 
+.onyx-menu-item:hover {
+  background-color: rgba(10, 100, 255, 0.07); }
+
 /* 
  *	Login Stuff
  */
@@ -69,6 +72,13 @@
   color: #888;
   font-size: 14px;
   line-height: 24px; }
+
+.groupItem {
+  padding: 10px; }
+
+.onyx-toggle-button {
+  position: relative;
+  bottom: 4px; }
 
 /* Grid Page Stuff */
 .onyx-toolbar .onyx-icon-button {

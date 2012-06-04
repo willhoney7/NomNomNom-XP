@@ -42,7 +42,7 @@ button {
 	user-select: none;
 }
 
-.enyo-unselectabe::selection, .enyo-unselectable ::selection {
+.enyo-unselectable::selection, .enyo-unselectable ::selection {
 	color: transparent;
 }
 
@@ -87,6 +87,7 @@ body .enyo-fit {
 	-o-transform: translateZ(0);
 	transform: translateZ(0);
 }
+
 
 /* ../source/touch/Thumb.css */
 

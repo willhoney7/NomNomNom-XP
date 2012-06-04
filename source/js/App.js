@@ -21,6 +21,8 @@ enyo.kind({
 		window.document.getElementsByTagName("body")[0].className += " " + AppUtils.getPlatform();
 
 		databaseHelper.loadDb();
+
+		subscribe("online", enyo.bind(this, this.nowOnline));
 	},
 	rendered: function () {
 		this.inherited(arguments);
@@ -113,7 +115,47 @@ enyo.kind({
 	},
 	showAddFeedPage: function () {
 		this.$.book.pageName("addFeedPage");
+	},
+
+	nowOnline: function(){
+		databaseHelper.getQueue(enyo.bind(this, function(array){
+			console.log("OUR QUEUE", array);
+			var i = 0,
+				iterate = enyo.bind(this, function () {
+					if(i < array.length){
+						i++;
+						this.processQueuedData(array[i-1], iterate);
+					}
+				});
+
+			iterate();
+
+		}));
+		console.log("NOW ONLINE. CHECK DAT QUEUE");
+	},
+	processQueuedData: function(obj, callback) {
+		var data = JSON.parse(Base64.decode(obj.data));
+		console.log("PROCESSING", data);
+		switch (data.action) {
+			case "markRead":
+				var item = data.data;
+				reader.setItemTag(item.feed.id, item.id, "read", true, function(){
+
+					console.log("marked read", item);
+
+					databaseHelper.clearFromQueue(obj.id, callback);
+
+				});
+				break;
+			case "markAllRead":
+
+				break;
+			case "markStarred":
+
+				break;
+		}
 	}
+
 
 	
 });

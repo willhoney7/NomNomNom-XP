@@ -8,6 +8,8 @@
 			//tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
+			//@TODO: check to make sure this works XP.
+			tx.executeSql('CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)');
 
 
 		}, databaseHelper.error, databaseHelper.success);
@@ -18,8 +20,12 @@
 		db.transaction(function(tx){
 			tx.executeSql('DROP TABLE IF EXISTS ARTICLES');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)');
+			
 			tx.executeSql('DROP TABLE IF EXISTS SUBS');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
+			
+			tx.executeSql('DROP TABLE IF EXISTS QUEUE');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)');
 
 		}, databaseHelper.error, databaseHelper.success);
 	};
@@ -299,7 +305,46 @@
     	})*/
     };
 
-   	databaseHelper.test = function (){
+    databaseHelper.queue = function (opts) {
+
+    	var data = Base64.encode(JSON.stringify(opts));
+
+		db.transaction(function(tx){
+			tx.executeSql('CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)');
+			tx.executeSql('INSERT INTO QUEUE (id, data) VALUES (null, "' + data + '")');
+		}, databaseHelper.error, databaseHelper.success);
+
+    };
+    databaseHelper.getQueue = function (callback) {
+    	db.transaction(function(tx){
+    		var string = 'SELECT * FROM QUEUE';
+
+		    tx.executeSql(string, [], querySuccess, databaseHelper.error);
+    	}, databaseHelper.error);
+    	
+		function querySuccess(tx, results) {
+			var array = [];
+
+			for (var i = 0; i < results.rows.length; i++){
+				array.push(results.rows.item(i));
+			}
+			callback(array);
+			
+			//console.log(results.rows.item(2));
+			//var result = JSON.parse(Base64.decode(results.rows.item(0).data));
+			//callback(result);
+		}
+    };
+    databaseHelper.clearFromQueue = function (id, callback) {
+    	db.transaction(function(tx){
+    		var string = 'DELETE FROM QUEUE WHERE id = ' + id;
+
+		    tx.executeSql(string, [], callback, databaseHelper.error);
+    	}, databaseHelper.error);
+    	
+    };
+
+   	databaseHelper.test = function () {
     	var array = [];
     	//for (var i = 20 - 1; i >= 0; i--) {
     		array.push({id: "asbasbsdbasb" + 0, feed: ((Math.random() * 2) > 1) ? "dog" : "cat", read: false});

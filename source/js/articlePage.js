@@ -140,7 +140,11 @@ enyo.kind({
 	orderAndShowArticles: function(){
 		var toSort = AppPrefs.get("includeRead") ? this.unreadArticles.concat(this.readArticles) : this.unreadArticles;
     	this.articles = _(toSort).sortBy(function(article){
-			return (1 - article.updated);
+    		if(AppPrefs.get("articleSort") === "Recent First"){
+				return (1 - article.updated);
+    		} else {
+    			return article.updated;
+    		}
 		});
 
 		this.$.list.setCount(this.articles.length);
@@ -185,18 +189,19 @@ enyo.kind({
 
 		if(AppUtils.stringToBool(item.read) === false){
 
-			AppUtils.testInternetConnection(function(hasInternet){
-				if(hasInternet){
+			//AppUtils.testInternetConnection(function(hasInternet){
+				//if(hasInternet){
 					item.read = true;
 	
 					reader.background.markRead(item, function(){
 						publish("refreshGrid");
 					});
-				} else {
-					console.log("QUEUEING");
-				}
+				//} else {
+				//	console.log("QUEUEING");
+				//	databaseHelper.queue({action: "markRead", data: item});
+				//}
 			
-			});
+			//});
 
 			/*reader.setItemTag(item.feed.id, item.id, "read", true, enyo.bind(this, function(){
 				console.log("marked read", item);

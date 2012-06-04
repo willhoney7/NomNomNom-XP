@@ -84,8 +84,12 @@ enyo.kind({
 
 		//this.loadFeedsFromOnline();
 	}, 
-	buildGrid: function(items){
-		this.gridItems = items;
+	buildGrid: function(subs){
+
+		this.gridItems = (AppPrefs.get("hideRead")) ? _.reject(subs, function(sub){
+			return (!sub.count && !sub.isSpecial);
+		})  : subs;
+
 		reader.setFeeds(this.gridItems);
 		this.$.grid.setCount(this.gridItems.length);
 		this.$.grid.build();			

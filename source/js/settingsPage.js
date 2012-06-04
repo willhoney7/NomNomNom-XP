@@ -14,6 +14,13 @@ enyo.kind({
 		]},
 		{classes: "settingsList", components: [
 			{kind: "onyx.Groupbox", components: [
+				{kind: "onyx.GroupboxHeader", content: "Subscription Grid"},
+				{classes: "groupItem", components: [
+					{kind: "onyx.ToggleButton", onContent: "Yes", offContent: "No", classes: "floatRight", preference: "hideRead", setPreference: "hideRead", ontap: "setPreference"},
+					{kind: "enyo.Control", content: "Hide Read Feeds"},
+				]}	
+			]},
+			{kind: "onyx.Groupbox", components: [
 				{kind: "onyx.GroupboxHeader", content: "Reading Articles"},
 				{kind: "onyx.MenuDecorator", style: "z-index: 11;", components: [
 					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "fontSizeMenu", showPreferenceValue: "articleFontSize"},
@@ -32,6 +39,14 @@ enyo.kind({
 						{content: "High", ontap: "setPreference", preference: "articleContrast", menuName: "contrastMenu"},
 					]}
 				]}*/
+				{kind: "onyx.MenuDecorator", components: [
+					{kind: "enyo.Control", content: "", classes: "settingValue floatRight", onclick: "requestMenuShow", menuName: "articleSortMenu", showPreferenceValue: "articleSort"},
+					{kind: "enyo.Control", content: "Article Sort", onclick: "requestMenuShow", menuName: "articleSortMenu"},
+					{kind: "onyx.Menu", name: "articleSortMenu", components: [
+						{content: "Recent First", ontap: "setPreference", preference: "articleSort", menuName: "articleSortMenu"},
+						{content: "Oldest First", ontap: "setPreference", preference: "articleSort", menuName: "articleSortMenu"},
+					]}
+				]}
 			]},
 			{kind: "onyx.Button", classes: "onyx-negative full", content: "Log Out", ontap: "logOut"}
 		]}
@@ -42,11 +57,7 @@ enyo.kind({
 	rendered: function () {
 		this.inherited(arguments);
 		
-		_.each(this.getComponents(), function(control){
-			if(control.showPreferenceValue){
-				control.setContent(AppPrefs.get(control.showPreferenceValue));
-			}
-		})
+		this.showPreferenceValues();
 	},
 	bubbleEvent: function(inSender, inEvent) {
 		this.bubble(inSender.eventToBubble);
@@ -57,16 +68,23 @@ enyo.kind({
 	},
 
 	setPreference: function(inSender, inEvent) {
-		AppPrefs.set(inSender.preference, inSender.content);
+		
+		var value = (inSender.getValue() !== undefined) ? inSender.getValue() : inSender.getContent();
+		AppPrefs.set(inSender.preference, value);
+
 		if(inSender.menuName){
 			this.$[inSender.menuName].requestHide();
 		}
+	},
 
+	showPreferenceValues: function () {
 		_.each(this.getComponents(), function(control){
 			if(control.showPreferenceValue){
 				control.setContent(AppPrefs.get(control.showPreferenceValue));
+			} else if(control.setPreference){
+				control.setValue(AppPrefs.get(control.setPreference));
 			}
-		})
+		});
 	},
 
 	logOut: function() {

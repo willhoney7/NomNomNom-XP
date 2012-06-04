@@ -26,16 +26,27 @@
 		}
 	}
 
+	var probablyHasInternet;
 	AppUtils.testInternetConnection = function (callback){
 		//quick and dirty
 		if(navigator.onLine && navigator.onLine === true){
 			var i = new Image();
-				i.onload = function(){ callback(true) };
-				i.onerror = function(){ callback(false) };
+				i.onload = function(){
+					if(!probablyHasInternet){
+						publish("online");
+					}
+					probablyHasInternet = true;
+					callback(true); 
+				};
+				i.onerror = function(){ 
+					probablyHasInternet = false;
+					callback(false);
+				};
 
 			//use a favicon since it is around 1 kb.
 			i.src = "http://www.google.com/s2/favicons?domain_url=" + escape("http://www.google.com") + "&d=" + escape(Date());	
 		} else {
+			probablyHasInternet = false;
 			callback(false);
 		}
 	};
@@ -79,7 +90,9 @@
 	var preferences = enyo.mixin({
 		"includeRead": true, //or false
 		"articleContrast": "Normal",
-		"articleFontSize": "Medium"
+		"articleFontSize": "Medium",
+		"articleSort": "Recent First",
+		"hideRead": false
 	}, JSON.parse(localStorage["preferences"]));
  
  

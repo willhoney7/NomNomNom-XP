@@ -695,7 +695,8 @@ importProps: function(a) {
 this.inherited(arguments), this.owner || (this.owner = enyo.master);
 },
 createComponents: function() {
-this.inherited(arguments), this.discoverControlParent();
+var a = this.inherited(arguments);
+return this.discoverControlParent(), a;
 },
 discoverControlParent: function() {
 this.controlParent = this.$[this.controlParentName] || this.controlParent;
@@ -743,6 +744,9 @@ return this.container.indexOfControl(this);
 },
 clientIndexInContainer: function() {
 return this.container.indexOfClientControl(this);
+},
+controlAtIndex: function(a) {
+return this.controls[a];
 },
 addChild: function(a) {
 this.controlParent ? this.controlParent.addChild(a) : (a.setParent(this), this.children[this.prepend ? "unshift" : "push"](a));
@@ -870,7 +874,7 @@ handle: function(a, b) {
 var c = b.shift();
 if (c) if (c instanceof enyo.Async) this.route(c, a); else {
 var d = enyo.call(this.context || this, c, [ this, a ]);
-(this.failed ? this.fail : this.respond).call(this, d);
+d = d !== undefined ? d : a, (this.failed ? this.fail : this.respond).call(this, d);
 }
 },
 startTimer: function() {
@@ -1045,19 +1049,24 @@ name: "enyo.JsonpRequest",
 kind: enyo.Async,
 published: {
 url: "",
-callbackName: "callback"
+charset: null,
+callbackName: "callback",
+cacheBust: !0
 },
 statics: {
-nextCallbackID: 0,
-addScriptElement: function(a) {
-var b = document.createElement("script");
-b.src = a;
-var c = document.getElementsByTagName("script")[0];
-return c.parentNode.insertBefore(b, c), b;
+nextCallbackID: 0
 },
-removeElement: function(a) {
-a.parentNode.removeChild(a);
-}
+addScriptElement: function() {
+var a = document.createElement("script");
+a.src = this.src, a.async = "async", this.charset && (a.charset = this.charset), a.onerror = enyo.bind(this, function() {
+this.fail(400), this.removeScriptElement();
+});
+var b = document.getElementsByTagName("script")[0];
+b.parentNode.insertBefore(a, b), this.scriptTag = a;
+},
+removeScriptElement: function() {
+var a = this.scriptTag;
+this.scriptTag = null, a.onerror = null, a.parentNode && a.parentNode.removeChild(a);
 },
 constructor: function(a) {
 enyo.mixin(this, a), this.inherited(arguments);
@@ -1066,16 +1075,16 @@ go: function(a) {
 return this.startTimer(), this.jsonp(a), this;
 },
 jsonp: function(a) {
-var b = "enyo_jsonp_callback_" + enyo.JsonpRequest.nextCallbackID++, c = this.buildUrl(a, b), d = enyo.JsonpRequest.addScriptElement(c);
-window[b] = enyo.bind(this, this.respond);
-var e = function() {
-enyo.JsonpRequest.removeElement(d), window[b] = null;
-};
-this.response(e), this.error(e);
+var b = "enyo_jsonp_callback_" + enyo.JsonpRequest.nextCallbackID++;
+this.src = this.buildUrl(a, b), this.addScriptElement(), window[b] = enyo.bind(this, this.respond);
+var c = enyo.bind(this, function() {
+this.removeScriptElement(), window[b] = null;
+});
+this.response(c), this.error(c);
 },
 buildUrl: function(a, b) {
 var c = this.url.split("?"), d = c.shift() || "", e = c.join("?").split("&"), f = this.bodyArgsFromParams(a, b);
-return e.push(f), [ d, e.join("&") ].join("?");
+return e.push(f), this.cacheBust && e.push(Math.random()), [ d, e.join("&") ].join("?");
 },
 bodyArgsFromParams: function(a, b) {
 if (enyo.isString(a)) return a.replace("=?", "=" + b);
@@ -1087,9 +1096,17 @@ return c[this.callbackName] = b, enyo.Ajax.objectToQuery(c);
 // WebService.js
 
 enyo.kind({
-name: "enyo.WebService",
+name: "enyo._AjaxComponent",
 kind: enyo.Component,
-published: enyo.AjaxProperties,
+published: enyo.AjaxProperties
+}), enyo.kind({
+name: "enyo.WebService",
+kind: enyo._AjaxComponent,
+published: {
+jsonp: !1,
+callback: "callback",
+charset: null
+},
 events: {
 onResponse: "",
 onError: ""
@@ -1098,9 +1115,24 @@ constructor: function(a) {
 this.inherited(arguments);
 },
 send: function(a) {
+return this.jsonp ? this.sendJsonp(a) : this.sendAjax(a);
+},
+sendJsonp: function(a) {
+var b = new enyo.JsonpRequest;
+for (var c in {
+url: 1,
+callback: 1,
+charset: 1
+}) b[c] = this[c];
+return this.sendAsync(b, a);
+},
+sendAjax: function(a) {
 var b = new enyo.Ajax;
 for (var c in enyo.AjaxProperties) b[c] = this[c];
-return b.go(a).response(this, "response").error(this, "error");
+return this.sendAsync(b, a);
+},
+sendAsync: function(a, b) {
+return a.go(b).response(this, "response").error(this, "error");
 },
 response: function(a, b) {
 this.doResponse({
@@ -1128,11 +1160,11 @@ escape: function(a) {
 return a !== null ? String(a).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
 },
 getComputedStyle: function(a) {
-return window.getComputedStyle && window.getComputedStyle(a, null);
+return window.getComputedStyle && a && window.getComputedStyle(a, null);
 },
 getComputedStyleValue: function(a, b, c) {
 var d = c || this.getComputedStyle(a);
-return d.getPropertyValue(b);
+return d ? d.getPropertyValue(b) : null;
 },
 getFirstElementByTagName: function(a) {
 var b = document.getElementsByTagName(a);
@@ -1148,49 +1180,43 @@ b && (b.className += " enyo-body-fit"), enyo.bodyIsFitting = !0;
 
 // transform.js
 
-enyo.mixin(enyo.dom, {
-canAccelerate: function() {
-return this.accelerando !== undefined ? this.accelerando : document.body && (this.accelerando = this.calcCanAccelerate());
-},
-calcCanAccelerate: function() {
+(function() {
+enyo.dom.calcCanAccelerate = function() {
 if (enyo.platform.android <= 2) return !1;
-var a = [ "perspective", "msPerspective", "MozPerspective", "WebkitPerspective", "OPerspective" ];
+var a = [ "perspective", "WebkitPerspective", "MozPerspective", "msPerspective", "OPerspective" ];
 for (var b = 0, c; c = a[b]; b++) if (typeof document.body.style[c] != "undefined") return !0;
 return !1;
-},
-cssTransformProps: [ "-webkit-transform", "-moz-transform", "-ms-transform", "-o-transform", "transform" ],
-styleTransformProps: [ "webkitTransform", "MozTransform", "msTransform", "OTransform", "transform" ],
-getCssTransformProp: function() {
+};
+var a = [ "transform", "-webkit-transform", "-moz-transform", "-ms-transform", "-o-transform" ], b = [ "transform", "webkitTransform", "MozTransform", "msTransform", "OTransform" ];
+enyo.dom.getCssTransformProp = function() {
 if (this._cssTransformProp) return this._cssTransformProp;
-var a = enyo.indexOf(this.getStyleTransformProp(), this.styleTransformProps);
-return this._cssTransformProp = this.cssTransformProps[a];
-},
-getStyleTransformProp: function() {
+var c = enyo.indexOf(this.getStyleTransformProp(), b);
+return this._cssTransformProp = a[c];
+}, enyo.dom.getStyleTransformProp = function() {
 if (this._styleTransformProp || !document.body) return this._styleTransformProp;
-for (var a = 0, b; b = this.styleTransformProps[a]; a++) if (typeof document.body.style[b] != "undefined") return this._styleTransformProp = b;
-},
-transformValue: function(a, b, c) {
-var d = a.domTransforms = a.domTransforms || {};
-d[b] = c, this.transformsToDom(a);
-},
-accelerate: function(a, b) {
-var c = b == "auto" ? this.canAccelerate() : b;
-this.transformValue(a, "translateZ", c ? 0 : null);
-},
-transform: function(a, b) {
-var c = a.domTransforms = a.domTransforms || {};
-enyo.mixin(c, b), this.transformsToDom(a);
-},
-domTransformsToCss: function(a) {
+for (var a = 0, c; c = b[a]; a++) if (typeof document.body.style[c] != "undefined") return this._styleTransformProp = c;
+}, enyo.dom.domTransformsToCss = function(a) {
 var b, c, d = "";
 for (b in a) c = a[b], c !== null && c !== undefined && c !== "" && (d += b + "(" + c + ") ");
 return d;
-},
-transformsToDom: function(a) {
+}, enyo.dom.transformsToDom = function(a) {
 var b = this.domTransformsToCss(a.domTransforms), c = a.hasNode() ? a.node.style : null, d = a.domStyles, e = this.getStyleTransformProp(), f = this.getCssTransformProp();
 e && f && (d[f] = b, c ? c[e] = b : a.domStylesChanged());
-}
-});
+}, enyo.dom.canTransform = function() {
+return Boolean(this.getStyleTransformProp());
+}, enyo.dom.canAccelerate = function() {
+return this.accelerando !== undefined ? this.accelerando : document.body && (this.accelerando = this.calcCanAccelerate());
+}, enyo.dom.transform = function(a, b) {
+var c = a.domTransforms = a.domTransforms || {};
+enyo.mixin(c, b), this.transformsToDom(a);
+}, enyo.dom.transformValue = function(a, b, c) {
+var d = a.domTransforms = a.domTransforms || {};
+d[b] = c, this.transformsToDom(a);
+}, enyo.dom.accelerate = function(a, b) {
+var c = b == "auto" ? this.canAccelerate() : b;
+this.transformValue(a, "translateZ", c ? 0 : null);
+};
+})();
 
 // Control.js
 
@@ -1303,11 +1329,14 @@ this.domStyles[a] = b, this.domStylesChanged();
 addStyles: function(a) {
 enyo.Control.cssTextToDomStyles(a, this.domStyles), this.domStylesChanged();
 },
+getComputedStyleValue: function(a, b) {
+return this.hasNode() ? enyo.dom.getComputedStyleValue(this.node, a) : b;
+},
 domStylesChanged: function() {
 this.domCssText = enyo.Control.domStylesToCssText(this.domStyles), this.invalidateTags(), this.renderStyles();
 },
 stylesToNode: function() {
-this.node.style.cssText = this.style + this.domCssText;
+this.node.style.cssText = this.style + (this.style[this.style.length - 1] == ";" ? " " : "; ") + this.domCssText;
 },
 render: function() {
 if (this.parent) {
@@ -1981,6 +2010,41 @@ return this.findTargetTraverse(null, a, b);
 };
 b.connect();
 });
+
+// msevents.js
+
+(function() {
+if (window.navigator.msPointerEnabled) {
+var a = [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerOver", "MSPointerOut", "MSPointerCancel", "MSGestureTap", "MSGestureDoubleTap", "MSGestureHold", "MSGestureStart", "MSGestureChange", "MSGestureEnd" ];
+enyo.forEach(a, function(a) {
+enyo.dispatcher.listen(document, a);
+}), enyo.dispatcher.features.push(function(a) {
+c[a.type] && c[a.type](a);
+});
+}
+var b = function(a, b) {
+var c = enyo.clone(b);
+return enyo.mixin(c, {
+pageX: b.translationX || 0,
+pageY: b.translationY || 0,
+rotation: b.rotation * (180 / Math.PI) || 0,
+type: a,
+srcEvent: b,
+preventDefault: enyo.gesture.preventDefault,
+disablePrevention: enyo.gesture.disablePrevention
+});
+}, c = {
+MSGestureStart: function(a) {
+enyo.dispatch(b("gesturestart", a));
+},
+MSGestureChange: function(a) {
+enyo.dispatch(b("gesturechange", a));
+},
+MSGestureEnd: function(a) {
+enyo.dispatch(b("gestureend", a));
+}
+};
+})();
 
 // gesture.js
 
@@ -2947,7 +3011,8 @@ onblur: enyo.bubbler
 },
 handlers: {
 oninput: "input",
-onclear: "clear"
+onclear: "clear",
+ondragstart: "dragstart"
 },
 create: function() {
 enyo.platform.ie && (this.handlers.onkeyup = "iekeyup"), this.inherited(arguments), this.placeholderChanged(), this.type && this.typeChanged(), this.valueChanged();
@@ -2979,6 +3044,9 @@ this.setValue("");
 },
 focus: function() {
 this.hasNode() && this.node.focus();
+},
+dragstart: function() {
+return !0;
 }
 });
 
@@ -2997,6 +3065,16 @@ kind: enyo.Input,
 tag: "div",
 attributes: {
 contenteditable: !0
+},
+handlers: {
+onfocus: "focusHandler",
+onblur: "blurHandler"
+},
+focusHandler: function() {
+this._value = this.getValue();
+},
+blurHandler: function() {
+this._value !== this.getValue() && this.bubble("onchange");
 },
 valueChanged: function() {
 this.hasFocus() ? (this.selectAll(), this.insertAtCursor(this.value)) : this.setPropertyValue("content", this.value, "contentChanged");
@@ -3076,6 +3154,9 @@ this.setNodeProperty("selectedIndex", this.selected);
 },
 change: function() {
 this.selected = this.getSelected();
+},
+render: function() {
+enyo.platform.ie ? this.parent.render() : this.inherited(arguments);
 },
 getValue: function() {
 if (this.hasNode()) return this.node.value;
@@ -3234,11 +3315,14 @@ this.inherited(arguments), this.countChanged();
 initComponents: function() {
 this.itemComponents = this.components || this.kindComponents, this.components = this.kindComponents = null, this.inherited(arguments);
 },
-seCount: function(a) {
+setCount: function(a) {
 this.setPropertyValue("count", a, "countChanged");
 },
 countChanged: function() {
 this.build();
+},
+itemAtIndex: function(a) {
+return this.controlAtIndex(a);
 },
 build: function() {
 this.destroyClientControls();
@@ -3356,13 +3440,13 @@ kind: "Signals",
 onKeydown: "keydown"
 } ],
 create: function() {
-this.inherited(arguments), this.floating && this.setParent(enyo.floatingLayer);
+this.inherited(arguments), this.canGenerate = !this.floating;
+},
+render: function() {
+this.floating && (enyo.floatingLayer.hasNode() || enyo.floatingLayer.render(), this.parentNode = enyo.floatingLayer.hasNode()), this.inherited(arguments);
 },
 destroy: function() {
 this.showing && this.release(), this.inherited(arguments);
-},
-getBubbleTarget: function() {
-return this.floating ? this.owner : this.inherited(arguments);
 },
 reflow: function() {
 this.updatePosition(), this.inherited(arguments);
@@ -3381,7 +3465,7 @@ height: a.offsetHeight
 updatePosition: function() {
 if (this.centered) {
 var a = this.calcViewportSize(), b = this.getBounds();
-this.addStyles("top: " + (a.height - b.height) / 2 + "px; left: " + (a.width - b.width) / 2 + "px;");
+this.addStyles("top: " + Math.max((a.height - b.height) / 2, 0) + "px; left: " + Math.max((a.width - b.width) / 2, 0) + "px;");
 }
 },
 showingChanged: function() {
@@ -3406,7 +3490,7 @@ blur: function(a, b) {
 b.dispatchTarget.isDescendantOf(this) && (this.lastFocus = b.originator);
 },
 focus: function(a, b) {
-var c = b.dispa2tchTarget;
+var c = b.dispatchTarget;
 if (this.modal && !c.isDescendantOf(this)) {
 c.hasNode() && c.node.blur();
 var d = this.lastFocus && this.lastFocus.hasNode() || this.hasNode();

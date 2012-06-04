@@ -30,6 +30,9 @@ $red: #cc3333;
 
 //overwrites of default styles
 
+.onyx-menu-item:hover {
+	background-color: rgba(10, 100, 255, 0.07)
+}
 /* 
  *	Login Stuff
  */
@@ -91,6 +94,13 @@ $red: #cc3333;
 	color: #888;
 	font-size: 14px;
 	line-height: 24px;
+}
+.groupItem {
+	padding: 10px;
+}
+.onyx-toggle-button {
+	position: relative;
+	bottom: 4px;
 }
 
 
