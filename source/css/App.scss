@@ -11,6 +11,9 @@ $red: #cc3333;
 .floatLeft {
 	float:left;
 }
+.padRight {
+	padding-right: 10px;
+}
 
 @mixin truncated-text {
 	text-overflow: ellipsis;
@@ -54,7 +57,6 @@ $red: #cc3333;
 		width: 47.5%;
 	}
 }
-
 
 .errorMessage {
 	text-align: center;
@@ -101,26 +103,67 @@ $red: #cc3333;
 .folderFeedIcon {
 	
 }
+.editPopup {
+	width: 400px;
+	/*@media screen and (min-width: 650px) {
+		max-width: 500px; 
+	}*/
+}
+
+.onyx-popup {
+	input {
+		color: white !important;
+	}
+	.onyx-input-decorator {
+		background-color: inherit;	
+	}
+	.popupTitle {
+		font-size: 20px;
+		text-align: center;
+	}
+	$black: rgb(68, 68, 68);
+	.onyx-groupbox > :first-child {
+		border-color: $black;
+	}
+	.onyx-groupbox-header {
+		color: #888;
+		background-color: $black;
+	}
+	.onyx-groupbox > * {
+		border-color: $black;
+	}
+}
+
+.onyx-popup > * {
+	margin: 10px 0px;
+}
+
+.inputPrompt {
+	color: #888;
+}
 
 /* @TODO: Does this screw other stuff up?*/
 .enyo-children-inline > *, .enyo-tool-decorator > * {
 	display: block;
 }
-/*.onyx-popup {
-	background: #eee;
-	color: black;
-}*/
+
 .onyx-popup-decorator {
 	padding: 10px;
 }
 
 .groupItem {
 	padding: 10px;
+
+	.onyx-toggle-button {
+		position: relative;
+		bottom: 4px;
+	}
+	.onyx-checkbox {
+		position: relative;
+		bottom: 7px;
+	}
 }
-.onyx-toggle-button {
-	position: relative;
-	bottom: 4px;
-}
+
 
 
 /* Grid Page Stuff */

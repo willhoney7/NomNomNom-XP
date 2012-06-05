@@ -15,16 +15,17 @@ enyo.kind({
 			]},
 		]},
 
-		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+		{name: "normalToolbar", kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 			{name: "titleBar", content: "NomNomNomXP", classes: "truncating-text"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
+			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-edit-outline.png"), ontap: "enterEditMode"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-new.png"), ontap: "bubbleEvent", eventToBubble: "onShowAddFeedPage"}
 		]},
 		{name: "editToolbar", kind: "onyx.Toolbar", showing: false, classes: "onyx-toolbar-inline", components: [
-			{content: "NomNomNomXP", classes: "truncating-text"},
+			{content: "Edit Mode", classes: "truncating-text"},
 			{kind: "onyx.Button", content: "Exit", classes: "floatRight", ontap: "exitEditMode"},
-			
+			{name: "editPopup", kind: "editPopup"}
 		]},
 		
 	],
@@ -155,7 +156,7 @@ enyo.kind({
 	loadGridItem: function (inSender, inEnvent) {
 		console.log("loading this sub", inSender.getItem());
 		var opts = {};
-		if(!inSender.getItem().isLabel || AppPrefs.get("folderTap") === "Show Articles" || inSender.getItem().forceArticles){
+		if(!inSender.getItem().isLabel || (AppPrefs.get("folderTap") === "Show Articles" && !this.inEditMode) || inSender.getItem().forceArticles){
 
 			if(inSender.getItem().isFeed){
 				opts.feed = inSender.getItem().id;
@@ -171,37 +172,38 @@ enyo.kind({
 				opts.starred = true;
 			} 
 			//console.log("opts", opts);
-			databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
-				if(articles.length === 0){
-					humane.log("No Articles to Show", {timeout: 1500});
-					return;
-				}
-				if(articles.length < inSender.getItem().count){
-					console.log("Uh oh, cache failed", articles);
+			if(this.inEditMode === false) {
 
-					AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
+				databaseHelper.loadArticles(opts, enyo.bind(this, function(articles){
+					if(articles.length === 0){
+						humane.log("No Articles to Show", {timeout: 1500});
+						return;
+					}
+					if(articles.length < inSender.getItem().count){
+						console.log("Uh oh, cache failed", articles);
 
-						reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
-							this.bubble("onViewArticles", {articles: loadedArticles, sub: inSender.getItem()});
-						}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+						AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
-					}));
-				} else {
-					console.log("Articles loaded from cache", articles.length);
-					this.bubble("onViewArticles", {sub: inSender.getItem(), articles: AppUtils.buildArticlesArray(articles)});
-				}
-			}));
+							reader.getItems(inSender.getItem().id, enyo.bind(this, function(loadedArticles){
+								this.bubble("onViewArticles", {articles: loadedArticles, sub: inSender.getItem()});
+							}), {n: inSender.getItem().count, xt: reader.TAGS['read']});
+
+						}));
+					} else {
+						console.log("Articles loaded from cache", articles.length);
+						this.bubble("onViewArticles", {sub: inSender.getItem(), articles: AppUtils.buildArticlesArray(articles)});
+					}
+				}));
+
+			} else {
+				console.log("EDIT THIS FEEDDDDD");
+				this.$.editPopup.showEditOptions(inSender.getItem());
+			}
 		} else {
 			//this is a folder.
 			inSender.openFolder();
 		}
 
-		/*var fakeArticlesArray = [];
-		
-		for (var i = 0; i < 80; i++) {
-			fakeArticlesArray.push({title: inSender.getItem().dog + Math.round(Math.random()*200), date: "4/" + Math.round(i/2) + "/12"});
-		};
-		this.bubble("onViewArticles", {articles: fakeArticlesArray});*/
 	},
 	//this is for feeds in folders
 	loadFeedItem: function(inSender, obj) {
@@ -210,16 +212,28 @@ enyo.kind({
 		}});
 	},
 
+	inEditMode: false, 
 	enterEditMode: function (){
-		var items = _.reject(subs, function(sub){
+		this.inEditMode = true;
+
+		var items = _.reject(reader.getFeeds(), function(sub){
 			return (sub.isSpecial);
-		}) 
+		}); 
 
 		this.$.grid.setCount(items.length);
+		this.gridItems = items;
 		this.$.grid.build();
 
-		this.$.titleBar.setContent("Edit Mode");
+		this.$.normalToolbar.hide();
+		this.$.editToolbar.show();
+	},
+	exitEditMode: function (){
+		this.inEditMode = false;
+		
+		this.buildGrid(reader.getFeeds());
 
+		this.$.editToolbar.hide();
+		this.$.normalToolbar.show();
 	}
 
 	
@@ -261,14 +275,18 @@ enyo.kind({
 					item.content = "All Articles";
 					item.ontap = "loadGridItem";
 					item.forceArticles = true;
+					item.name = "allAtriclesItem"
 
 				feeds.push(item);
 			}
 			_.each(this.getItem().feeds, function(feed){
-				feeds.push({isFeed: true, title: feed.title, id: feed.id, ontap: "loadGridItem", components: [
-					{kind: enyo.Image, classes: "folderFeedIcon floatLeft abs", src: reader.getIconForFeed(feed.id.replace(/feed\//, ""))},
-					{content: feed.title, classes: "folderFeedTitle"}
-				]});
+				var kind = _(feed).clone();
+					kind.ontap = "loadGridItem";
+					kind.components = [
+						{kind: enyo.Image, classes: "folderFeedIcon floatLeft abs", src: reader.getIconForFeed(feed.id.replace(/feed\//, ""))},
+						{content: feed.title, classes: "folderFeedTitle"}
+					];
+				feeds.push(kind);
 			});
 			this.$.menu.destroyComponents();
 			this.$.menu.createComponents(feeds, {owner: this});
@@ -285,11 +303,76 @@ enyo.kind({
 		}
 	},
 	openFolder: function(){
+		console.log(this.$.allAtriclesItem, this.owner);
+
+		if (this.$.allAtriclesItem) {
+			//this is bad practices, but it's not worth the effort to change.
+			this.$.allAtriclesItem.setContent(this.owner.owner.owner.inEditMode ? "Edit Folder" : "View All Articles");
+		}
 		this.$.menu.requestMenuShow();
 	},
 	loadGridItem: function(inSender, inEvent){
+		this.$.menu.hide();
+
 		this.bubble("onLoadFeed", inSender);
+
 		return true;
 	},
 
+});
+
+
+
+enyo.kind({
+	name: "editPopup", 
+	kind: "onyx.Popup", 
+	classes: "editPopup", 
+	centered: true, 
+	floating: true, 
+	components: [
+		{content: "Edit", classes: "popupTitle"},
+		{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", style: "margin: 0; width: 382px; background-color: inherit;", components: [
+			{content: "Name: ", classes: "floatLeft padRight inputPrompt"}, 
+			{name: "title", kind: "onyx.Input", fit: true},
+		]},
+		{name: "labelsList", kind: "onyx.Groupbox"},
+		{name: "unsubscribeButton", kind: "onyx.Button", classes: "onyx-negative full", content: "Unsubscribe", ontap: "unsubscribe"}
+	],
+	showEditOptions: function(sub){
+		var components = [];
+		this.$.title.setValue(sub.title);
+		if(sub.isLabel){
+			this.$.unsubscribeButton.hide();
+			this.$.labelsList.hide();
+			
+		} else if (sub.isFeed){
+			this.$.unsubscribeButton.show();
+			this.$.labelsList.show();
+
+			var items = [{kind: "onyx.GroupboxHeader", content: "Labels"}];
+			
+			_.each(reader.getLabels(), function(label){
+				var hasLabel = (!!_.find(sub.categories, function(category){
+					return category.id === label.id;
+				}));
+				console.log("hasLabel", hasLabel);
+
+				items.push({classes: "groupItem", components: [{name: label.id + "Check", labelId: label.id, feedId: sub.id, kind:"onyx.Checkbox", classes: "floatRight", checked: hasLabel, onchange: "toggleLabel"}, {content: label.title, id: label.id}]});
+			});
+			//items.push({classes: "groupItem", components: [{content: label.title, id: label.id}]});
+			this.$.labelsList.destroyClientControls();
+			this.$.labelsList.createComponents(items, {owner: this});
+			this.$.labelsList.render();
+		}
+		this.show();
+
+	},
+	toggleLabel: function (inSender, inEvent) {
+		//QUEUE :'(
+		reader.background.editFeedLabel(inSender.feedId, inSender.labelId, inSender.checked, function () {
+			console.log("success suckers");
+		});
+	
+		console.log("CHECKED", inSender.checked);
+	}
 });

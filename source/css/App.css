@@ -9,6 +9,9 @@
 .floatLeft {
   float: left; }
 
+.padRight {
+  padding-right: 10px; }
+
 .truncating-text {
   text-overflow: ellipsis;
   overflow: hidden;
@@ -76,23 +79,48 @@
   overflow: hidden;
   white-space: nowrap; }
 
+.editPopup {
+  width: 400px;
+  /*@media screen and (min-width: 650px) {
+  	max-width: 500px; 
+  }*/ }
+
+.onyx-popup input {
+  color: white !important; }
+.onyx-popup .onyx-input-decorator {
+  background-color: inherit; }
+.onyx-popup .popupTitle {
+  font-size: 20px;
+  text-align: center; }
+.onyx-popup .onyx-groupbox > :first-child {
+  border-color: #444444; }
+.onyx-popup .onyx-groupbox-header {
+  color: #888;
+  background-color: #444444; }
+.onyx-popup .onyx-groupbox > * {
+  border-color: #444444; }
+
+.onyx-popup > * {
+  margin: 10px 0px; }
+
+.inputPrompt {
+  color: #888; }
+
 /* @TODO: Does this screw other stuff up?*/
 .enyo-children-inline > *, .enyo-tool-decorator > * {
   display: block; }
 
-/*.onyx-popup {
-	background: #eee;
-	color: black;
-}*/
 .onyx-popup-decorator {
   padding: 10px; }
 
 .groupItem {
   padding: 10px; }
-
-.onyx-toggle-button {
-  position: relative;
-  bottom: 4px; }
+  .groupItem .onyx-toggle-button {
+    position: relative;
+    bottom: 4px; }
+  .groupItem .onyx-checkbox {
+    position: relative;
+    bottom: 7px; }
 
 /* Grid Page Stuff */
 .onyx-toolbar .onyx-icon-button {
