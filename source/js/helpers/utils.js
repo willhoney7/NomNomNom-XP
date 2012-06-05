@@ -1,4 +1,8 @@
 //utils.js
+
+function logArg(arg1, arg2, arg3) {
+	console.log("Args", arg1, arg2, arg3);
+}
 (function(){
 	window.AppUtils = {};
 
@@ -29,6 +33,7 @@
 	var probablyHasInternet;
 	AppUtils.testInternetConnection = function (callback){
 		//quick and dirty
+		//@TODO: I want to keep track of the exact point when the app goes online... how?
 		if(navigator.onLine && navigator.onLine === true){
 			var i = new Image();
 				i.onload = function(){

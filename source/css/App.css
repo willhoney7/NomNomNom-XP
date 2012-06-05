@@ -38,9 +38,11 @@
 .onyx-popup > * {
   margin: 10px 5px; }
 
-.onyx-popup .onyx-button {
-  width: 47.5%; }
-
+/*.onyx-popup {
+	.onyx-button {
+		width: 47.5%;
+	}
+}*/
 .errorMessage {
   text-align: center;
   color: #cc3333;
@@ -121,6 +123,11 @@
   .groupItem .onyx-checkbox {
     position: relative;
     bottom: 7px; }
+
+.onyx-input-decorator .onyx-icon-button {
+  position: relative;
+  bottom: 5px;
+  right: 2px; }
 
 /* Grid Page Stuff */
 .onyx-toolbar .onyx-icon-button {

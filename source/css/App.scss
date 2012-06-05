@@ -52,11 +52,11 @@ $red: #cc3333;
 .onyx-popup > * {
 	margin: 10px 5px;
 }
-.onyx-popup {
+/*.onyx-popup {
 	.onyx-button {
 		width: 47.5%;
 	}
-}
+}*/
 
 .errorMessage {
 	text-align: center;
@@ -162,6 +162,11 @@ $red: #cc3333;
 		position: relative;
 		bottom: 7px;
 	}
+}
+.onyx-input-decorator .onyx-icon-button {
+	position: relative;
+	bottom: 5px;
+	right: 2px;
 }
 
 

@@ -152,8 +152,9 @@ enyo.kind({
 				});
 				break;
 			case "markAllRead":
+
 				//We have to treat this a little differently.
-				//We have to mark each article read individually
+				//We have to mark each article read individually, not the entire feed
 				//the api does not like it if we send more than 100 at a time... sooo we need to separate them out.
 
 				var articleSets = _(data.data).chain().groupBy(function(article, index){ 
@@ -188,25 +189,6 @@ enyo.kind({
 
 				iterate();
 
-				//console.log(articlesObj);
-/*
-				console.log("articles", articles);
-				_.each(articles, function(article, index){
-					if(index < 100){
-						subIds.push(article.feed.id);
-						articleIds.push(article.id);	
-					}
-					
-				});
-
-				reader.setItemTag(subIds, articleIds, "read", true, function () {
-					console.log("WORKED?");
-					//databaseHelper.clearFromQueue(obj.id, callback);
-				
-				}, function () {
-					console.log("Mark all read from Queued Failed");
-					callback();
-				})*/
 				break;
 			case "markStarred":
 				var item = data.data;
@@ -224,6 +206,31 @@ enyo.kind({
 					callback();
 				});
 				break;
+			case  "editFeedLabel":
+				var feedId = data.data.feedId,
+					labelId = data.data.labelId,
+					opt = data.data.opt;
+
+				reader.editFeedLabel(feedId, labelId, opt, function(){
+					console.log("Edited feed label");
+					databaseHelper.clearFromQueue(obj.id, callback);
+
+				}, function () {
+					console.log("EDIT FEED LABEL FAILED");
+					callback();
+				});
+				break;
+			case "editFeedTitle":
+				var feedId = data.data.feedId,
+					newTitle = data.data.newTitle;
+
+				reader.editFeedTitle(feedId, newTitle, function () {
+					console.log("EDITED FEED TITLE");
+					databaseHelper.clearFromQueue(obj.id, callback);
+				}, function () {
+					console.log("EDIT FEED TITLE FAILED");
+					callback();
+				});
 		}
 	}
 
