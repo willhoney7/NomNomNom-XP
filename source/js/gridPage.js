@@ -90,25 +90,22 @@ enyo.kind({
 
 		//this.loadFeedsFromOnline();
 	}, 
-	buildGrid: function(subs){
+	buildGrid: function(subs, opts){
 
-		if(this.inEditMode){
+		this.gridItems = (AppPrefs.get("hideRead") && !this.inEditMode) ? _.reject(subs, function(sub){
+			return (!sub.count && !sub.isSpecial);
+		})  : subs;
 
-			this.gridItems = _.reject(reader.getFeeds(), function(sub){
-				return (sub.isSpecial);
-			}); 
-
-		} else {
-
-			this.gridItems = (AppPrefs.get("hideRead")) ? _.reject(subs, function(sub){
-				return (!sub.count && !sub.isSpecial);
-			})  : subs;
-
-			reader.setFeeds(this.gridItems);
+		if(reader.getFeeds().length === 0){
+			reader.setFeeds(subs);
 		}
 		
 		this.$.grid.setCount(this.gridItems.length);
-		this.$.grid.build();			
+
+		if(!opts || !opts.noWaterfall)
+			this.$.grid.waterfallDown("onChangeOpacity", {inEditMode: (opts && opts.waterfallOpposite) ? !this.inEditMode : this.inEditMode, noTransition: true});
+		
+		//this.$.grid.build();			
 
 	},
 	loadFeedsFromOnline: function(){
@@ -206,8 +203,10 @@ enyo.kind({
 				}));
 
 			} else {
-				console.log("EDIT THIS FEEDDDDD");
-				this.$.editPopup.showEditOptions(inSender.getItem());
+				if(!inSender.getItem().isSpecial){
+					console.log("EDIT THIS FEEDDDDD");
+					this.$.editPopup.showEditOptions(inSender.getItem());
+				}
 			}
 		} else {
 			//this is a folder.
@@ -226,21 +225,22 @@ enyo.kind({
 	enterEditMode: function (){
 		this.inEditMode = true;
 
-		var items = _.reject(reader.getFeeds(), function(sub){
-			return (sub.isSpecial);
-		}); 
+		this.buildGrid(reader.getFeeds(), {noWaterfall: true});
 
-		this.$.grid.setCount(items.length);
-		this.gridItems = items;
-		this.$.grid.build();
+		this.$.grid.waterfallDown("onChangeOpacity", {inEditMode: this.inEditMode});
 
 		this.$.normalToolbar.hide();
 		this.$.editToolbar.show();
 	},
 	exitEditMode: function (){
+
 		this.inEditMode = false;
-		
-		this.loadGrid();
+
+		this.buildGrid(reader.getFeeds(), {waterfallOpposite: true});
+
+		setTimeout(enyo.bind(this, function () {
+			this.$.grid.waterfallDown("onChangeOpacity", {inEditMode: this.inEditMode});
+		}), 0);
 
 		this.$.editToolbar.hide();
 		this.$.normalToolbar.show();
@@ -255,10 +255,12 @@ enyo.kind({
 	kind: "Control",
 	classes: "grid-item",
 	published: {
-		item: {}
+		item: {},
+		disabled: false
 	},
-	handler: {
-		onLoadFeed: ""
+	handlers: {
+		onLoadFeed: "",
+		onChangeOpacity: "changeOpacity"
 	},
 	components: [
 		{kind: "enyo.Image", src: ""},
@@ -268,9 +270,9 @@ enyo.kind({
 		{kind: "onyx.MenuDecorator", components: [
 			{kind: "onyx.Menu", name: "menu", modal: false, classes: "folderMenu", style: "", components: []}
 		]}
-
 	],
 	itemChanged: function(inSender, inOldItem) {
+
 		var img;
 		if(this.getItem().isAll) {
 			img = "all";
@@ -294,6 +296,7 @@ enyo.kind({
 					kind.ontap = "loadGridItem";
 					kind.components = [
 						{kind: enyo.Image, classes: "folderFeedIcon floatLeft abs", src: reader.getIconForFeed(feed.id.replace(/feed\//, ""))},
+						{content: feed.count ? "(" + feed.count + ")" : "", classes: "folderFeedTitle unreadCount floatRight"},
 						{content: feed.title, classes: "folderFeedTitle"}
 					];
 				feeds.push(kind);
@@ -311,6 +314,18 @@ enyo.kind({
 		if(this.getItem().count){
 			this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
 		}
+
+	},
+	changeOpacity: function (inSender, inEvent) {
+
+		this.addRemoveClass("opacity-transition", !inEvent.noTransition);
+
+		this.applyStyle("opacity", ((inEvent.inEditMode && this.getItem().isSpecial) ? .3 : 1));
+		setTimeout(enyo.bind(this, function () {
+			this.applyStyle("opacity", ((inEvent.inEditMode && this.getItem().isSpecial) ? .3 : 1));
+		}), 0);
+
+		//this.addRemoveClass("disabled", this.getDisabled());
 	},
 	openFolder: function(){
 		console.log(this.$.allAtriclesItem, this.owner);
@@ -381,9 +396,11 @@ enyo.kind({
 			this.$.labelsList.render();
 		}
 		this.sub = sub;
+		this.unsubscribed = false;
 		this.show();
 		onyx.scrim.show();
 	},
+	unsubscribed: false,
 	hide: function () {
 		this.inherited(arguments);
 
@@ -407,8 +424,8 @@ enyo.kind({
 		} 
 	},
 	updateTitle: function (callback) {
-		if(this.$.title.getValue().length > 0 && this.$.title.getValue() !== this.sub.title){
-			reader.background.editFeedTitle(this.sub.id, this.$.title.getValue(), function () {
+		if(!this.unsubscribed && this.$.title.getValue().length > 0 && this.$.title.getValue() !== this.sub.title){
+			reader.background[this.sub.isLabel ? "editLabelTitle" : "editFeedTitle"](this.sub.id, this.$.title.getValue(), function () {
 				console.log("success suckers");
 				callback();
 			});
@@ -426,5 +443,12 @@ enyo.kind({
 				this.showEditOptions(this.sub);
 			}));
 		}
+	},
+	unsubscribe: function () {
+		//@TODO: confirm
+		reader.background.unsubscribeFeed(this.sub.id, enyo.bind(this, function () {
+			this.unsubscribed = true;
+			this.hide();
+		}));
 	},
 });

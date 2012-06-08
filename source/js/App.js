@@ -231,6 +231,30 @@ enyo.kind({
 					console.log("EDIT FEED TITLE FAILED");
 					callback();
 				});
+				break;
+			case "editLabelTitle":
+				var labelId = data.data.labelId,
+					newTitle = data.data.newTitle;
+
+				reader.editLabelTitle(labelId, newTitle, function () {
+					console.log("EDITED LABEL TITLE");
+					databaseHelper.clearFromQueue(obj.id, callback);
+				}, function () {
+					console.log("EDIT LABEL TITLE FAILED");
+					callback();
+				});
+				break;
+			case "unsubscribeFeed":
+				var feedId = data.data;
+
+				reader.unsubscribeFeed(feedId, function () {
+					console.log("UNSUBSCRIBED FEED");
+					databaseHelper.clearFromQueue(obj.id, callback);
+				}, function () {
+					console.log("UNSUBSCRIBE FEED FAILED");
+					callback();
+				});
+				break;
 		}
 	}
 

@@ -91,23 +91,8 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 
 	function adjustDb () {
 		if(opt){
-			var item, labelIndex, feeds = reader.getFeeds();
 
-			//GET OUR ITEM
-			for (var i = feeds.length - 1; i >= 0; i--) {
-				if(feeds[i].id === feedId){
-					//find the feed if it has no label
-					item = feeds.splice(i, 1)[0];
-					break;
-				} else if(feeds[i].isLabel){
-					//otherwise find the feed if it is in a label
-					_.each(feeds[i].feeds, function(feed){
-						if(feed.id === feedId){
-							item = feed;
-						}
-					});
-				}
-			};
+			var item, labelIndex, feeds = reader.getFeeds();
 
 			//Get our label
 			_.each(feeds, function(feed, index){
@@ -139,9 +124,30 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 			var categoryLabel = _(feeds[labelIndex]).clone();
 				delete categoryLabel.feeds;
 
-			item.categories.push(categoryLabel);
+
+			//GET OUR ITEM
+			for (var i = feeds.length - 1; i >= 0; i--) {
+				if(feeds[i].id === feedId){
+					//find the feed if it has no label
+					
+					item = feeds.splice(i, 1)[0];
+					item.categories.push(categoryLabel);
+
+					break;
+				} else if(feeds[i].isLabel){
+					//otherwise find the feed if it is in a label
+					_.each(feeds[i].feeds, function(feed){
+						if(feed.id === feedId){
+							item = feed;
+							item.categories.push(categoryLabel);
+						}
+					});
+				}
+			};
+
 			feeds[labelIndex].feeds.push(item);
-			feeds[labelIndex].count = (feeds[labelIndex].count || 0) + item.count;
+
+			feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) + item.count;
 			
 		} else {
 
@@ -162,11 +168,10 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 				for (var i = feeds[labelIndex].feeds.length - 1; i >= 0; i--) {
 					if(feeds[labelIndex].feeds[i].id === feedId){
 
-						feeds[labelIndex].count = feeds[labelIndex].count || 0;
-						feeds[labelIndex].count -= feeds[labelIndex].feeds[i];
-
-
 						item = feeds[labelIndex].feeds.splice(i, 1)[0];
+
+						feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) - item.count;
+
 						break;
 					}
 				};
@@ -178,12 +183,25 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 					break;
 				}
 			};
-			feeds.push(item);
-		}
+			var alreadyThere = false;
+			_.each(feeds, function(feed) {
+				if(feed.isLabel){
+					_.each(feed.feeds, function (insideFeed) {
+						if(insideFeed.id === item.id){
+							alreadyThere = true;
+						}
+					});
+					
+				}
+			});
+			if(!alreadyThere)
+				feeds.push(item);
+		}	
 
 		console.log("feeds", feeds);
 
 		databaseHelper.saveSubs(feeds);
+		//reader.setFeeds(feeds);
 
 		callback();
 	}
@@ -249,7 +267,98 @@ reader.background.editFeedTitle = function(feedId, newTitle, callback){
 };
 
 reader.background.editLabelTitle = function (labelId, newTitle, callback) {
+	function adjustDb () {
+		var label, feeds = reader.getFeeds();
+			
+			//GET OUR label
 
+			for (var i = feeds.length - 1; i >= 0; i--) {
+				if(feeds[i].isLabel){
+					if(feeds[i].id === labelId){
+						label = feeds[i];
+					}
+					_.each(feeds[i].feeds, function (feed) {
+						_.each(feed.categories, function (category) {
+							if(category.id === labelId) {
+								category.label = newTitle;
+								category.id = reader.TAGS["label"] + newTitle;
+							}
+						});
+					});
+				}
+			};
+
+			label.title = newTitle;
+			label.id = reader.TAGS["label"] + newTitle;
+
+			databaseHelper.saveSubs(feeds);
+
+			if (callback)
+				callback();
+	}
+
+	//@TODO: REMOVE SPECIAL KEYS
+	//WHAT IF THIS FAILS???
+	adjustDb();
+
+	AppUtils.testInternetConnection(function(hasInternet){
+		if(hasInternet){
+			reader.editLabelTitle(labelId, newTitle, function(){
+				//console.log("marked read", item);
+			});
+		} else {
+			console.log("QUEUED");
+
+			databaseHelper.queue({action: "editLabelTitle", data: {labelId: labelId, newTitle: newTitle}});
+		}
+	});	
 };
+
+reader.background.unsubscribeFeed = function(feedId, callback){ 
+	function adjustDb () {
+		var item, feeds = reader.getFeeds();
+
+			//GET OUR ITEM
+			for (var i = feeds.length - 1; i >= 0; i--) {
+				if(feeds[i].id === feedId){
+					item = feeds.splice(i, 1)[0]; //feeds[i];
+					break;
+				} else if(feeds[i].isLabel){
+					for (var j = feeds[i].feeds.length - 1; j >= 0; j--) {
+						if(feeds[i].feeds[j].id === feedId){
+							if (feeds[i].count) {
+								feeds[i].count -= feeds[i].feeds[j].count;
+							}
+							item = feeds[i].feeds.splice(j, 1)[0]
+							break;
+						}
+					};
+				}
+			};
+			if(feeds[0].count){
+				feeds[0].count -= item.count;
+			}
+
+			databaseHelper.saveSubs(feeds);
+
+			if (callback)
+				callback();
+	}
+
+	adjustDb();
+
+	AppUtils.testInternetConnection(function(hasInternet){
+		if(hasInternet){
+			reader.unsubscribeFeed(feedId, function(){
+				//console.log("marked read", item);
+			});
+		} else {
+			console.log("QUEUED");
+
+			databaseHelper.queue({action: "unsubscribeFeed", data: feedId});
+		}
+	});
+};
+
 
 

@@ -76,10 +76,14 @@
 
 .folderFeedTitle {
   font-size: 14px;
-  padding: 0 10px 0 25px;
+  padding: 0 0 0 25px;
+  text-align: left;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap; }
+
+.folderFeedTitle.unreadCount {
+  font-weight: bold; }
 
 .editPopup {
   width: 400px;
@@ -184,6 +188,9 @@
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px; }
+
+.grid-item.opacity-transition {
+  -webkit-transition: opacity 300ms ease-in-out; }
 
 .subTitle {
   /*margin: auto;*/
