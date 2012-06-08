@@ -67,6 +67,11 @@ function logArg(arg1, arg2, arg3) {
 		});
 	};
 
+	AppUtils.getPos = function (el) {
+	    for (var lx=0, ly=0; el != null; lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
+	    return {x: lx,y: ly};
+	}
+
 	AppUtils.stringToBool = function (str) {
 		return (/^true$/i).test(str);
 	};

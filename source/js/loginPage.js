@@ -21,11 +21,10 @@ enyo.kind({
 				{name: "errorMessage", classes: "errorMessage", content: ""},
 				{kind: "onyx.Button", content: "Log in", ontap: "attemptLogin", classes: "full"}
 			]},
-			{name: "popup", kind: "onyx.Popup", centered: true, modal: true, floating: true, components: [
-				{name: "popupText", content: "Logged in successfully! Would you like to view the tour? We highly recommend it."},
-				//@TODO: Classes
-				{kind: "onyx.Button", content: "Yes!", ontap: "showFeeds", name: "showTour"},
-				{kind: "onyx.Button", classes: "onyx-negative", content: "No, I'm silly.", ontap: "showFeeds"},
+			{name: "popup", kind: "onyx.Popup", classes: "loginPopup", centered: true, modal: true, floating: true, components: [
+				{name: "popupText", classes: "popupText", content: "Logged in successfully! Would you like to view the tour? We highly recommend it."},
+				{kind: "onyx.Button", content: "Yes!", style: "width: 68%; margin-right: 8px;", ontap: "showFeeds", name: "showTour"},
+				{kind: "onyx.Button", classes: "onyx-negative", style: "width: 30%", content: "No, I'm silly.", ontap: "showFeeds"},
 			]},
 
 		]}	
@@ -34,7 +33,6 @@ enyo.kind({
 	create: function(){
 		this.inherited(arguments);
 
-		//@TODO: GET THIS WORKING X-PLAT
 	},
 	showingChanged: function(previousValue) {
 		this.inherited(arguments);
@@ -86,6 +84,7 @@ enyo.kind({
 	loggedIn: function(){
 		//this.$.popupText.setContent(navigator.appVersion);
 		this.$.popup.show();
+		this.$.popup.resized();
 	},
 
 	errorLogin: function(error){

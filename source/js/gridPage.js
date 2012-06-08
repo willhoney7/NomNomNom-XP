@@ -266,8 +266,8 @@ enyo.kind({
 		{kind: "enyo.Image", src: ""},
 		{kind: "enyo.Control", classes: "title", allowHtml: true},
 		{name: "icon", kind: "Image", classes: "icon"},
-		{name: "unread", classes: "unread"},
-		{kind: "onyx.MenuDecorator", components: [
+		{name: "unread", classes: "unread", allowHtml: true},
+		{kind: "onyx.MenuDecorator", style: "", components: [
 			{kind: "onyx.Menu", name: "menu", modal: false, classes: "folderMenu", style: "", components: []}
 		]}
 	],
@@ -313,6 +313,8 @@ enyo.kind({
 		this.$.control.setContent(this.getItem().title);
 		if(this.getItem().count){
 			this.$.unread.setContent((this.getItem().count >= 1000) ? "1000+" : this.getItem().count);
+		} else {
+			this.$.unread.setContent("&nbsp;");
 		}
 
 	},
@@ -335,6 +337,21 @@ enyo.kind({
 			this.$.allAtriclesItem.setContent(this.owner.owner.owner.inEditMode ? "Edit Folder" : "View All Articles");
 		}
 		this.$.menu.requestMenuShow();
+
+		if(this.$.menu.hasNode()){
+
+			this.$.menu.applyStyle("left", null);
+	    	this.$.menu.applyStyle("right", null);
+			
+			var pos = AppUtils.getPos(this.$.menu.node);
+
+	    	if(pos.x < 0) {
+	    		this.$.menu.applyStyle("left", "0px");
+	    	} else if(window.innerWidth - pos.x < 200) {
+	    		this.$.menu.applyStyle("right", "110px");	    		
+	    	}
+	    }
+   
 	},
 	loadGridItem: function(inSender, inEvent){
 		this.$.menu.hide();

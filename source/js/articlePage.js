@@ -140,6 +140,9 @@ enyo.kind({
 
     	this.orderAndShowArticles();
 
+    	this.previous();
+
+
 	},
 	orderAndShowArticles: function(){
 		var toSort = AppPrefs.get("includeRead") ? this.unreadArticles.concat(this.readArticles) : this.unreadArticles;
@@ -240,36 +243,6 @@ enyo.kind({
 		reader.background.markAllRead(this.sub, _.reject(this.articles, function(article) { return reader.isRead(article) }), enyo.bind(this, function(){
 			this.$.list.refresh();
 		}));
-
-		/*AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
-			if(hasInternet){
-				reader.markAllAsRead(this.sub.id, enyo.bind(this, function(){
-			
-					_(this.articles).each(function(item){
-						item.read = true;
-					});
-
-					databaseHelper.markArticlesRead(this.unreadArticles, enyo.bind(this, function(){
-						console.log("read articles saved methinks");
-
-						_.each(this.unreadArticles, function(article){
-							reader.decrementUnreadCount(article.feed.id, 1);
-						});
-
-						databaseHelper.saveSubs(reader.getFeeds());
-
-					}));
-
-					this.$.list.refresh();
-
-				}));	
-
-			} else {
-				console.log("QUEUEING");
-			}
-			
-
-		}));*/
 		
 	},
 

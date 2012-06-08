@@ -38,11 +38,14 @@
 .onyx-popup > * {
   margin: 10px 5px; }
 
-/*.onyx-popup {
-	.onyx-button {
-		width: 47.5%;
-	}
-}*/
+.loginPopup {
+  width: 400px; }
+  .loginPopup .popupText {
+    margin: 5px 10px; }
+
+.onyx-popup > * {
+  margin: 5px 5px; }
+
 .errorMessage {
   text-align: center;
   color: #cc3333;
@@ -72,7 +75,7 @@
 .folderMenu {
   position: relative;
   right: 60px;
-  bottom: 30px; }
+  bottom: 45px; }
 
 .folderFeedTitle {
   font-size: 14px;
@@ -81,6 +84,11 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap; }
+
+.onyx-popup-decorator {
+  position: relative;
+  z-index: 10;
+  pointer-events: none; }
 
 .folderFeedTitle.unreadCount {
   font-weight: bold; }
@@ -171,6 +179,7 @@
       width: 93px; } }
   .grid-item .unread {
     position: relative;
+    z-index: 0;
     font-size: 15px;
     font-weight: bold;
     bottom: 72px; }

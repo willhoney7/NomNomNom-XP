@@ -3,12 +3,6 @@ TODO
 Slide article to side to do things
 Scroll to next article?
 
-
-
-QUEUE
-	Check that everything works.
-	//LOOKING GOOD
-
 Flesh Out Article View Page
 	Services
 	update? scroll to next article
@@ -21,3 +15,6 @@ Spinners
 	Canvas?
 
 Tooltips
+
+Grid 
+	Do we want to make the feeds popup modal and with a scrim?
