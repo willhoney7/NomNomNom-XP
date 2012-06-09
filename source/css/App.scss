@@ -96,7 +96,7 @@ $red: #cc3333;
 .folderMenu {
 	position: relative;
 	right: 60px;
-	bottom: 45px;
+	bottom: -28px;
 }
 .folderFeedTitle {
 	font-size: 14px;
@@ -109,7 +109,7 @@ $red: #cc3333;
 .onyx-popup-decorator {
 	position: relative;
 	z-index: 10;
-	pointer-events:none;
+	bottom: 75px;
 }
 
 .folderFeedTitle.unreadCount {

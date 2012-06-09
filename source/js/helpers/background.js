@@ -145,10 +145,11 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 				}
 			};
 
-			feeds[labelIndex].feeds.push(item);
+			console.log(feeds[labelIndex]);
 
+			feeds[labelIndex].feeds.push(item);
 			feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) + item.count;
-			
+
 		} else {
 
 			var item, 

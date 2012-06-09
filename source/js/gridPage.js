@@ -330,7 +330,6 @@ enyo.kind({
 		//this.addRemoveClass("disabled", this.getDisabled());
 	},
 	openFolder: function(){
-		console.log(this.$.allAtriclesItem, this.owner);
 
 		if (this.$.allAtriclesItem) {
 			//this is bad practices, but it's not worth the effort to change.
@@ -380,8 +379,8 @@ enyo.kind({
 		{name: "labelsList", kind: "onyx.Groupbox"},
 		{name: "unsubscribeButton", kind: "onyx.Button", classes: "onyx-negative full", content: "Unsubscribe", ontap: "unsubscribe"}
 	],
-	showEditOptions: function(_sub){
-		var sub = _(_sub).clone();
+	showEditOptions: function(sub){
+		//var sub = _(_sub).clone();
 		var components = [];
 		this.$.title.setValue(sub.title);
 		if(sub.isLabel){
