@@ -110,17 +110,10 @@ enyo.kind({
 
 	addLabel: function (inSender, inEvent) {
 		if(this.$.newLabelInput.getValue().length > 0){
-			var exists = false;
-			_.each(this.item.categories, enyo.bind(this, function(label) {
-				if(label.title === this.$.newLabelInput.getValue()){
-					exists = true;
-				}
+
+			reader.background.editFeedLabel(this.item.id, reader.TAGS["label"] + this.$.newLabelInput.getValue(), true, enyo.bind(this, function () {
+				this.buildLabelsList();
 			}));
-			if(!exists){
-				reader.background.editFeedLabel(this.item.id, reader.TAGS["label"] + this.$.newLabelInput.getValue(), true, enyo.bind(this, function () {
-					this.buildLabelsList();
-				}));
-			}
 		}
 	},
 	unsubscribe: function () {
