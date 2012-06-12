@@ -37,6 +37,10 @@ $red: #cc3333;
  *	Login Stuff
  */
 
+.onyx-toolbar {
+	padding: 5px 8px 5px 8px;
+}
+
 /*.loginGroup {
 	@media screen and (min-width: 400px) {
 		width: 300px;
@@ -47,6 +51,12 @@ $red: #cc3333;
 	
 }*/
 
+.titleBarText {
+	font-size: 16px;
+	vertical-align: middle;
+	line-height: 29px;
+}
+
 /* CHECK FOR CROSS PLATFORM COMPATIBILITY */
 
 .onyx-popup > * {
@@ -54,7 +64,7 @@ $red: #cc3333;
 }
 
 .loginPopup {
-	width: 400px;
+	width: 300px;
 	.popupText {
 		margin: 5px 10px;
 	}
@@ -69,7 +79,7 @@ $red: #cc3333;
 	margin-top: 5px;
 }
 
-.settingsList, .addFeedList, .loginGroup {
+.fixedWidthList {
 	margin: 20px auto;
 	padding: 0px 10px;
 
@@ -119,10 +129,19 @@ $red: #cc3333;
 	
 }
 .editPopup {
-	width: 400px;
-	/*@media screen and (min-width: 650px) {
-		max-width: 500px; 
-	}*/
+	width: 300px;
+	@media screen and (min-width: 650px) {
+		width: 400px; 
+	}
+
+	.editPopupInputDecorator {
+		margin: 0; 
+		width: 282px; 
+		background-color: inherit;
+		@media screen and (min-width: 650px) {
+			width: 382px; 
+		}
+	}
 }
 
 .onyx-popup {
@@ -201,6 +220,11 @@ $red: #cc3333;
 	.center {
 		width: 100%;
 		text-align: center;
+		> * {
+			background-position-x: center !important;
+			width: 20%;
+			margin: auto 0px;
+		}
 	}
 }
 
@@ -281,7 +305,7 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
  	text-align: center;
 	width: 100%;
 	/*@TODO: CHANGE THIS WHEN WE CHANGE THE INCLUDE READ BUTTON */
-	padding: 0px 10px 0px 85px;
+	padding: 0px 10px 0px 30px;
 	@include truncated-text;
 }
 
@@ -312,7 +336,7 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 
 .articlePanel {
 	z-index: -1;
-	margin-top: 54px; /*height of toolbar*/
+	margin-top: 44px; /*height of toolbar*/
 
 	
 	.articleList {
@@ -400,6 +424,10 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 			float: right;
 			color: #888;
 			font-size: 14px;
+		}
+		img {
+			display: block;
+			max-width: 100%;
 		}
 	}
 	

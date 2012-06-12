@@ -1477,7 +1477,7 @@ c = d, d = e;
 c != this.fromIndex && (this.fraction = 1 - this.fraction), this.fromIndex = c, this.toIndex = d;
 },
 refresh: function() {
-this.startTransition(), this.fraction = 1, this.stepTransition(), this.finishTransition();
+this.$.animator.isAnimating() && this.$.animator.stop(), this.startTransition(), this.fraction = 1, this.stepTransition(), this.finishTransition();
 },
 startTransition: function() {
 this.fromIndex = this.fromIndex != null ? this.fromIndex : this.lastIndex || 0, this.toIndex = this.toIndex != null ? this.toIndex : this.index, this.layout && this.layout.start(), this.fireTransitionStart();
@@ -1517,7 +1517,7 @@ return b;
 },
 statics: {
 isScreenNarrow: function() {
-return window.matchMedia && window.matchMedia("all and (max-width: 800px)").matches;
+return enyo.dom.getWindowWidth() <= 800;
 },
 lerp: function(a, b, c) {
 var d = [];
@@ -2308,140 +2308,6 @@ return new d(a);
 }
 }, a.humane = new d;
 }(this);
-
-// book.js
-
-enyo.kind({
-name: "Book",
-kind: "Control",
-published: {
-transition: "fade",
-cue: !1,
-absolute: !0
-},
-transitions: {
-simple: 0,
-fade: 500,
-slade: 500,
-pop: 500
-},
-transitioning: !1,
-movementing: !1,
-direction: "next",
-defaultKind: "Page",
-create: function() {
-this.absolute === !1 && (this.defaultKind = "Control", this.transition = "simple"), this.setOwner = this.owner, this.pane = null, this.lazy = [], this.history = [], this.historyPane = null, this.inherited(arguments);
-for (x in this.getControls()) this.getControls().hasOwnProperty(x) && this.getControls()[x].hide();
-},
-rendered: function() {
-this.inherited(arguments), this._showPane(0, !0);
-},
-initComponents: function() {
-var a = [];
-for (x in this.components) this.components.hasOwnProperty(x) && (this.components[x].lazy && this.components[x].lazy == 1 ? this.lazy.push(this.components[x]) : a.push(this.components[x]), this.absolute === !1 && !(this.components[x].absolute = !1));
-this.components = a, this.inherited(arguments);
-},
-pageNumber: function(a) {
-this.pane < a ? this.direction = "next" : this.direction = "back", this.pane !== a && (this.movementing ? this.cue && this._cue({
-action: "pageNumber",
-arguments: a
-}) : (this.movementing = !0, this._hidePane(this.pane), this._showPane(a)));
-},
-pageName: function(a) {
-this.pane < this._getPageNumber(a) ? this.direction = "next" : this.direction = "back", this.movementing ? this.cue && this._cue.push({
-action: "pageName",
-arguments: a
-}) : (this.movementing = !0, this._paneIsLazy(a) ? (this._hidePane(this.pane), this.createComponent(this._getLazyPane(a), {
-owner: this.owner
-}), this.getControls()[this._getPageNumber(a)].render(), this._showPane(this._getPageNumber(a)), this._deleteLazyPane(a)) : this.pane !== this._getPageNumber(a) ? (this._hidePane(this.pane), this._showPane(this._getPageNumber(a))) : this._end());
-},
-back: function() {
-this.direction = "back";
-if (this.movementing) this.cue && this._cue.push({
-action: "back",
-arguments: ""
-}); else {
-if (!this.history[this.historyPane - 1]) return !1;
-this._hidePane(this.pane), this._showPane(this.history[this.historyPane - 1], !0, this.historyPane - 1);
-}
-},
-next: function() {
-this.direction = "next";
-if (this.movementing) this.cue && this._cue.push({
-action: "next",
-arguments: ""
-}); else {
-if (!this.history[this.historyPane + 1]) return !1;
-this._hidePane(this.pane), this._showPane(this.history[this.historyPane + 1], !0, this.historyPane + 1);
-}
-},
-_paneIsLazy: function(a) {
-var b = !1;
-for (x in this.lazy) this.lazy.hasOwnProperty(x) && this.lazy[x].name === a && (b = !0);
-return b;
-},
-_getLazyPane: function(a) {
-var b = [];
-for (x in this.lazy) this.lazy.hasOwnProperty(x) && this.lazy[x].name === a && (b = this.lazy[x]);
-return b;
-},
-_deleteLazyPane: function(a) {
-for (x in this.lazy) this.lazy.hasOwnProperty(x) && this.lazy[x].name === a && delete this.lazy[x];
-return !0;
-},
-_getPageNumber: function(a) {
-var b = null;
-for (x in this.getControls()) this.getControls().hasOwnProperty(x) && this.getControls()[x].name === a && (b = x);
-return b;
-},
-_cue: [],
-_showPane: function(a, b, c) {
-if (typeof a == "object") var c = a.index, b = a.history, a = a.number;
-if (this.transitioning) this._cue.push({
-action: "_showPane",
-arguments: {
-number: a,
-history: b || "",
-index: c || ""
-}
-}); else {
-this.cue && (this.transitioning = !0);
-var d = this.getControls()[a];
-d.show(), this.transition != "slade" ? d.addClass("enyo-book-" + this.transition + "-in") : this.direction == "next" ? d.addClass("enyo-book-sladenext-in") : d.addClass("enyo-book-sladeback-in"), this.pane = a, b !== !0 ? (this.history.push(this.pane), this.historyPane = this.history.length - 1) : this.historyPane = c, window.setTimeout(enyo.bind(this, function() {
-d.show(), this.transition != "slade" ? d.removeClass("enyo-book-" + this.transition + "-in") : this.direction == "next" ? d.removeClass("enyo-book-sladenext-in") : d.removeClass("enyo-book-sladeback-in"), this._end();
-}), this.transitions[this.transition]);
-}
-},
-_hidePane: function(a) {
-if (this.transitioning) this._cue.push({
-action: "_hidePane",
-arguments: a
-}); else {
-this.cue && (this.transitioning = !0);
-var b = this.getControls()[a];
-this.transition != "slade" ? b.addClass("enyo-book-" + this.transition + "-out") : this.direction == "next" ? b.addClass("enyo-book-sladenext-out") : b.addClass("enyo-book-sladeback-out"), window.setTimeout(enyo.bind(this, function() {
-b.hide(), this.transition != "slade" ? b.removeClass("enyo-book-" + this.transition + "-out") : this.direction == "next" ? b.removeClass("enyo-book-sladenext-out") : b.removeClass("enyo-book-sladeback-out"), this._end();
-}), this.transitions[this.transition]);
-}
-},
-_end: function() {
-this.movementing = !1, this.transitioning = !1, this._startCue();
-},
-_startCue: function() {
-if (this._cue.length >= 1) {
-var a = this._cue[0].action, b = this._cue[0].arguments;
-this._cue.splice(0, 1), this[a](b);
-}
-}
-});
-
-// page.js
-
-enyo.kind({
-name: "Page",
-kind: "Control",
-classes: "enyo-page enyo-fit"
-});
 
 // vendors/underscore-min.js
 
@@ -3663,41 +3529,54 @@ share: "user/-/state/com.google/broadcast",
 "kept-unread": "user/-/state/com.google/kept-unread",
 "reading-list": "user/-/state/com.google/reading-list"
 }, reader.has_loaded_prefs = !1;
-var a = "Tibfib", b = "https://www.google.com/accounts/ClientLogin", c = "http://www.google.com/reader/api/0/", d = "preference/stream/list", e = "stream/contents/", f = "subscription/", g = "user/-/label/", h = "tag/", i = "list", j = "edit", k = "mark-all-as-read", l = "token", m = "user-info", n = "unread-count", o = "rename-tag", p = "edit-tag", q = [];
+var a = "Tibfib", b = "https://www.google.com/accounts/ClientLogin", c = "http://www.google.com/reader/api/0/", d = "preference/stream/list", e = "stream/contents/", f = "subscription/", g = "tag/", h = "list", i = "edit", j = "mark-all-as-read", k = "token", l = "user-info", m = "unread-count", n = "rename-tag", o = "edit-tag", p = [], q = new localStorageWrapper("Auth"), r = new localStorageWrapper("User");
 reader.setFeeds = function(a) {
-q = a;
+p = a;
 }, reader.getFeeds = function() {
-return q;
+return p;
 }, reader.getLabels = function() {
 return _(reader.getFeeds()).select(function(a) {
 return a.isLabel;
 });
+}, reader.getUser = function() {
+return r;
 };
-var r = new localStorageWrapper("User"), s = new localStorageWrapper("Auth"), t = "", u = [], v = function(b, c) {
-b.method = b.method || "GET", b.parameters = b.parameters || {}, b.method === "GET" && (b.parameters.ck = Date.now() || (new Date).getTime(), b.parameters.accountType = "GOOGLE", b.parameters.service = "reader", b.parameters.output = "json", b.parameters.client = a), t && b.method === "POST" && (b.parameters.T = t);
+var s = "", t = [], u = function(b, c) {
+function g(a) {
+for (e in a) a.hasOwnProperty(e) && (e === "set" ? _.each(a[e], function(a) {
+g(a);
+}) : d.push(encodeURIComponent(e) + "=" + encodeURIComponent(a[e])));
+}
+b.method = b.method || "GET", b.parameters = b.parameters || {}, b.method === "GET" && (b.parameters.ck = Date.now() || (new Date).getTime(), b.parameters.accountType = "GOOGLE", b.parameters.service = "reader", b.parameters.output = "json", b.parameters.client = a), s && b.method === "POST" && (b.parameters.T = s);
 var d = [], e, f;
-for (e in b.parameters) b.parameters.hasOwnProperty(e) && d.push(encodeURIComponent(e) + "=" + encodeURIComponent(b.parameters[e]));
-f = d.join("&");
-var g = b.method === "GET" ? b.url + "?" + f : b.url + "?" + encodeURIComponent("client") + "=" + encodeURIComponent(a), h = new XMLHttpRequest;
-h.open(b.method, g, !0), h.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), h.setRequestHeader("Cookie", ""), s.get() && !c && h.setRequestHeader("Authorization", "GoogleLogin auth=" + s.get());
-var i = u.length;
-h.onreadystatechange = function() {
-h.readyState === 4 && h.status === 200 ? b.onSuccess && (b.onSuccess(h), u[i] && delete u[i]) : h.readyState === 4 && (b.method === "POST" ? b.tried || reader.getToken(function() {
-b.tried = !0, v(b), u[i] && delete u[i];
-}, b.onFailure) : b.onFailure && (b.onFailure(h), u[i] && delete u[i]), h.status === 401 && h.statusText === "Unauthorized" && (humane ? humane.log(h.statusText + ". " + "Try logging in again.", {
+g(b.parameters), f = d.join("&");
+var h = b.method === "GET" ? b.url + "?" + f : b.url + "?" + encodeURIComponent("client") + "=" + encodeURIComponent(a), i = new XMLHttpRequest;
+i.open(b.method, h, !0), i.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), i.setRequestHeader("Cookie", ""), q.get() && !c && i.setRequestHeader("Authorization", "GoogleLogin auth=" + q.get());
+var j = t.length;
+i.onreadystatechange = function() {
+if (i.readyState === 4 && i.status === 200) b.onSuccess && (b.onSuccess(i), t[j] && delete t[j]); else if (i.readyState === 4) {
+b.method === "POST" ? b.tried || reader.getToken(function() {
+b.tried = !0, u(b), t[j] && delete t[j];
+}, b.onFailure) : b.onFailure && (b.onFailure(i), t[j] && delete t[j]);
+if (i.status === 401 && i.statusText === "Unauthorized") if (humane) {
+var a = humane.create();
+a.log(i.statusText + ". " + "Try logging in again.", {
 timeout: 2e3,
 clickToClose: !1
-}) : console.error("AUTH EXPIRED? TRY LOGGING IN AGAIN")), console.error(h));
-}, h.send(b.method === "POST" ? f : ""), u.push(h);
+});
+} else console.error("AUTH EXPIRED? TRY LOGGING IN AGAIN");
+console.error("Request Failed: " + i);
+}
+}, i.send(b.method === "POST" ? f : ""), t.push(i);
 };
 reader.hasAuth = function() {
-if (s.get()) return !0;
+if (q.get()) return !0;
 }, reader.login = function(a, c, d, e) {
 if (a.length === 0 || c.length === 0) {
 e("Blank Info...");
 return;
 }
-v({
+u({
 method: "GET",
 url: b,
 parameters: {
@@ -3705,30 +3584,31 @@ Email: a,
 Passwd: c
 },
 onSuccess: function(a) {
-s.set(_.lines(a.responseText)[2].replace("Auth=", "")), reader.getUserInfo(d, e);
+q.set(_.lines(a.responseText)[2].replace("Auth=", "")), v(d, e);
 },
 onFailure: function(a) {
 console.error(a), e(reader.normalizeError(a.responseText));
 }
 });
 }, reader.getToken = function(a, b) {
-v({
+u({
 method: "GET",
-url: c + l,
+url: c + k,
 parameters: {},
 onSuccess: function(b) {
-t = b.responseText, a();
+s = b.responseText, a();
 },
 onFailure: function(a) {
 console.error("failed", a), b && b(reader.normalizeError(a.responseText));
 }
 });
 }, reader.logout = function() {
-s.del(), r.del(), reader.setFeeds([]);
-}, reader.getUserInfo = function(a, b) {
-v({
+q.del(), r.del(), reader.setFeeds([]);
+};
+var v = function(a, b) {
+u({
 method: "GET",
-url: c + m,
+url: c + l,
 parameters: {},
 onSuccess: function(b) {
 r.set(JSON.parse(b.responseText)), a();
@@ -3737,9 +3617,8 @@ onFailure: function(a) {
 console.error(a), b && b(reader.normalizeError(a.responseText));
 }
 });
-};
-var w = function(a, b) {
-v({
+}, w = function(a, b) {
+u({
 method: "GET",
 url: c + d,
 parameters: {},
@@ -3753,12 +3632,12 @@ console.error(a), b && b(reader.normalizeError(a.responseText));
 };
 reader.loadFeeds = function(a) {
 function b() {
-v({
+u({
 method: "GET",
-url: c + f + i,
+url: c + f + h,
 onSuccess: function(b) {
 x(function(c) {
-reader.getUnreadCounts(function(d) {
+z(function(d) {
 reader.setFeeds(y(JSON.parse(b.responseText).subscriptions, c, d, reader.userPrefs)), a(reader.getFeeds());
 });
 });
@@ -3771,9 +3650,9 @@ console.error(a);
 reader.has_loaded_prefs ? b() : w(b);
 };
 var x = function(a) {
-v({
+u({
 method: "GET",
-url: c + h + i,
+url: c + g + h,
 onSuccess: function(b) {
 a(JSON.parse(b.responseText).tags);
 },
@@ -3830,10 +3709,9 @@ value: ""
 return j = _(j).sortBy(function(a) {
 return i.value.indexOf(a.sortid) === -1 && !a.isSpecial ? 1e3 : i.value.indexOf(a.sortid) / 8;
 }), j;
-};
-reader.getUnreadCounts = function(a, b) {
-v({
-url: c + n,
+}, z = function(a, b) {
+u({
+url: c + m,
 onSuccess: function(c) {
 var d = JSON.parse(c.responseText).unreadcounts, e = {};
 _(d).each(function(a) {
@@ -3844,62 +3722,63 @@ onFailure: function(a) {
 console.error(a);
 }
 });
-}, reader.decrementUnreadCount = function(a, b, c) {
+};
+reader.decrementUnreadCount = function(a, b, c) {
 _.each(reader.getFeeds(), function(c) {
 c.id === a || c.isAll ? c.count -= b || 1 : c.feeds && c.feeds.length > 0 && _.each(c.feeds, function(d) {
 d.id === a && (c.count -= b || 1);
 });
 }), c && c();
 };
-var z = function(a, b) {
+var A = function(a, b, d) {
 if (!a) {
 console.error("No params for feed edit");
 return;
 }
-v({
+u({
 method: "POST",
-url: c + f + j,
+url: c + f + i,
 parameters: a,
 onSuccess: function(a) {
 b(a.responseText);
 },
 onFailure: function(a) {
-console.error(a);
+console.error(a), d && d(a);
 }
 });
 };
-reader.editFeedTitle = function(a, b, c) {
-z({
+reader.editFeedTitle = function(a, b, c, d) {
+A({
 ac: "edit",
 t: b,
 s: a
-}, c);
-}, reader.editFeedLabel = function(a, b, c, d) {
-var e = {
+}, c, d);
+}, reader.editFeedLabel = function(a, b, c, d, e) {
+var f = {
 ac: "edit",
 s: a
 };
-c ? e.a = b : e.r = b, z(e, d);
-}, reader.editLabelTitle = function(a, b, d) {
-v({
+c ? f.a = b : f.r = b, A(f, d, e);
+}, reader.editLabelTitle = function(a, b, d, e) {
+u({
 method: "POST",
-url: c + o,
+url: c + n,
 parameters: {
-s: g + a,
+s: a,
 t: a,
-dest: g + b
+dest: reader.TAGS.label + b
 },
 onSuccess: function(a) {
 d(a.responseText);
 },
 onFailure: function(a) {
-console.error(a);
+console.error(a), e && e();
 }
 });
 }, reader.markAllAsRead = function(a, b) {
-v({
+u({
 method: "POST",
-url: c + k,
+url: c + j,
 parameters: {
 s: a
 },
@@ -3911,21 +3790,21 @@ console.error(a);
 }
 });
 }, reader.unsubscribeFeed = function(a, b) {
-z({
+A({
 ac: "unsubscribe",
 s: a
 }, b);
 }, reader.subscribeFeed = function(a, b, c) {
-z({
+A({
 ac: "subscribe",
 s: "feed/" + a,
 t: c || undefined
 }, b);
 };
-var A = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?\^=%&amp;:\/~\+#]*[\w\-\@?\^=%&amp;\/~\+#])?/;
+var B = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?\^=%&amp;:\/~\+#]*[\w\-\@?\^=%&amp;\/~\+#])?/;
 reader.processFeedInput = function(a, b, c, d) {
 var e = "https://ajax.googleapis.com/ajax/services/feed/";
-!A.test(a) && b !== "url" || b === "keyword" ? (e += "find", a = a.replace(/\.\w{1,3}\.*\w{0,2}$/ig, "")) : e += "load", v({
+!B.test(a) && b !== "url" || b === "keyword" ? (e += "find", a = a.replace(/\.\w{1,3}\.*\w{0,2}$/ig, "")) : e += "load", u({
 url: e,
 parameters: {
 q: encodeURI(a),
@@ -3943,7 +3822,7 @@ console.error(a);
 var f = d || {
 n: 50
 };
-f.r = f.r || "d", v({
+f.r = f.r || "d", u({
 method: "GET",
 url: c + e + encodeURIComponent(a),
 parameters: f,
@@ -3954,34 +3833,39 @@ onFailure: function(a) {
 console.error(a);
 }
 });
-}, reader.setItemTag = function(a, b, d, e, f) {
-var g = {
-s: a,
-i: b,
+}, reader.setItemTag = function(a, b, d, e, f, g) {
+var h = {
 async: "true",
 ac: "edit-tags"
 };
-e === !0 ? g.a = reader.TAGS[d] : g.r = reader.TAGS[d], v({
+e === !0 ? h.a = reader.TAGS[d] : h.r = reader.TAGS[d], _.isArray(b) && _.isArray(a) ? (h.set = [], _.each(b, function(b, c) {
+h.set.push({
+i: b,
+s: a[c]
+});
+})) : (h.s = a, h.i = b), u({
 method: "POST",
-url: c + p,
-parameters: g,
+url: c + o,
+parameters: h,
 onSuccess: function(a) {
 a.responseText === "OK" && f(a.responseText);
 },
 onFailure: function(a) {
-console.error(a);
+console.error("FAILED", a), g && g();
 }
 });
 };
-var B = /user\/\d*\//;
+var C = /user\/\d*\//;
 reader.correctId = function(a) {
-return a.replace(B, "user/-/");
-}, reader.isRead = function(a) {
-if (a.read !== undefined) return /^true$/i.test(a.read);
+return a.replace(C, "user/-/");
+};
+var D = /^true$/i;
+reader.isRead = function(a) {
+if (a.read !== undefined) return D.test(a.read);
 for (var b = 0; b < a.categories.length; b++) if (reader.correctId(a.categories[b]) === reader.TAGS.read) return !0;
 return !1;
 }, reader.isStarred = function(a) {
-if (a.starred !== undefined) return /^true$/i.test(a.starred);
+if (a.starred !== undefined) return D.test(a.starred);
 for (var b = 0; b < a.categories.length; b++) if (reader.correctId(a.categories[b]) === reader.TAGS.star) return !0;
 return !1;
 }, reader.getIconForFeed = function(a) {
@@ -3994,33 +3878,47 @@ return b = b === "Bad Authentication" ? "Incorrect Email/Password" : b, b;
 
 // js/helpers/utils.js
 
+function logArg(a, b, c) {
+console.log("Args", a, b, c);
+}
+
 function htmlToText(a) {
 return a.replace(/(?:\n|\r\n|\r)/ig, "").replace(/<\s*br[^>]*>/ig, "\n").replace(/<\s*\/li[^>]*>/ig, "\n").replace(/<\s*p[^>]*>/ig, "\n\n").replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig, "").replace(/<\s*style[^>]*>[\s\S]*?<\/style>/mig, "").replace(/<!--.*?-->/mig, "").replace(/<\s*a[^>]*href=['"](.*?)['"][^>]*>([\s\S]*?)<\/\s*a\s*>/ig, "$2").replace(/(<([^>]+)>)/ig, "").replace(/\n/g, "").replace(/(?:<br\s*\/?>\s*){2,}/gi, "<br/><br/>").replace(/\t/g, "").replace(/^\s*(?:<br\s*\/?>\s*)+/m, "").replace(/ {2,}/g, " ");
 }
 
 (function() {
-window.AppUtils = {}, AppUtils.getImagePath = function(a) {
+window.AppUtils = {};
+var a = 1;
+window.devicePixelRatio !== undefined && (a = window.devicePixelRatio), AppUtils.getPixelRatio = function() {
+return a;
+}, AppUtils.getImagePath = function(a) {
 return "assets/" + a;
 }, AppUtils.getPlatform = function() {
 var a = navigator.appVersion;
 return navigator.appVersion.indexOf("iPhone") !== -1 ? "iPhone" : navigator.appVersion.indexOf("iPad") !== -1 ? "iPad" : navigator.appVersion.indexOf("Chrome") !== -1 ? "Chrome" : navigator.appVersion.indexOf("Safari") !== -1 ? "Safari" : "Browser";
 };
-var a;
-AppUtils.testInternetConnection = function(b) {
+var b;
+AppUtils.testInternetConnection = function(a) {
 if (navigator.onLine && navigator.onLine === !0) {
 var c = new Image;
 c.onload = function() {
-a || console.log("CHECK QUEUE"), a = !0, b(!0);
+b || publish("online"), b = !0, a(!0);
 }, c.onerror = function() {
-a = !1, b(!1);
+b = !1, a(!1);
 }, c.src = "http://www.google.com/s2/favicons?domain_url=" + escape("http://www.google.com") + "&d=" + escape(Date());
-} else b(!1);
+} else b = !1, a(!1);
 };
-var b = humane.create();
+var c = humane.create();
 AppUtils.wrapWithInternetTest = function(a) {
-AppUtils.testInternetConnection(function(c) {
-c ? a() : b.log("No Internet Connection...");
+AppUtils.testInternetConnection(function(b) {
+b ? a() : c.log("No Internet Connection...");
 });
+}, AppUtils.getPos = function(a) {
+for (var b = 0, c = 0; a != null; b += a.offsetLeft, c += a.offsetTop, a = a.offsetParent) ;
+return {
+x: b,
+y: c
+};
 }, AppUtils.stringToBool = function(a) {
 return /^true$/i.test(a);
 }, AppUtils.buildArticlesArray = function(a) {
@@ -4035,8 +3933,10 @@ window.AppPrefs = {}, localStorage.preferences || (localStorage.preferences = "{
 var a = enyo.mixin({
 includeRead: !0,
 articleContrast: "Normal",
-articleFontSize: "Medium",
-articleSort: "Recent First"
+articleFontSize: "Small",
+articleSort: "Recent First",
+hideRead: !1,
+folderTap: "Shows Feeds"
 }, JSON.parse(localStorage.preferences));
 AppPrefs.get = function(b) {
 return a[b];
@@ -4076,7 +3976,9 @@ var d = "INSERT INTO ARTICLES SELECT '" + c[0].id + "' AS id, '" + c[0].origin.s
 for (var e = 1; e < c.length; e++) d += " UNION SELECT '" + c[e].id + "', '" + c[e].origin.streamId + "', '" + reader.isRead(c[e]) + "','" + reader.isStarred(c[e]) + "', '" + Base64.encode(JSON.stringify(b(c[e]))) + "', ''";
 } else var d = 'INSERT INTO ARTICLES (id, feed, read, starred, data, imgs) VALUES ("' + c[0].id + '", "' + c[0].origin.streamId + '", "' + reader.isRead(c[0]) + '","' + reader.isStarred(c[0]) + '", "' + Base64.encode(JSON.stringify(b(c[0]))) + '", "")';
 a.executeSql(d);
-}, databaseHelper.error, d);
+}, function(a) {
+console.log("ADD ARTICLES FAILED", a);
+}, d);
 }
 function d(b, c) {
 if (b.length === 0) {
@@ -4114,11 +4016,11 @@ window.databaseHelper = {};
 var a;
 databaseHelper.loadDb = function() {
 a = window.openDatabase("nomnomnomXP_db", "1.0", "NomNomNomXP Database", 2e6), a.transaction(function(a) {
-a.executeSql("CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)"), a.executeSql("CREATE TABLE IF NOT EXISTS SUBS (data)");
+a.executeSql("CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)"), a.executeSql("CREATE TABLE IF NOT EXISTS SUBS (data)"), a.executeSql("CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)");
 }, databaseHelper.error, databaseHelper.success);
 }, databaseHelper.dumpData = function() {
 a.transaction(function(a) {
-a.executeSql("DROP TABLE IF EXISTS ARTICLES"), a.executeSql("CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)"), a.executeSql("DROP TABLE IF EXISTS SUBS"), a.executeSql("CREATE TABLE IF NOT EXISTS SUBS (data)");
+a.executeSql("DROP TABLE IF EXISTS ARTICLES"), a.executeSql("CREATE TABLE IF NOT EXISTS ARTICLES (id unique, feed, read, starred, data, imgs)"), a.executeSql("DROP TABLE IF EXISTS SUBS"), a.executeSql("CREATE TABLE IF NOT EXISTS SUBS (data)"), a.executeSql("DROP TABLE IF EXISTS QUEUE"), a.executeSql("CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)");
 }, databaseHelper.error, databaseHelper.success);
 }, databaseHelper.saveSubs = function(b) {
 var c = Base64.encode(JSON.stringify(b));
@@ -4135,15 +4037,15 @@ a.executeSql("SELECT * FROM SUBS", [], c, databaseHelper.error);
 }, databaseHelper.error);
 }, databaseHelper.saveArticles = function(a, b) {
 databaseHelper.loadArticles(null, function(g) {
-var h = [], i = [], j = [], k = a.unread, l = a.read, m = a.starred, n = _.groupBy(g, function(a) {
-return a.read;
-});
+var h = [], i = [], j = [], k = a.unread, l = a.read, m = a.starred;
 _.each(g, function(a) {
-a.starred ? j.push(a) : a.read ? i.push(a) : h.push(a);
+reader.isStarred(a) ? j.push(a) : reader.isRead(a) ? i.push(a) : h.push(a);
 });
-var o = [].concat(e(m, j)), p = [].concat(e(j, m), f(m, h), f(m, i)), q, r;
-q = [].concat(e(k, h), e(l, i), o), r = [].concat(e(h, k), e(i, l), p), d(r, function() {
-c(q, b);
+var n = [].concat(e(m, j)), o = [].concat(e(j, m), f(m, h), f(m, i), f(m, l), f(m, k));
+console.log("starredToRemove", o);
+var p, q;
+p = [].concat(e(k, h), e(l, i), n), q = [].concat(e(h, k), e(i, l), o), console.log("removing these from the db", q.length), d(q, function() {
+console.log("adding these to the db", p.length), c(p, b);
 });
 });
 }, databaseHelper.loadArticles = function(b, c) {
@@ -4168,6 +4070,31 @@ _(b).each(function(a) {
 d.push(a.id);
 }), c += g("id", d), console.log(c), a.executeSql(c);
 }, databaseHelper.error, c);
+}, databaseHelper.markArticleStarred = function(b, c) {
+a.transaction(function(a) {
+var c = "UPDATE ARTICLES SET starred = '" + b.starred + "' WHERE id = '" + b.id + "'";
+console.log(c), a.executeSql(c);
+}, databaseHelper.error, c);
+}, databaseHelper.queue = function(b) {
+var c = Base64.encode(JSON.stringify(b));
+a.transaction(function(a) {
+a.executeSql("CREATE TABLE IF NOT EXISTS QUEUE (id INTEGER PRIMARY KEY, data)"), a.executeSql('INSERT INTO QUEUE (id, data) VALUES (null, "' + c + '")');
+}, databaseHelper.error, databaseHelper.success);
+}, databaseHelper.getQueue = function(b) {
+function c(a, c) {
+var d = [];
+for (var e = 0; e < c.rows.length; e++) d.push(c.rows.item(e));
+b(d);
+}
+a.transaction(function(a) {
+var b = "SELECT * FROM QUEUE";
+a.executeSql(b, [], c, databaseHelper.error);
+}, databaseHelper.error);
+}, databaseHelper.clearFromQueue = function(b, c) {
+a.transaction(function(a) {
+var d = "DELETE FROM QUEUE WHERE id = " + b;
+a.executeSql(d, [], c, databaseHelper.error);
+}, databaseHelper.error);
 }, databaseHelper.test = function() {
 var b = [];
 b.push({
@@ -4200,10 +4127,178 @@ console.log("SQL Success");
 // js/helpers/background.js
 
 reader.background = {}, reader.background.markRead = function(a, b) {
-reader.setItemTag(a.feed.id, a.id, "read", !0, function() {
+function c() {
 databaseHelper.markArticlesRead([ a ], function() {
 reader.decrementUnreadCount(a.feed.id, 1), databaseHelper.saveSubs(reader.getFeeds()), b && b();
 });
+}
+AppUtils.testInternetConnection(function(b) {
+b ? reader.setItemTag(a.feed.id, a.id, "read", a.read, function() {
+c();
+}) : (console.log("QUEUED"), databaseHelper.queue({
+action: "markRead",
+data: a
+}), c());
+});
+}, reader.background.markStarred = function(a, b) {
+function c() {
+databaseHelper.markArticleStarred(a, function() {
+b && b();
+});
+}
+AppUtils.testInternetConnection(function(b) {
+b ? reader.setItemTag(a.feed.id, a.id, "star", a.starred, function() {
+c();
+}) : (console.log("QUEUED"), databaseHelper.queue({
+action: "markStarred",
+data: a
+}), c());
+});
+}, reader.background.markAllRead = function(a, b, c) {
+function d() {
+databaseHelper.markArticlesRead(b, enyo.bind(this, function() {
+console.log("read articles saved methinks"), _.each(b, function(a) {
+reader.decrementUnreadCount(a.feed.id, 1);
+}), databaseHelper.saveSubs(reader.getFeeds()), c && c();
+}));
+}
+AppUtils.testInternetConnection(function(c) {
+c ? reader.markAllAsRead(a.id, enyo.bind(this, function() {
+d();
+})) : (console.log("QUEUED"), databaseHelper.queue({
+action: "markAllRead",
+data: b
+}), d());
+});
+}, reader.background.editFeedLabel = function(a, b, c, d) {
+function e() {
+if (c) {
+var e, f, g = reader.getFeeds();
+_.each(g, function(a, c) {
+a.id === b && (f = c);
+});
+if (!f) {
+var h = {
+id: b,
+count: 0,
+feeds: [],
+isLabel: !0,
+title: b.replace(reader.TAGS.label, "")
+};
+for (var i = 0; i < g.length; i++) if (g[i].isLabel && b < g[i].id) {
+g.splice(i, 0, h), f = i;
+break;
+}
+f || (g.splice(2, 0, h), f = 2);
+}
+var j = _(g[f]).clone();
+delete j.feeds;
+for (var i = g.length - 1; i >= 0; i--) {
+if (g[i].id === a) {
+e = g.splice(i, 1)[0], e.categories.push(j);
+break;
+}
+g[i].isLabel && _.each(g[i].feeds, function(b) {
+b.id === a && (e = b, e.categories.push(j));
+});
+}
+console.log(g[f]), g[f].feeds.push(e), g[f].count = (parseInt(g[f].count) || 0) + e.count;
+} else {
+var e, g = reader.getFeeds(), f;
+_.each(g, function(a, c) {
+a.id === b && (f = c);
+});
+if (g[f].feeds.length === 1) e = g[f].feeds.splice(0, 1)[0], g.splice(f, 1); else for (var i = g[f].feeds.length - 1; i >= 0; i--) if (g[f].feeds[i].id === a) {
+e = g[f].feeds.splice(i, 1)[0], g[f].count = (parseInt(g[f].count) || 0) - e.count;
+break;
+}
+for (var i = e.categories.length - 1; i >= 0; i--) if (e.categories[i].id === b) {
+e.categories.splice(i, 1);
+break;
+}
+var k = !1;
+_.each(g, function(a) {
+a.isLabel && _.each(a.feeds, function(a) {
+a.id === e.id && (k = !0);
+});
+}), k || g.push(e);
+}
+console.log("feeds", g), databaseHelper.saveSubs(g), d();
+}
+AppUtils.testInternetConnection(function(d) {
+d ? (e(), reader.editFeedLabel(a, b, c, function() {
+console.log("EDITED FEED LABEL");
+})) : (console.log("QUEUED"), e(), databaseHelper.queue({
+action: "editFeedLabel",
+data: {
+feedId: a,
+labelId: b,
+opt: c
+}
+}));
+});
+}, reader.background.editFeedTitle = function(a, b, c) {
+function d() {
+var d, e = reader.getFeeds();
+for (var f = e.length - 1; f >= 0; f--) {
+if (e[f].id === a) {
+d = e[f];
+break;
+}
+e[f].isLabel && _.each(e[f].feeds, function(b) {
+b.id === a && (d = b);
+});
+}
+d.title = b, databaseHelper.saveSubs(e), c && c();
+}
+d(), AppUtils.testInternetConnection(function(c) {
+c ? reader.editFeedTitle(a, b, function() {}) : (console.log("QUEUED"), databaseHelper.queue({
+action: "editFeedTitle",
+data: {
+feedId: a,
+newTitle: b
+}
+}));
+});
+}, reader.background.editLabelTitle = function(a, b, c) {
+function d() {
+var d, e = reader.getFeeds();
+for (var f = e.length - 1; f >= 0; f--) e[f].isLabel && (e[f].id === a && (d = e[f]), _.each(e[f].feeds, function(c) {
+_.each(c.categories, function(c) {
+c.id === a && (c.label = b, c.id = reader.TAGS.label + b);
+});
+}));
+d.title = b, d.id = reader.TAGS.label + b, databaseHelper.saveSubs(e), c && c();
+}
+d(), AppUtils.testInternetConnection(function(c) {
+c ? reader.editLabelTitle(a, b, function() {}) : (console.log("QUEUED"), databaseHelper.queue({
+action: "editLabelTitle",
+data: {
+labelId: a,
+newTitle: b
+}
+}));
+});
+}, reader.background.unsubscribeFeed = function(a, b) {
+function c() {
+var c, d = reader.getFeeds();
+for (var e = d.length - 1; e >= 0; e--) {
+if (d[e].id === a) {
+c = d.splice(e, 1)[0];
+break;
+}
+if (d[e].isLabel) for (var f = d[e].feeds.length - 1; f >= 0; f--) if (d[e].feeds[f].id === a) {
+d[e].count && (d[e].count -= d[e].feeds[f].count), c = d[e].feeds.splice(f, 1)[0];
+break;
+}
+}
+d[0].count && (d[0].count -= c.count), databaseHelper.saveSubs(d), b && b();
+}
+c(), AppUtils.testInternetConnection(function(b) {
+b ? reader.unsubscribeFeed(a, function() {}) : (console.log("QUEUED"), databaseHelper.queue({
+action: "unsubscribeFeed",
+data: a
+}));
 });
 };
 
@@ -4211,13 +4306,12 @@ reader.decrementUnreadCount(a.feed.id, 1), databaseHelper.saveSubs(reader.getFee
 
 enyo.kind({
 name: "loginPage",
-kind: "Page",
 fit: !0,
 handlers: {
 onLogin: ""
 },
 components: [ {
-classes: "loginGroup",
+classes: "fixedWidthList",
 components: [ {
 kind: "onyx.Groupbox",
 components: [ {
@@ -4254,20 +4348,24 @@ classes: "full"
 }, {
 name: "popup",
 kind: "onyx.Popup",
+classes: "loginPopup",
 centered: !0,
 modal: !0,
 floating: !0,
 components: [ {
 name: "popupText",
+classes: "popupText",
 content: "Logged in successfully! Would you like to view the tour? We highly recommend it."
 }, {
 kind: "onyx.Button",
 content: "Yes!",
+style: "width: 68%; margin-right: 8px;",
 ontap: "showFeeds",
 name: "showTour"
 }, {
 kind: "onyx.Button",
 classes: "onyx-negative",
+style: "width: 30%",
 content: "No, I'm silly.",
 ontap: "showFeeds"
 } ]
@@ -4289,7 +4387,7 @@ console.log("succes 2"), this.loggedIn();
 }));
 },
 loggedIn: function() {
-this.$.popup.show();
+this.$.popup.show(), this.$.popup.resized();
 },
 errorLogin: function(a) {
 console.log("ERROR", a), this.$.errorMessage.setContent(a);
@@ -4307,7 +4405,6 @@ this.bubble("onLogin", c);
 
 enyo.kind({
 name: "gridPage",
-kind: "Page",
 fit: !0,
 layoutKind: "FittableRowsLayout",
 handler: {
@@ -4318,7 +4415,7 @@ onShowAddFeedPage: ""
 components: [ {
 kind: "enyo.Scroller",
 fit: !0,
-horizontal: !1,
+horizontal: "hidden",
 classes: "grid",
 components: [ {
 name: "grid",
@@ -4328,21 +4425,29 @@ count: 0,
 onSetupItem: "setupGridItem",
 components: [ {
 kind: "gridItem",
-ontap: "loadGridItem"
+ontap: "loadGridItem",
+onLoadFeed: "loadFeedItem"
 } ]
 } ]
 }, {
+name: "normalToolbar",
 kind: "onyx.Toolbar",
 classes: "onyx-toolbar-inline",
 components: [ {
+name: "titleBar",
 content: "NomNomNomXP",
-classes: "truncating-text"
+classes: "titleBarText truncating-text"
 }, {
 kind: "onyx.IconButton",
 classes: "floatRight",
 src: AppUtils.getImagePath("menu-icon-settings.png"),
 ontap: "bubbleEvent",
 eventToBubble: "onShowSettingsPage"
+}, {
+kind: "onyx.IconButton",
+classes: "floatRight",
+src: AppUtils.getImagePath("menu-icon-edit-outline.png"),
+ontap: "enterEditMode"
 }, {
 kind: "onyx.IconButton",
 classes: "floatRight",
@@ -4354,6 +4459,23 @@ classes: "floatRight",
 src: AppUtils.getImagePath("menu-icon-new.png"),
 ontap: "bubbleEvent",
 eventToBubble: "onShowAddFeedPage"
+} ]
+}, {
+name: "editToolbar",
+kind: "onyx.Toolbar",
+showing: !1,
+classes: "onyx-toolbar-inline",
+components: [ {
+content: "Edit Mode",
+classes: "titleBarText truncating-text"
+}, {
+kind: "onyx.Button",
+content: "Exit",
+classes: "floatRight",
+ontap: "exitEditMode"
+}, {
+name: "editPopup",
+kind: "editPopup"
 } ]
 } ],
 create: function() {
@@ -4386,8 +4508,13 @@ databaseHelper.loadSubs(enyo.bind(this, function(a) {
 console.log("SUBS LOADED FROM DB"), this.buildGrid(a);
 }));
 },
-buildGrid: function(a) {
-this.gridItems = a, reader.setFeeds(this.gridItems), this.$.grid.setCount(this.gridItems.length), this.$.grid.build();
+buildGrid: function(a, b) {
+this.gridItems = AppPrefs.get("hideRead") && !this.inEditMode ? _.reject(a, function(a) {
+return !a.count && !a.isSpecial;
+}) : a, reader.getFeeds().length === 0 && reader.setFeeds(a), this.$.grid.setCount(this.gridItems.length), (!b || !b.noWaterfall) && this.$.grid.waterfallDown("onChangeOpacity", {
+inEditMode: b && b.waterfallOpposite ? !this.inEditMode : this.inEditMode,
+noTransition: !0
+});
 },
 loadFeedsFromOnline: function() {
 AppUtils.wrapWithInternetTest(enyo.bind(this, function() {
@@ -4409,7 +4536,8 @@ humane.remove(), _.isEqual(a, this.gridItems) ? console.log("Subs are the same")
 }), undefined);
 }), {
 n: 50,
-ot: moment().subtract("days", 10).unix()
+ot: moment().subtract("days", 10).unix(),
+xt: reader.TAGS.star
 });
 }), {
 n: a[0].count,
@@ -4424,9 +4552,9 @@ if (this.gridItems[b.index]) return b.item.$.gridItem.setItem(this.gridItems[b.i
 loadGridItem: function(a, b) {
 console.log("loading this sub", a.getItem());
 var c = {};
-a.getItem().isFeed ? c.feed = a.getItem().id : a.getItem().isLabel ? (c.feed = [], _.each(a.getItem().feeds, function(a) {
+!a.getItem().isLabel || AppPrefs.get("folderTap") === "Show Articles" && !this.inEditMode || a.getItem().forceArticles ? (a.getItem().isFeed ? c.feed = a.getItem().id : a.getItem().isLabel ? (c.feed = [], _.each(a.getItem().feeds, function(a) {
 c.feed.push(a.id);
-})) : a.getItem().isAll || a.getItem().isSpecial && !a.getItem().isAll && (c.starred = !0), databaseHelper.loadArticles(c, enyo.bind(this, function(b) {
+})) : a.getItem().isAll || a.getItem().isSpecial && !a.getItem().isAll && (c.starred = !0), this.inEditMode === !1 ? databaseHelper.loadArticles(c, enyo.bind(this, function(b) {
 if (b.length === 0) {
 humane.log("No Articles to Show", {
 timeout: 1500
@@ -4447,14 +4575,43 @@ xt: reader.TAGS.read
 sub: a.getItem(),
 articles: AppUtils.buildArticlesArray(b)
 }));
-}));
+})) : a.getItem().isSpecial || (console.log("EDIT THIS FEEDDDDD"), this.$.editPopup.showEditOptions(a.getItem()))) : a.openFolder();
+},
+loadFeedItem: function(a, b) {
+this.loadGridItem({
+getItem: function() {
+return b;
+}
+});
+},
+inEditMode: !1,
+enterEditMode: function() {
+this.inEditMode = !0, this.buildGrid(reader.getFeeds(), {
+noWaterfall: !0
+}), this.$.grid.waterfallDown("onChangeOpacity", {
+inEditMode: this.inEditMode
+}), this.$.normalToolbar.hide(), this.$.editToolbar.show();
+},
+exitEditMode: function() {
+this.inEditMode = !1, this.buildGrid(reader.getFeeds(), {
+waterfallOpposite: !0
+}), setTimeout(enyo.bind(this, function() {
+this.$.grid.waterfallDown("onChangeOpacity", {
+inEditMode: this.inEditMode
+});
+}), 0), this.$.editToolbar.hide(), this.$.normalToolbar.show();
 }
 }), enyo.kind({
 name: "gridItem",
 kind: "Control",
 classes: "grid-item",
 published: {
-item: {}
+item: {},
+disabled: !1
+},
+handlers: {
+onLoadFeed: "",
+onChangeOpacity: "changeOpacity"
 },
 components: [ {
 kind: "enyo.Image",
@@ -4469,11 +4626,170 @@ kind: "Image",
 classes: "icon"
 }, {
 name: "unread",
-classes: "unread"
+classes: "unread",
+allowHtml: !0
+}, {
+kind: "onyx.MenuDecorator",
+style: "",
+components: [ {
+kind: "onyx.Menu",
+name: "menu",
+modal: !1,
+classes: "folderMenu",
+style: "",
+components: []
+} ]
 } ],
 itemChanged: function(a, b) {
 var c;
-this.getItem().isAll ? c = "all" : this.getItem().isSpecial ? c = this.getItem().title.toLowerCase() : this.getItem().isLabel ? c = "folder" : (c = "feed", this.$.icon.setSrc(reader.getIconForFeed(this.getItem().id.replace(/feed\//, "")))), this.$.image.setSrc(AppUtils.getImagePath("grid-icon-" + c + ".png")), this.$.control.setContent(this.getItem().title), this.getItem().count && this.$.unread.setContent(this.getItem().count >= 1e3 ? "1000+" : this.getItem().count);
+if (this.getItem().isAll) c = "all"; else if (this.getItem().isSpecial) c = this.getItem().title.toLowerCase(); else if (this.getItem().isLabel) {
+c = "folder";
+var d = [];
+if (this.getItem().feeds.length > 0) {
+var e = _(this.getItem()).clone();
+e.content = "All Articles", e.ontap = "loadGridItem", e.forceArticles = !0, e.name = "allAtriclesItem", d.push(e);
+}
+_.each(this.getItem().feeds, function(a) {
+var b = _(a).clone();
+b.ontap = "loadGridItem", b.components = [ {
+kind: enyo.Image,
+classes: "folderFeedIcon floatLeft abs",
+src: reader.getIconForFeed(a.id.replace(/feed\//, ""))
+}, {
+content: a.count ? "(" + a.count + ")" : "",
+classes: "folderFeedTitle unreadCount floatRight"
+}, {
+content: a.title,
+classes: "folderFeedTitle"
+} ], d.push(b);
+}), this.$.menu.destroyComponents(), this.$.menu.createComponents(d, {
+owner: this
+}), this.render();
+} else c = "feed", this.$.icon.setSrc(reader.getIconForFeed(this.getItem().id.replace(/feed\//, "")));
+this.$.image.setSrc(AppUtils.getImagePath("grid-icon-" + c + ".png")), this.$.control.setContent(this.getItem().title), this.getItem().count ? this.$.unread.setContent(this.getItem().count >= 1e3 ? "1000+" : this.getItem().count) : this.$.unread.setContent("&nbsp;");
+},
+changeOpacity: function(a, b) {
+this.addRemoveClass("opacity-transition", !b.noTransition), this.applyStyle("opacity", b.inEditMode && this.getItem().isSpecial ? .3 : 1), setTimeout(enyo.bind(this, function() {
+this.applyStyle("opacity", b.inEditMode && this.getItem().isSpecial ? .3 : 1);
+}), 0);
+},
+openFolder: function() {
+this.$.allAtriclesItem && this.$.allAtriclesItem.setContent(this.owner.owner.owner.inEditMode ? "Edit Folder" : "View All Articles"), this.$.menu.requestMenuShow();
+if (this.$.menu.hasNode()) {
+this.$.menu.applyStyle("left", null), this.$.menu.applyStyle("right", null);
+var a = AppUtils.getPos(this.$.menu.node);
+a.x < 0 ? this.$.menu.applyStyle("left", "0px") : window.innerWidth - a.x < 200 && this.$.menu.applyStyle("right", "110px");
+}
+},
+loadGridItem: function(a, b) {
+return this.$.menu.hide(), this.bubble("onLoadFeed", a), !0;
+}
+}), enyo.kind({
+name: "editPopup",
+kind: "onyx.Popup",
+classes: "editPopup",
+centered: !0,
+floating: !0,
+components: [ {
+content: "Edit",
+classes: "popupTitle"
+}, {
+kind: "onyx.InputDecorator",
+layoutKind: "FittableColumnsLayout",
+classes: "editPopupInputDecorator",
+onblur: "inputBlur",
+components: [ {
+content: "Name: ",
+classes: "floatLeft padRight inputPrompt"
+}, {
+name: "title",
+kind: "onyx.Input",
+fit: !0
+} ]
+}, {
+name: "labelsList",
+kind: "onyx.Groupbox"
+}, {
+name: "unsubscribeButton",
+kind: "onyx.Button",
+classes: "onyx-negative full",
+content: "Unsubscribe",
+ontap: "unsubscribe"
+} ],
+showEditOptions: function(a) {
+var b = [];
+this.$.title.setValue(a.title);
+if (a.isLabel) this.$.unsubscribeButton.hide(), this.$.labelsList.hide(); else if (a.isFeed) {
+this.$.unsubscribeButton.show(), this.$.labelsList.show();
+var c = [ {
+kind: "onyx.GroupboxHeader",
+content: "Labels"
+} ];
+_.each(reader.getLabels(), function(b) {
+var d = !!_.find(a.categories, function(a) {
+return a.id === b.id;
+});
+console.log("hasLabel", d), c.push({
+classes: "groupItem",
+components: [ {
+name: b.id + "Check",
+labelId: b.id,
+feedId: a.id,
+kind: "onyx.Checkbox",
+classes: "floatRight",
+checked: d,
+onchange: "toggleLabel"
+}, {
+content: b.title,
+id: b.id
+} ]
+});
+}), c.push({
+kind: "onyx.InputDecorator",
+components: [ {
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-new.png"),
+ontap: "addLabel",
+classes: "floatRight"
+}, {
+name: "newLabelInput",
+placeholder: "New Label...",
+kind: "onyx.Input"
+} ]
+}), this.$.labelsList.destroyClientControls(), this.$.labelsList.createComponents(c, {
+owner: this
+}), this.$.labelsList.render();
+}
+this.sub = a, this.unsubscribed = !1, this.show(), onyx.scrim.show();
+},
+unsubscribed: !1,
+hide: function() {
+this.inherited(arguments), this.updateTitle(function() {
+publish("refreshGrid"), onyx.scrim.hide();
+});
+},
+toggleLabel: function(a, b) {
+reader.background.editFeedLabel(a.feedId, a.labelId, a.checked, function() {
+console.log("success suckers");
+}), console.log("CHECKED", a.checked);
+},
+inputBlur: function() {
+this.$.title.getValue().length === 0 && this.$.title.setValue(this.sub.title);
+},
+updateTitle: function(a) {
+!this.unsubscribed && this.$.title.getValue().length > 0 && this.$.title.getValue() !== this.sub.title ? reader.background[this.sub.isLabel ? "editLabelTitle" : "editFeedTitle"](this.sub.id, this.$.title.getValue(), function() {
+console.log("success suckers"), a();
+}) : a();
+},
+addLabel: function(a, b) {
+this.$.newLabelInput.getValue().length > 0 && reader.background.editFeedLabel(this.sub.id, reader.TAGS.label + this.$.newLabelInput.getValue(), !0, enyo.bind(this, function() {
+console.log("success suckers"), this.showEditOptions(this.sub);
+}));
+},
+unsubscribe: function() {
+reader.background.unsubscribeFeed(this.sub.id, enyo.bind(this, function() {
+this.unsubscribed = !0, this.hide();
+}));
 }
 });
 
@@ -4481,7 +4797,6 @@ this.getItem().isAll ? c = "all" : this.getItem().isSpecial ? c = this.getItem()
 
 enyo.kind({
 name: "articlePage",
-kind: "Page",
 fit: !0,
 handlers: {
 onShowGridPage: "",
@@ -4491,27 +4806,20 @@ components: [ {
 kind: "onyx.Toolbar",
 classes: "onyx-toolbar-inline",
 components: [ {
-kind: "onyx.Button",
-content: "Grid",
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-home.png"),
 ontap: "bubbleEvent",
 eventToBubble: "onShowGridPage",
 opts: {
 refresh: !0
 },
 classes: "abs",
-style: "left: 10px;"
+style: "left: 10px; margin: auto;"
 }, {
 name: "subTitle",
 content: "",
 classes: "subTitle center",
 style: "text-align: center"
-}, {
-name: "includeReadButton",
-kind: "onyx.Button",
-content: "Include Read",
-ontap: "toggleIncludeUnread",
-classes: "abs",
-style: "right: 10px;"
 } ]
 }, {
 kind: "ArticlePanel",
@@ -4535,10 +4843,7 @@ this.bubble(a.eventToBubble, a.opts);
 },
 articles: [],
 loadArticles: function(a, b) {
-console.log("LOAD DEM ARTICLES"), this.$.includeReadButton.addRemoveClass("active", AppPrefs.get("includeRead")), this.$.subTitle.setContent(a.title), this.$.articlePanel.loadArticles(a, b);
-},
-toggleIncludeUnread: function(a) {
-AppPrefs.set("includeRead", !AppPrefs.get("includeRead")), a.addRemoveClass("active", AppPrefs.get("includeRead")), this.$.articlePanel.orderAndShowArticles();
+console.log("LOAD DEM ARTICLES"), this.$.subTitle.setContent(a.title), this.$.articlePanel.loadArticles(a, b);
 }
 }), enyo.kind({
 name: "ArticlePanel",
@@ -4589,9 +4894,16 @@ allowHtml: !0
 kind: "onyx.Toolbar",
 classes: "onyx-toolbar-inline",
 components: [ {
-kind: "onyx.Button",
-content: "CHECK",
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-mark-read.png"),
 ontap: "markAllRead"
+}, {
+name: "includeReadButton",
+kind: "onyx.Button",
+content: "Include Read",
+ontap: "toggleIncludeUnread",
+classes: "abs",
+style: "right: 10px;"
 } ]
 } ]
 }, {
@@ -4621,15 +4933,33 @@ classes: "articleContent"
 kind: "onyx.Toolbar",
 classes: "onyx-toolbar-inline",
 components: [ {
-kind: "onyx.Grabber"
+kind: "onyx.Grabber",
+style: "position: absolute;"
 }, {
-kind: "onyx.Button",
-content: "v",
+classes: "center",
+style: "margin: inherit",
+components: [ {
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-mark-read.png"),
+ontap: ""
+}, {
+name: "starredIcon",
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-starred-outline.png"),
+ontap: "toggleStarred"
+}, {
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-down.png"),
 ontap: "increaseIndex"
 }, {
-kind: "onyx.Button",
-content: "^",
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-up.png"),
 ontap: "decreaseIndex"
+}, {
+kind: "onyx.IconButton",
+src: AppUtils.getImagePath("menu-icon-share.png"),
+ontap: ""
+} ]
 } ]
 } ]
 } ],
@@ -4637,7 +4967,9 @@ rendered: function() {
 this.size(), this.inherited(arguments);
 },
 resizeHandler: function() {
-this.size(), this.$.grabber.setShowing(window.innerWidth < 800), this.inherited(arguments);
+this.size();
+var a = humane.create();
+a.log(window.innerWidth + " " + AppUtils.getPixelRatio()), this.$.grabber.setShowing(parseInt(window.innerWidth) < 800), this.inherited(arguments);
 },
 size: function() {
 var a = this.$.left.getBounds();
@@ -4647,10 +4979,11 @@ refreshSettings: function() {
 this.$.list.refresh();
 },
 loadArticles: function(a, b) {
+this.$.includeReadButton.addRemoveClass("active", AppPrefs.get("includeRead"));
 var c = _.groupBy(b, function(a) {
 return reader.isRead(a);
 });
-this.unreadArticles = c.false || [], this.readArticles = c.true || [], this.sub = a, this.orderAndShowArticles();
+this.unreadArticles = c.false || [], this.readArticles = c.true || [], this.sub = a, this.orderAndShowArticles(), this.previous();
 },
 orderAndShowArticles: function() {
 var a = AppPrefs.get("includeRead") ? this.unreadArticles.concat(this.readArticles) : this.unreadArticles;
@@ -4673,11 +5006,9 @@ this.articleIndex = b.index, this.showCurrentArticle(), this.next();
 },
 showCurrentArticle: function() {
 var a = this.articles[this.articleIndex];
-this.$.articleViewTitle.setContent(a.title), this.$.articleViewContent.setContent(a.content), this.$.articleViewTime.setContent(moment.unix(a.updated).format("h:mm a")), AppUtils.stringToBool(a.read) === !1 && AppUtils.testInternetConnection(function(b) {
-b ? (a.read = !0, reader.background.markRead(a, function() {
+this.$.articleViewTitle.setContent(a.title), this.$.articleViewContent.setContent(a.content), this.$.articleViewTime.setContent(moment.unix(a.updated).format("h:mm a")), this.$.starredIcon.setSrc(reader.isStarred(a) ? AppUtils.getImagePath("menu-icon-starred.png") : AppUtils.getImagePath("menu-icon-starred-outline.png")), AppUtils.stringToBool(a.read) === !1 && (a.read = !0, reader.background.markRead(a, function() {
 publish("refreshGrid");
-})) : console.log("QUEUEING");
-}), this.$.list.select(this.articleIndex, a);
+})), this.$.list.select(this.articleIndex, a);
 },
 clearCurrentArticle: function() {
 this.$.articleViewTitle.setContent(""), this.$.articleViewContent.setContent(""), this.$.articleViewTime.setContent("");
@@ -4688,18 +5019,21 @@ this.articles[this.articleIndex + 1] && this.articleIndex++, this.showCurrentArt
 decreaseIndex: function() {
 this.articles[this.articleIndex - 1] && this.articleIndex--, this.showCurrentArticle();
 },
+toggleStarred: function() {
+var a = this.articles[this.articleIndex];
+console.log("isStarred", reader.isStarred(a)), a.starred = !reader.isStarred(a), reader.background.markStarred(a), this.$.starredIcon.setSrc(reader.isStarred(a) ? AppUtils.getImagePath("menu-icon-starred.png") : AppUtils.getImagePath("menu-icon-starred-outline.png"));
+},
 markAllRead: function() {
-AppUtils.testInternetConnection(enyo.bind(this, function(a) {
-a ? reader.markAllAsRead(this.sub.id, enyo.bind(this, function() {
-_(this.articles).each(function(a) {
-a.read = !0;
-}), databaseHelper.markArticlesRead(this.unreadArticles, enyo.bind(this, function() {
-console.log("read articles saved methinks"), _.each(this.unreadArticles, function(a) {
-reader.decrementUnreadCount(a.feed.id, 1);
-}), databaseHelper.saveSubs(reader.getFeeds());
-})), this.$.list.refresh();
-})) : console.log("QUEUEING");
+console.log(_.reject(this.articles, function(a) {
+return reader.isRead(a);
+})), reader.background.markAllRead(this.sub, _.reject(this.articles, function(a) {
+return reader.isRead(a);
+}), enyo.bind(this, function() {
+this.$.list.refresh();
 }));
+},
+toggleIncludeUnread: function(a) {
+AppPrefs.set("includeRead", !AppPrefs.get("includeRead")), a.addRemoveClass("active", AppPrefs.get("includeRead")), this.orderAndShowArticles();
 }
 });
 
@@ -4707,7 +5041,6 @@ reader.decrementUnreadCount(a.feed.id, 1);
 
 enyo.kind({
 name: "settingsPage",
-kind: "Page",
 fit: !0,
 layoutKind: "FittableRowsLayout",
 handlers: {
@@ -4728,102 +5061,106 @@ content: "Settings",
 classes: "center"
 } ]
 }, {
-classes: "settingsList",
-components: [ {
-kind: "onyx.Groupbox",
-components: [ {
+name: "settingList",
+classes: "fixedWidthList",
+components: []
+} ],
+settings: [ {
+section: "Subscription Grid",
+items: [ {
+type: "toggle",
+description: "Hide Read Feeds",
+preference: "hideRead"
+}, {
+type: "select",
+description: "Tapping on Folders...",
+preference: "folderTap",
+options: [ "Shows Feeds", "Shows Articles" ]
+} ]
+}, {
+section: "Reading Articles",
+items: [ {
+type: "select",
+description: "Font Size",
+preference: "articleFontSize",
+options: [ "Small", "Medium", "Large" ]
+}, {
+type: "select",
+description: "Article Sort",
+preference: "articleSort",
+options: [ "Recent First", "Oldest First" ]
+} ]
+} ],
+create: function() {
+this.inherited(arguments), _.each(this.settings, enyo.bind(this, function(a) {
+var b = [ {
 kind: "onyx.GroupboxHeader",
-content: "Reading Articles"
-}, {
-kind: "onyx.MenuDecorator",
-style: "z-index: 11;",
-components: [ {
-kind: "enyo.Control",
-content: "",
-classes: "settingValue floatRight",
-onclick: "requestMenuShow",
-menuName: "fontSizeMenu",
-showPreferenceValue: "articleFontSize"
-}, {
-kind: "enyo.Control",
-content: "Font Size",
-onclick: "requestMenuShow",
-menuName: "fontSizeMenu"
-}, {
-kind: "onyx.Menu",
-name: "fontSizeMenu",
-components: [ {
-content: "Small",
-ontap: "setPreference",
-preference: "articleFontSize",
-menuName: "fontSizeMenu"
-}, {
-content: "Medium",
-ontap: "setPreference",
-preference: "articleFontSize",
-menuName: "fontSizeMenu"
-}, {
-content: "Large",
-ontap: "setPreference",
-preference: "articleFontSize",
-menuName: "fontSizeMenu"
-} ]
-} ]
-}, {
-kind: "onyx.MenuDecorator",
-components: [ {
-kind: "enyo.Control",
-content: "",
-classes: "settingValue floatRight",
-onclick: "requestMenuShow",
-menuName: "articleSortMenu",
-showPreferenceValue: "articleSort"
+content: a.section
+} ];
+_.each(a.items, function(a) {
+var c = {
+classes: "groupItem",
+components: []
+};
+switch (a.type) {
+case "toggle":
+c.components.push({
+kind: "onyx.ToggleButton",
+onContent: "Yes",
+offContent: "No",
+classes: "floatRight",
+value: AppPrefs.get(a.preference),
+preference: a.preference,
+ontap: "setPreference"
 }, {
 kind: "enyo.Control",
-content: "Contrast",
-onclick: "requestMenuShow",
-menuName: "articleSortMenu"
+content: a.description
+});
+break;
+case "select":
+var d = [], e = 0;
+_.each(a.options, function(b, c) {
+d.push({
+content: b,
+value: b
+}), b === AppPrefs.get(a.preference) && (e = c);
+}), c.components.push({
+kind: "Select",
+onchange: "setPreference",
+selected: e,
+preference: a.preference,
+classes: "floatRight",
+components: d
 }, {
-kind: "onyx.Menu",
-name: "articleSortMenu",
-components: [ {
-content: "Recent First",
-ontap: "setPreference",
-preference: "articleSort",
-menuName: "articleSortMenu"
+kind: "enyo.Control",
+content: a.description
+});
+}
+b.push(c);
+}), this.$.settingList.createComponent({
+kind: "onyx.Groupbox",
+components: b
 }, {
-content: "Oldest First",
-ontap: "setPreference",
-preference: "articleSort",
-menuName: "articleSortMenu"
-} ]
-} ]
-} ]
-}, {
+owner: this
+});
+})), this.$.settingList.createComponent({
 kind: "onyx.Button",
 classes: "onyx-negative full",
 content: "Log Out",
 ontap: "logOut"
-} ]
-} ],
-create: function() {
-this.inherited(arguments);
+}, {
+owner: this
+});
 },
 rendered: function() {
-this.inherited(arguments), _.each(this.getComponents(), function(a) {
-a.showPreferenceValue && a.setContent(AppPrefs.get(a.showPreferenceValue));
-});
+this.inherited(arguments);
 },
 bubbleEvent: function(a, b) {
 this.bubble(a.eventToBubble);
 },
-requestMenuShow: function(a, b) {
-this.$[a.menuName].requestMenuShow();
-},
 setPreference: function(a, b) {
-AppPrefs.set(a.preference, a.content), a.menuName && this.$[a.menuName].requestHide(), _.each(this.getComponents(), function(a) {
-a.showPreferenceValue && a.setContent(AppPrefs.get(a.showPreferenceValue));
-});
+var c = a.type === "select" ? a.components[a.getSelected()].value : a.getValue();
+AppPrefs.set(a.preference, c);
 },
 logOut: function() {
 reader.logout(), databaseHelper.dumpData(), this.bubble("onLogOut");
@@ -4834,7 +5171,6 @@ reader.logout(), databaseHelper.dumpData(), this.bubble("onLogOut");
 
 enyo.kind({
 name: "addFeedPage",
-kind: "Page",
 fit: !0,
 layoutKind: "FittableRowsLayout",
 handlers: {
@@ -4854,7 +5190,7 @@ content: "Add Feed",
 classes: "center"
 } ]
 }, {
-classes: "addFeedList",
+classes: "fixedWidthList",
 components: [ {
 kind: "onyx.Groupbox",
 components: [ {
@@ -4899,7 +5235,6 @@ this.inherited(arguments);
 
 enyo.kind({
 name: "tourPage",
-kind: "Page",
 fit: !0,
 layoutKind: "FittableRowsLayout",
 handlers: {
@@ -4930,13 +5265,84 @@ this.bubble(a.eventToBubble);
 }
 });
 
+// js/editSubPage.js
+
+enyo.kind({
+name: "editSubPage",
+fit: !0,
+layoutKind: "FittableRowsLayout",
+handlers: {
+onShowGridPage: ""
+},
+components: [ {
+kind: "onyx.Toolbar",
+classes: "onyx-toolbar-inline",
+components: [ {
+kind: "onyx.Button",
+content: "Back",
+ontap: "bubbleEvent",
+eventToBubble: "onShowGridPage",
+classes: "abs"
+}, {
+content: "Edit",
+classes: "center"
+} ]
+}, {
+classes: "fixedWidthList",
+components: [ {
+kind: "onyx.Groupbox",
+components: [ {
+kind: "onyx.GroupboxHeader",
+content: "Add New Feed"
+}, {
+kind: "onyx.InputDecorator",
+components: [ {
+name: "username",
+kind: "onyx.Input",
+style: "width: 70%",
+placeholder: "URL/Search Term"
+}, {
+kind: "enyo.Select",
+classes: "floatRight",
+components: [ {
+content: "Auto",
+active: !0
+}, {
+content: "Force URL"
+}, {
+content: "Force Search"
+} ]
+} ]
+} ]
+}, {
+kind: "onyx.Button",
+content: "Go",
+ontap: "processInput",
+classes: "full"
+} ]
+} ],
+bubbleEvent: function(a, b) {
+this.bubble(a.eventToBubble);
+},
+create: function() {
+this.inherited(arguments);
+},
+showingChanged: function(a) {
+this.inherited(arguments), this.getShowing() && a !== undefined && this.activate();
+},
+activate: function() {
+console.log("gridPage activated"), this.resized();
+}
+});
+
 // js/App.js
 
 enyo.kind({
 name: "App",
 fit: !0,
 components: [ {
-kind: "Book",
+kind: "Panels",
+classes: "enyo-fit",
 components: [ {
 name: "loadingPage",
 content: "Loading...",
@@ -4946,34 +5352,42 @@ name: "loginPage",
 kind: "loginPage",
 onLogin: "loggedIn"
 }, {
+name: "gridPage",
 kind: "gridPage",
 onViewArticles: "showArticlePage",
 onShowSettingsPage: "showSettingsPage",
 onShowAddFeedPage: "showAddFeedPage"
 }, {
+name: "articlePage",
 kind: "articlePage",
 onShowGridPage: "showGridPage",
 onViewArticle: "showArticleViewPage"
 }, {
 name: "tourPage",
 kind: "tourPage",
-lazy: !0,
 onShowGridPage: "showGridPage"
 }, {
 name: "addFeedPage",
 kind: "addFeedPage",
-lazy: !0,
 onShowGridPage: "showGridPage"
 }, {
 name: "settingsPage",
 kind: "settingsPage",
-lazy: !0,
 onShowGridPage: "showGridPage",
 onLogOut: "showLoginPage"
 } ]
 } ],
+panelsIndex: {
+loadingPage: 0,
+loginPage: 1,
+gridPage: 2,
+articlePage: 3,
+tourPage: 4,
+addFeedPage: 5,
+settignsPage: 6
+},
 create: function() {
-this.inherited(arguments), window.document.getElementsByTagName("body")[0].className += " " + AppUtils.getPlatform(), databaseHelper.loadDb();
+this.inherited(arguments), window.document.getElementsByTagName("body")[0].className += " " + AppUtils.getPlatform(), databaseHelper.loadDb(), subscribe("online", enyo.bind(this, this.nowOnline));
 },
 rendered: function() {
 this.inherited(arguments), this.checkLogin();
@@ -4988,36 +5402,118 @@ this.showLoginPage();
 loggedIn: function(a, b) {
 console.log("Logged in"), b && b.showTour ? this.showTourPage() : this.showGridPage(), this.$.gridPage.loadFeedsFromOnline();
 },
+changePage: function(a) {
+this.$.panels.setIndex(this.panelsIndex[a]);
+},
 showLoginPage: function() {
-this.$.book.pageName("loginPage");
+this.changePage("loginPage");
 },
 showGridPage: function(a, b) {
-this.$.book.pageName("gridPage");
+this.changePage("gridPage");
 },
 showArticlePage: function(a, b) {
 if (!b || !b.articles || !b.sub) {
 console.error("Error Displaying Articles");
 return;
 }
-this.$.book.pageName("articlePage"), this.$.articlePage.loadArticles(b.sub, b.articles);
+this.changePage("articlePage"), this.$.articlePage.loadArticles(b.sub, b.articles);
 },
 backToArticlePage: function() {
-this.$.book.pageName("articlePage");
+this.changePage("articlePage");
 },
 showArticleViewPage: function(a, b) {
 if (!b || !b.articles || b.index === undefined) {
 console.error("Error Viewing Articles");
 return;
 }
-this.$.book.pageName("articleViewPage"), this.$.articleViewPage.viewArticles(b.articles, b.index);
+this.changePage("articleViewPage"), this.$.articleViewPage.viewArticles(b.articles, b.index);
 },
 showTourPage: function() {
-this.$.book.pageName("tourPage");
+this.changePage("tourPage");
 },
 showSettingsPage: function() {
-this.$.book.pageName("settingsPage");
+this.changePage("settingsPage");
 },
 showAddFeedPage: function() {
-this.$.book.pageName("addFeedPage");
+this.changePage("addFeedPage");
+},
+nowOnline: function() {
+databaseHelper.getQueue(enyo.bind(this, function(a) {
+console.log("OUR QUEUE", a);
+var b = 0, c = enyo.bind(this, function() {
+b < a.length && (b++, this.processQueuedData(a[b - 1], c));
+});
+c();
+})), console.log("NOW ONLINE. CHECK DAT QUEUE");
+},
+processQueuedData: function(a, b) {
+var c = JSON.parse(Base64.decode(a.data));
+console.log("PROCESSING", c);
+switch (c.action) {
+case "markRead":
+var d = c.data;
+console.log("FROM QUEUE, isREAD?", d.read), reader.setItemTag(d.feed.id, d.id, "read", d.read, function() {
+console.log("marked read", d), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("Mark read from Queued Failed"), b();
+});
+break;
+case "markAllRead":
+var e = _(c.data).chain().groupBy(function(a, b) {
+return "set" + Math.floor(b / 100);
+}).toArray().value(), f = 0, g = function() {
+if (f < e.length) {
+var c = [], d = [];
+_.each(e[f], function(a, b) {
+c.push(a.feed.id), d.push(a.id);
+}), reader.setItemTag(c, d, "read", !0, function() {
+console.log("WORKED?"), f++, g();
+}, function() {
+console.log("Mark all read from Queued Failed"), b();
+});
+} else console.log("DONE! clearing from queue"), databaseHelper.clearFromQueue(a.id, b);
+};
+g();
+break;
+case "markStarred":
+var d = c.data;
+console.log("FROM QUEUE, isStarred?", d.starred), reader.setItemTag(d.feed.id, d.id, "star", d.starred, function() {
+console.log("marked read", d), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("Mark starred from Queued Failed"), b();
+});
+break;
+case "editFeedLabel":
+var h = c.data.feedId, i = c.data.labelId, j = c.data.opt;
+reader.editFeedLabel(h, i, j, function() {
+console.log("Edited feed label"), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("EDIT FEED LABEL FAILED"), b();
+});
+break;
+case "editFeedTitle":
+var h = c.data.feedId, k = c.data.newTitle;
+reader.editFeedTitle(h, k, function() {
+console.log("EDITED FEED TITLE"), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("EDIT FEED TITLE FAILED"), b();
+});
+break;
+case "editLabelTitle":
+var i = c.data.labelId, k = c.data.newTitle;
+reader.editLabelTitle(i, k, function() {
+console.log("EDITED LABEL TITLE"), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("EDIT LABEL TITLE FAILED"), b();
+});
+break;
+case "unsubscribeFeed":
+var h = c.data;
+reader.unsubscribeFeed(h, function() {
+console.log("UNSUBSCRIBED FEED"), databaseHelper.clearFromQueue(a.id, b);
+}, function() {
+console.log("UNSUBSCRIBE FEED FAILED"), b();
+});
+}
 }
 });

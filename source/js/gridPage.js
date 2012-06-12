@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "gridPage",
-	kind: "Page",
 	fit: true,
 	layoutKind: "FittableRowsLayout",
 	handler: {
@@ -9,21 +8,21 @@ enyo.kind({
 		onShowAddFeedPage: ""
 	},
 	components:[
-		{kind: "enyo.Scroller", fit: true, horizontal: false, classes: "grid", components: [
+		{kind: "enyo.Scroller", fit: true, horizontal: "hidden", classes: "grid", components: [
 			{name: "grid", kind: enyo.Repeater, fit: true, count: 0, onSetupItem: "setupGridItem", components: [
 			    {kind: "gridItem", ontap: "loadGridItem", onLoadFeed: "loadFeedItem"}
 			]},
 		]},
 
 		{name: "normalToolbar", kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{name: "titleBar", content: "NomNomNomXP", classes: "truncating-text"},
+			{name: "titleBar", content: "NomNomNomXP", classes: "titleBarText truncating-text"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-edit-outline.png"), ontap: "enterEditMode"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-new.png"), ontap: "bubbleEvent", eventToBubble: "onShowAddFeedPage"}
 		]},
 		{name: "editToolbar", kind: "onyx.Toolbar", showing: false, classes: "onyx-toolbar-inline", components: [
-			{content: "Edit Mode", classes: "truncating-text"},
+			{content: "Edit Mode", classes: "titleBarText truncating-text"},
 			{kind: "onyx.Button", content: "Exit", classes: "floatRight", ontap: "exitEditMode"},
 			{name: "editPopup", kind: "editPopup"}
 		]},
@@ -372,7 +371,7 @@ enyo.kind({
 	floating: true, 
 	components: [
 		{content: "Edit", classes: "popupTitle"},
-		{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", style: "margin: 0; width: 382px; background-color: inherit;", onblur: "inputBlur", components: [
+		{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", classes: "editPopupInputDecorator", onblur: "inputBlur", components: [
 			{content: "Name: ", classes: "floatLeft padRight inputPrompt"}, 
 			{name: "title", kind: "onyx.Input", fit: true},
 		]},

@@ -7,7 +7,6 @@ enyo.depends(
 	//vendors
 	"vendors/humane-original.css",
 	"vendors/humane.min.js",
-	"vendors/book/",
 	"vendors/underscore-min.js",
 	"vendors/underscore.string.min.js",
 	"vendors/moment.min.js",
@@ -33,6 +32,7 @@ enyo.depends(
 	"js/settingsPage.js",
 	"js/addFeedPage.js",
 	"js/tourPage.js",
+	"js/editSubPage.js",
 
 	//app
 	"js/App.js"

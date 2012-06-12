@@ -2,19 +2,28 @@ enyo.kind({
 	name: "App",
 	fit: true,
 	components:[
-		{kind: "Book", components: [
+		{kind: "Panels", classes: "enyo-fit", components: [
 			//always load these
 			{name: "loadingPage", content: "Loading...", classes: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
-			{kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
-			{kind: "articlePage", onShowGridPage: "showGridPage", onViewArticle: "showArticleViewPage"},
+			{name: "gridPage", kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
+			{name: "articlePage", kind: "articlePage", onShowGridPage: "showGridPage", onViewArticle: "showArticleViewPage"},
 
 			//load these lazy, because they might not always be needed
-			{name: "tourPage", kind: "tourPage", lazy: true, onShowGridPage: "showGridPage"},
-			{name: "addFeedPage", kind: "addFeedPage", lazy: true, onShowGridPage: "showGridPage"},
-			{name: "settingsPage", kind: "settingsPage", lazy: true, onShowGridPage: "showGridPage", onLogOut: "showLoginPage"}
+			{name: "tourPage", kind: "tourPage", onShowGridPage: "showGridPage"},
+			{name: "addFeedPage", kind: "addFeedPage", onShowGridPage: "showGridPage"},
+			{name: "settingsPage", kind: "settingsPage",  onShowGridPage: "showGridPage", onLogOut: "showLoginPage"}
 		]},
 	],
+	panelsIndex: {
+		"loadingPage": 0,
+		"loginPage": 1,
+		"gridPage": 2,
+		"articlePage": 3,
+		"tourPage": 4,
+		"addFeedPage": 5,
+		"settignsPage": 6
+	},
 	create: function () {
 		this.inherited(arguments);
 
@@ -81,40 +90,46 @@ enyo.kind({
 		//this.showArticlePage(this, {articles: ["dog", "cat"]});
 	},
 
+	changePage: function(name) {
+		//_.defer(enyo.bind(this, function() {
+			this.$.panels.setIndex(this.panelsIndex[name]);
+		//}));
+	},
+
 	showLoginPage: function() {
-		this.$.book.pageName("loginPage");
+		this.changePage("loginPage");
 	},
 	showGridPage: function(inSender, inEvent) {
-		this.$.book.pageName("gridPage");
+		this.changePage("gridPage");
 	},
 	showArticlePage: function(inSender, inEvent) {
 		if(!inEvent || !inEvent.articles || !inEvent.sub){
 			console.error("Error Displaying Articles");
 			return;
 		}
-		this.$.book.pageName("articlePage");
+		this.changePage("articlePage");
 		this.$.articlePage.loadArticles(inEvent.sub, inEvent.articles);
 	},
 	backToArticlePage: function (){
-		this.$.book.pageName("articlePage");
+		this.changePage("articlePage");
 	},
 	showArticleViewPage: function(inSender, inEvent){
 		if(!inEvent || !inEvent.articles || inEvent.index === undefined){
 			console.error("Error Viewing Articles");
 			return;
 		}
-		this.$.book.pageName("articleViewPage");
+		this.changePage("articleViewPage");
 		this.$.articleViewPage.viewArticles(inEvent.articles, inEvent.index);
 	},
 
 	showTourPage: function () {
-		this.$.book.pageName("tourPage");
+		this.changePage("tourPage");
 	},
 	showSettingsPage: function () {
-		this.$.book.pageName("settingsPage");
+		this.changePage("settingsPage");
 	},
 	showAddFeedPage: function () {
-		this.$.book.pageName("addFeedPage");
+		this.changePage("addFeedPage");
 	},
 
 	nowOnline: function(){

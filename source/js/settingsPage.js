@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "settingsPage",
-	kind: "Page",
 	fit: true,
 	layoutKind: "FittableRowsLayout",
 	handlers: {
@@ -13,7 +12,7 @@ enyo.kind({
 			{content: "Settings", classes: "center"}
 		]},
 
-		{name: "settingList", classes: "settingsList", components: []},
+		{name: "settingList", classes: "fixedWidthList", components: []},
 	],
 	settings: [
 		{section: "Subscription Grid", items: [

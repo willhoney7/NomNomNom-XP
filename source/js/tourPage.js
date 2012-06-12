@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "tourPage",
-	kind: "Page",
 	fit: true,
 	layoutKind: "FittableRowsLayout",
 	handlers: {

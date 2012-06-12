@@ -1,12 +1,11 @@
 enyo.kind({
 	name: "loginPage",
-	kind: "Page",
 	fit: true,
 	handlers: {
 		onLogin: ""
 	},
 	components:[
-		{classes: "loginGroup", components: [
+		{classes: "fixedWidthList", components: [
 			{kind: "onyx.Groupbox", components: [
 				{kind: "onyx.GroupboxHeader", content: "Log into Google Reader"},
 				{kind: "onyx.InputDecorator", components: [

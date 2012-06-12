@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "articlePage",
-	kind: "Page",
 	fit: true,
 	handlers: {
 		onShowGridPage: "",
@@ -8,7 +7,7 @@ enyo.kind({
 	},
 	components:[
 		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{kind: "onyx.Button", content: "Grid", ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px;"},
+			{kind: "onyx.IconButton", src:AppUtils.getImagePath("menu-icon-home.png"), ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px; margin: auto;"},
 			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 		]},
 
@@ -119,7 +118,10 @@ enyo.kind({
 	},
 	resizeHandler: function() {
 		this.size();
-		this.$.grabber.setShowing(window.innerWidth < 800);
+		var newHumane = humane.create();
+			newHumane.log(window.innerWidth + " " + AppUtils.getPixelRatio());
+
+		this.$.grabber.setShowing(parseInt(window.innerWidth) < 800);
 		this.inherited(arguments);
 	},
 	size: function() {

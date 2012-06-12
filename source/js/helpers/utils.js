@@ -6,6 +6,15 @@ function logArg(arg1, arg2, arg3) {
 (function(){
 	window.AppUtils = {};
 
+	var dpr = 1;
+	if(window.devicePixelRatio !== undefined) 
+		dpr = window.devicePixelRatio;
+
+	AppUtils.getPixelRatio = function () {
+		return dpr;
+	};
+
+	
 	AppUtils.getImagePath  = function(imageName) {
 		//based on device dimensions, we need to get the proper image size.
 
@@ -100,7 +109,7 @@ function logArg(arg1, arg2, arg3) {
 	var preferences = enyo.mixin({
 		"includeRead": true, //or false
 		"articleContrast": "Normal",
-		"articleFontSize": "Medium",
+		"articleFontSize": "Small",
 		"articleSort": "Recent First",
 		"hideRead": false,
 		"folderTap": "Shows Feeds"
