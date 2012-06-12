@@ -148,7 +148,7 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 			console.log(feeds[labelIndex]);
 
 			feeds[labelIndex].feeds.push(item);
-			feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) + item.count;
+			feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) + (item.count || 0);
 
 		} else {
 
@@ -171,7 +171,7 @@ reader.background.editFeedLabel = function(feedId, labelId, opt, callback) {
 
 						item = feeds[labelIndex].feeds.splice(i, 1)[0];
 
-						feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) - item.count;
+						feeds[labelIndex].count = (parseInt(feeds[labelIndex].count) || 0) - (item.count || 0);
 
 						break;
 					}
@@ -269,7 +269,7 @@ reader.background.editFeedTitle = function(feedId, newTitle, callback){
 
 reader.background.editLabelTitle = function (labelId, newTitle, callback) {
 	function adjustDb () {
-		var label, feeds = reader.getFeeds();
+		var label, feeds = reader.getFeeds(), newLabelIndex, existingLabelIndex;
 			
 			//GET OUR label
 
@@ -277,6 +277,10 @@ reader.background.editLabelTitle = function (labelId, newTitle, callback) {
 				if(feeds[i].isLabel){
 					if(feeds[i].id === labelId){
 						label = feeds[i];
+						changedLabelIndex = i;
+					} else if(feeds[i].id === reader.TAGS["label"] + newTitle) {
+						existingLabelIndex = i;
+						//our rename already exists. well poop
 					}
 					_.each(feeds[i].feeds, function (feed) {
 						_.each(feed.categories, function (category) {
@@ -289,9 +293,20 @@ reader.background.editLabelTitle = function (labelId, newTitle, callback) {
 				}
 			};
 
-			label.title = newTitle;
-			label.id = reader.TAGS["label"] + newTitle;
+			if(existingLabelIndex){
+				console.log("IT LIVES");
 
+				feeds[existingLabelIndex].feeds = _(label.feeds).chain().union(feeds[existingLabelIndex].feeds).uniq(false, function(item) { return item.id } ).sortBy( function(item) { return item.title }).value();
+				if(feeds[existingLabelIndex].count) {
+					label.count = (label.count || 0) + feeds[existingLabelIndex].count;
+				}
+				feeds.splice(changedLabelIndex, 1);
+
+			} else {
+
+				label.title = newTitle;
+				label.id = reader.TAGS["label"] + newTitle;
+			}
 			databaseHelper.saveSubs(feeds);
 
 			if (callback)
@@ -337,7 +352,7 @@ reader.background.unsubscribeFeed = function(feedId, callback){
 				}
 			};
 			if(feeds[0].count){
-				feeds[0].count -= item.count;
+				feeds[0].count -= (item.count || 0);
 			}
 
 			databaseHelper.saveSubs(feeds);

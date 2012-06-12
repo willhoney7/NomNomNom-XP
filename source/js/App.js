@@ -6,13 +6,14 @@ enyo.kind({
 			//always load these
 			{name: "loadingPage", content: "Loading...", classes: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},
-			{name: "gridPage", kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowAddFeedPage: "showAddFeedPage"},
+			{name: "gridPage", kind: "gridPage", onViewArticles: "showArticlePage", onShowSettingsPage: "showSettingsPage", onShowEditSubPage: "showEditSubPage", onShowAddFeedPage: "showAddFeedPage"},
 			{name: "articlePage", kind: "articlePage", onShowGridPage: "showGridPage", onViewArticle: "showArticleViewPage"},
 
 			//load these lazy, because they might not always be needed
 			{name: "tourPage", kind: "tourPage", onShowGridPage: "showGridPage"},
 			{name: "addFeedPage", kind: "addFeedPage", onShowGridPage: "showGridPage"},
-			{name: "settingsPage", kind: "settingsPage",  onShowGridPage: "showGridPage", onLogOut: "showLoginPage"}
+			{name: "settingsPage", kind: "settingsPage",  onShowGridPage: "showGridPage", onLogOut: "showLoginPage"},
+			{name: "editSubPage", kind: "editSubPage", onShowGridPage: "showGridPage"}
 		]},
 	],
 	panelsIndex: {
@@ -22,7 +23,8 @@ enyo.kind({
 		"articlePage": 3,
 		"tourPage": 4,
 		"addFeedPage": 5,
-		"settignsPage": 6
+		"settingsPage": 6,
+		"editSubPage": 7
 	},
 	create: function () {
 		this.inherited(arguments);
@@ -101,6 +103,10 @@ enyo.kind({
 	},
 	showGridPage: function(inSender, inEvent) {
 		this.changePage("gridPage");
+	},
+	showEditSubPage: function (inSender, inEvent) {
+		this.changePage("editSubPage");
+		this.$.editSubPage.setItem(inEvent.sub);
 	},
 	showArticlePage: function(inSender, inEvent) {
 		if(!inEvent || !inEvent.articles || !inEvent.sub){

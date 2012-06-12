@@ -5,7 +5,8 @@ enyo.kind({
 	handler: {
 		onViewArticles: "",
 		onShowSettingsPage: "",
-		onShowAddFeedPage: ""
+		onShowAddFeedPage: "",
+		onShowEditSubPage: ""
 	},
 	components:[
 		{kind: "enyo.Scroller", fit: true, horizontal: "hidden", classes: "grid", components: [
@@ -204,7 +205,8 @@ enyo.kind({
 			} else {
 				if(!inSender.getItem().isSpecial){
 					console.log("EDIT THIS FEEDDDDD");
-					this.$.editPopup.showEditOptions(inSender.getItem());
+					this.bubble("onShowEditSubPage", {sub: inSender.getItem()});
+					//this.$.editPopup.showEditOptions(inSender.getItem());
 				}
 			}
 		} else {
@@ -359,111 +361,4 @@ enyo.kind({
 		return true;
 	},
 
-});
-
-
-
-enyo.kind({
-	name: "editPopup", 
-	kind: "onyx.Popup", 
-	classes: "editPopup", 
-	centered: true, 
-	floating: true, 
-	components: [
-		{content: "Edit", classes: "popupTitle"},
-		{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", classes: "editPopupInputDecorator", onblur: "inputBlur", components: [
-			{content: "Name: ", classes: "floatLeft padRight inputPrompt"}, 
-			{name: "title", kind: "onyx.Input", fit: true},
-		]},
-		{name: "labelsList", kind: "onyx.Groupbox"},
-		{name: "unsubscribeButton", kind: "onyx.Button", classes: "onyx-negative full", content: "Unsubscribe", ontap: "unsubscribe"}
-	],
-	showEditOptions: function(sub){
-		//var sub = _(_sub).clone();
-		var components = [];
-		this.$.title.setValue(sub.title);
-		if(sub.isLabel){
-			this.$.unsubscribeButton.hide();
-			this.$.labelsList.hide();
-			
-		} else if (sub.isFeed){
-			this.$.unsubscribeButton.show();
-			this.$.labelsList.show();
-
-			var items = [{kind: "onyx.GroupboxHeader", content: "Labels"}];
-			
-			_.each(reader.getLabels(), function(label){
-				var hasLabel = (!!_.find(sub.categories, function(category){
-					return category.id === label.id;
-				}));
-				console.log("hasLabel", hasLabel);
-
-				items.push({classes: "groupItem", components: [{name: label.id + "Check", labelId: label.id, feedId: sub.id, kind:"onyx.Checkbox", classes: "floatRight", checked: hasLabel, onchange: "toggleLabel"}, {content: label.title, id: label.id}]});
-			});
-
-			items.push({kind: "onyx.InputDecorator", components: [
-				{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-new.png"), ontap: "addLabel", classes: "floatRight"},
-				{name:  "newLabelInput", placeholder: "New Label...", kind:"onyx.Input"}
-			]});
-			//items.push({classes: "groupItem", components: [{content: label.title, id: label.id}]});
-			this.$.labelsList.destroyClientControls();
-			this.$.labelsList.createComponents(items, {owner: this});
-			this.$.labelsList.render();
-		}
-		this.sub = sub;
-		this.unsubscribed = false;
-		this.show();
-		onyx.scrim.show();
-	},
-	unsubscribed: false,
-	hide: function () {
-		this.inherited(arguments);
-
-		this.updateTitle(function(){
-			publish("refreshGrid");
-			onyx.scrim.hide();
-		});
-
-	},
-	toggleLabel: function (inSender, inEvent) {
-		//QUEUE :'(
-		reader.background.editFeedLabel(inSender.feedId, inSender.labelId, inSender.checked, function () {
-			console.log("success suckers");
-		});
-	
-		console.log("CHECKED", inSender.checked);
-	},
-	inputBlur: function () {
-		if(this.$.title.getValue().length === 0){
-			this.$.title.setValue(this.sub.title);	
-		} 
-	},
-	updateTitle: function (callback) {
-		if(!this.unsubscribed && this.$.title.getValue().length > 0 && this.$.title.getValue() !== this.sub.title){
-			reader.background[this.sub.isLabel ? "editLabelTitle" : "editFeedTitle"](this.sub.id, this.$.title.getValue(), function () {
-				console.log("success suckers");
-				callback();
-			});
-		} else {
-			callback();
-		}
-	},
-
-	addLabel: function (inSender, inEvent) {
-		if(this.$.newLabelInput.getValue().length > 0){
-
-			reader.background.editFeedLabel(this.sub.id, reader.TAGS["label"] + this.$.newLabelInput.getValue(), true, enyo.bind(this, function () {
-				console.log("success suckers");
-
-				this.showEditOptions(this.sub);
-			}));
-		}
-	},
-	unsubscribe: function () {
-		//@TODO: confirm
-		reader.background.unsubscribeFeed(this.sub.id, enyo.bind(this, function () {
-			this.unsubscribed = true;
-			this.hide();
-		}));
-	},
 });
