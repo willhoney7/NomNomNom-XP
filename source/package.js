@@ -14,6 +14,9 @@ enyo.depends(
 	"vendors/minpubsub.js",
 	"vendors/google-reader/localStorageWrapper.js",
 	"vendors/google-reader/google-reader.js",
+	"vendors/utf-8.js",
+
+	"js/services/serviceWrapper.js",
 
 	//utils
 	"js/helpers/utils.js",

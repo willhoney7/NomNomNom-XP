@@ -2,7 +2,7 @@ enyo.kind({
 	name: "App",
 	fit: true,
 	components:[
-		{kind: "Panels", classes: "enyo-fit", components: [
+		{kind: "Panels", classes: "enyo-fit", draggable: false, components: [
 			//always load these
 			{name: "loadingPage", content: "Loading...", classes: "loading"},
 			{name: "loginPage", kind: "loginPage", onLogin: "loggedIn"},

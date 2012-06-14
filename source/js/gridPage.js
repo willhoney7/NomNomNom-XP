@@ -25,7 +25,6 @@ enyo.kind({
 		{name: "editToolbar", kind: "onyx.Toolbar", showing: false, classes: "onyx-toolbar-inline", components: [
 			{content: "Edit Mode", classes: "titleBarText truncating-text"},
 			{kind: "onyx.Button", content: "Exit", classes: "floatRight", ontap: "exitEditMode"},
-			{name: "editPopup", kind: "editPopup"}
 		]},
 		
 	],
@@ -206,7 +205,6 @@ enyo.kind({
 				if(!inSender.getItem().isSpecial){
 					console.log("EDIT THIS FEEDDDDD");
 					this.bubble("onShowEditSubPage", {sub: inSender.getItem()});
-					//this.$.editPopup.showEditOptions(inSender.getItem());
 				}
 			}
 		} else {

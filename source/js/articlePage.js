@@ -98,14 +98,22 @@ enyo.kind({
 				{name: "articleViewTitle", allowHtml: true, classes: "articleTitle"},
 				{name: "articleViewContent", allowHtml: true, fit: true, classes: "articleContent"}
 			]},
-			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+			{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", components: [
 				{kind: "onyx.Grabber", style: "position: absolute;"},
 				{classes: "center", style: "margin: inherit", components: [
 					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-mark-read.png"), ontap: ""},
 					{name: "starredIcon", kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-starred-outline.png"), ontap: "toggleStarred"},
 					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-down.png"), ontap: "increaseIndex"},
 					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-up.png"), ontap: "decreaseIndex"},
-					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-share.png"), ontap: ""}
+					{kind: "onyx.MenuDecorator", classes: "onyx-icon", components: [
+						{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-share.png")},
+						{kind: "onyx.Menu", classes: "opensUp", components: [
+							{content: "Send to Pocket", ontap: "sendTo", service: "readitlater"},
+							{content: "Send to Instapaper", ontap: "sendTo", service: "instapaper"},
+							{content: "Send to Delicious", ontap: "sendTo", service: "delicious"},
+							{content: "Send to Pinboard", ontap: "sendTo", service: "pinboard"},
+						]}
+					]}
 				]}
 				
 			]},
@@ -115,11 +123,12 @@ enyo.kind({
 		this.size();
 		this.inherited(arguments);
 
+		var newHumane = humane.create();
+			newHumane.log(window.innerWidth + " " + AppUtils.getPixelRatio());
+
 	},
 	resizeHandler: function() {
 		this.size();
-		var newHumane = humane.create();
-			newHumane.log(window.innerWidth + " " + AppUtils.getPixelRatio());
 
 		this.$.grabber.setShowing(parseInt(window.innerWidth) < 800);
 		this.inherited(arguments);
@@ -252,5 +261,26 @@ enyo.kind({
 		AppPrefs.set("includeRead", !AppPrefs.get("includeRead"));
 		inSender.addRemoveClass("active", AppPrefs.get("includeRead"));
 		this.orderAndShowArticles();
+	},
+
+	sendTo: function (inSender) {
+		var item = this.articles[this.articleIndex];
+		if(!item)
+			return;
+
+		this.$.menu.hide();
+
+		var service = new serviceWrapper(inSender.service);
+
+		if(AppPrefs.get(inSender.service + "Authenticated")){
+			service.add({title: item.title, url: item.url}, enyo.bind(this, function (response) {
+				console.log(response);
+				humane.log("Sent!");
+			}));
+		} else {
+			humane.log("You need to log in first!");
+			//@TODO: go to preferences
+		}
+
 	}
 });

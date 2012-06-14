@@ -1,15 +1,24 @@
 function serviceWrapper (name) {
 	this.name = name;
 };
-serviceWrapper.prototype.urls = {
+serviceWrapper.prototype.data = {
 	"instapaper": {
-		"authenticate": "https://www.instapaper.com/api/authenticate",
-		"add": "https://www.instapaper.com/api/add",
+		"authenticateUrl": "https://www.instapaper.com/api/authenticate",
+		"addUrl": "https://www.instapaper.com/api/add",
 	},
 	"readitlater": {
-		"authenticate": "https://readitlaterlist.com/v2/auth",
-		"add": "https://readitlaterlist.com/v2/add"
-	}	
+		"authenticateUrl": "https://readitlaterlist.com/v2/auth",
+		"addUrl": "https://readitlaterlist.com/v2/add",
+		"apikey": "9a0T3t7bg2cH7pi2dSd4b92u89pfU8fY"
+	},
+	"delicious": {
+		"authenticateUrl": "https://api.del.icio.us/v1/posts/update",
+		"addUrl": "https://api.del.icio.us/v1/posts/add"
+	},
+	"pinboard": {
+		"authenticateUrl": "https://api.pinboard.in/v1/posts/update",
+		"addUrl": "https://api.pinboard.in/v1/posts/add"
+	}
 }
 
 serviceWrapper.prototype.makeRequest = function (obj) {
@@ -22,7 +31,8 @@ serviceWrapper.prototype.makeRequest = function (obj) {
 	var url = obj.url + "?" + queryString;
 	
 	var request = new XMLHttpRequest();
-	request.open("POST", url, true);
+
+	request.open((obj.method || "POST"), url, true);
 
 	if(obj.headers.length > 0) {
 		_.each(obj.headers, function(header){
@@ -50,7 +60,7 @@ serviceWrapper.prototype.makeRequest = function (obj) {
 
 serviceWrapper.prototype.authenticate = function (username, password, callback) {
 	var request = {
-		url: this.urls[this.name].authenticate,
+		url: this.data[this.name].authenticateUrl,
 		parameters: {},
 		headers: [],
 		onSuccess: enyo.bind(this, function (response) {
@@ -58,7 +68,9 @@ serviceWrapper.prototype.authenticate = function (username, password, callback) 
 			var passToStore;
 				switch (this.name) {
 					case "instapaper":
-						passToStore = btoa(utf8.encode(username) + ':' + utf8.encode(password));
+					case "delicious":
+					case "pinboard":
+						passToStore = this.makeAuthHeader(username, password);
 						break;
 					case "readitlater":
 						passToStore = password;
@@ -68,40 +80,28 @@ serviceWrapper.prototype.authenticate = function (username, password, callback) 
 			
 			callback({success: true});
 		}),
-		onFailure: function (response) {
-			var error;
-			switch (response.status) {
-				case 400: //pocket
-					error = "Invalid Request";
-					break;
-				case 401: //pocket
-				case 403: //instapaper
-					error = "Username and/or Password incorrect";
-					break;
-				case 500: //instapaper
-					error = "Service encountered an error. Please try again later";
-					break;
-				case 501: //pocket
-					error = "API rate limit exceeded; Try again later";
-					break;
-				case 503: //pocket
-					error = "Pocket's sync server is down for scheduled maintenance.";
-					break;
-			}
-			callback({error: error});
-		}
+		onFailure: enyo.bind(this, function (response) {
+			callback({error: this.getError(response.status)});
+		})
 	};
 	switch (this.name) {
+		case "delicious":
+		case "pinboard":
+			request.method = "GET";
 		case "instapaper":
-			request.headers.push({title: "Authorization", value: "Basic " + btoa(utf8.encode(username) + ':' + utf8.encode(password))}) 
+			request.headers.push({title: "Authorization", value: "Basic " + this.makeAuthHeader(username, password)}); 
 			break;
 		case "readitlater":
 			request.parameters.username = username,
 			request.parameters.password = password,
-			request.parameters.apikey = "9a0T3t7bg2cH7pi2dSd4b92u89pfU8fY";			
+			request.parameters.apikey = this.data[this.name].apikey;			
 			break;
 	}
 	this.makeRequest(request);
+};
+
+serviceWrapper.prototype.makeAuthHeader = function(username, password) {
+	return btoa(utf8.encode(username) + ':' + utf8.encode(password));
 };
 
 serviceWrapper.prototype.logOut = function () {
@@ -111,52 +111,65 @@ serviceWrapper.prototype.logOut = function () {
 
 serviceWrapper.prototype.add = function (obj, callback) {
 	var request = {
-		url: this.urls[this.name].add,
+		url: this.data[this.name].addUrl,
 		parameters: {},
 		headers: [],
 		onSuccess: enyo.bind(this, function (response) {
 			callback({success: true});
 		}),
-		onFailure: function (response) {
-			var error;
-			switch (response.status) {
-				case 400: //pocket
-					error = "Invalid Request";
-					break;
-				case 401: //pocket
-				case 403: //instapaper
-					error = "Username and/or Password incorrect";
-					break;
-				case 500: //instapaper
-					error = "Service encountered an error. Please try again later";
-					break;
-				case 501: //pocket
-					error = "API rate limit exceeded; Try again later";
-					break;
-				case 503: //pocket
-					error = "Pocket's sync server is down for scheduled maintenance.";
-					break;
-			}
-			callback({error: error});
-		}
+		onFailure: enyo.bind(this, function (response) {
+			callback({error: this.getError(response.status)});
+		})
 	};
 	switch (this.name) {
 		case "instapaper":
-			request.headers.push({title: "Authorization", value: "Basic " + btoa(utf8.encode(username) + ':' + utf8.encode(password))});
+			request.headers.push({title: "Authorization", value: "Basic " + localStorage.getItem(this.name + "Password")});
+			request.parameters.title = utf8.encode(obj.title);
 			//request.parameters.url = obj.url;
-			//request.parameters.title = utf8.encode(obj.title);
 			break;
 		case "readitlater":
-			request.parameters.username = username,
-			request.parameters.password = password,
+			request.parameters.username = localStorage.getItem(this.name + "Username"),
+			request.parameters.password = localStorage.getItem(this.name + "Password"),
 			request.parameters.apikey = "9a0T3t7bg2cH7pi2dSd4b92u89pfU8fY";		
+			request.parameters.title = utf8.encode(obj.title);	
 			//request.parameters.url = obj.url;
-			//request.parameters.title = utf8.encode(obj.title);	
+			break;
+		case "delicious":
+		case "pinboard":
+			request.headers.push({title: "Authorization", value: "Basic " + localStorage.getItem(this.name + "Password")});
+			request.parameters.description = utf8.encode(obj.title);
+			request.method = "GET";
 			break;
 	}
 
 	request.parameters.url = obj.url;
-	request.parameters.title = utf8.encode(obj.title);
 
 	this.makeRequest(request);
-}
+};
+
+serviceWrapper.prototype.getError = function (status) {
+	var error;
+	switch (status) {
+		case 400: //pocket
+			error = "Invalid Request";
+			break;
+		case 401: //pocket and delicious
+		case 403: //instapaper
+			error = "Username and/or Password incorrect";
+			break;
+		case 500: //instapaper
+			error = "Service encountered an error. Please try again later";
+			break;
+		case 501: //pocket
+			error = "API rate limit exceeded; Try again later";
+			break;
+		case 503: //pocket
+			error = "Pocket's sync server is down for scheduled maintenance.";
+			break;
+		default:
+			error = "Error with Request";
+			console.log(status);
+			break;
+	}
+	return error;
+};

@@ -107,6 +107,27 @@ $red: #cc3333;
 	min-width: 200px;
 }
 
+.onyx-toolbar {
+	.onyx-menu {
+		.onyx-popup-decorator {
+			padding: 0px;
+			bottom: 0px;
+			
+		}
+	}
+	
+	.onyx-menu.onyx-menu-up {
+		margin-bottom: 5px;
+	}
+
+	.onyx-popup-decorator {
+		.onyx-icon-button {
+				position: relative;
+				bottom: 2px;
+		}
+	}
+}
+
 .folderMenu {
 	position: relative;
 	right: 60px;
@@ -120,10 +141,18 @@ $red: #cc3333;
 	@include truncated-text;
 }
 
-.onyx-popup-decorator {
+
+.grid .onyx-popup-decorator {
 	position: relative;
 	z-index: 10;
 	bottom: 75px;
+	padding: 10px;
+}
+
+
+.onyx-menu.opensUp, .onyx.onyx-menu.opensUp {
+	bottom: 100%;
+	right: 0;
 }
 
 .folderFeedTitle.unreadCount {
@@ -131,21 +160,6 @@ $red: #cc3333;
 }
 .folderFeedIcon {
 	
-}
-.editPopup {
-	width: 300px;
-	@media screen and (min-width: 650px) {
-		width: 400px; 
-	}
-
-	.editPopupInputDecorator {
-		margin: 0; 
-		width: 282px; 
-		background-color: inherit;
-		@media screen and (min-width: 650px) {
-			width: 382px; 
-		}
-	}
 }
 
 .onyx-popup {
@@ -185,9 +199,6 @@ $red: #cc3333;
 	display: block;
 }
 
-.onyx-popup-decorator {
-	padding: 10px;
-}
 
 .groupItem {
 	padding: 10px;

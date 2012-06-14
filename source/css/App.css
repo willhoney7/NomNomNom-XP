@@ -83,6 +83,15 @@
 .onyx-menu, .onyx.onyx-menu {
   min-width: 200px; }
 
+.onyx-toolbar .onyx-menu .onyx-popup-decorator {
+  padding: 0px;
+  bottom: 0px; }
+.onyx-toolbar .onyx-menu.onyx-menu-up {
+  margin-bottom: 5px; }
+.onyx-toolbar .onyx-popup-decorator .onyx-icon-button {
+  position: relative;
+  bottom: 2px; }
+
 .folderMenu {
   position: relative;
   right: 60px;
@@ -96,26 +105,18 @@
   overflow: hidden;
   white-space: nowrap; }
 
-.onyx-popup-decorator {
+.grid .onyx-popup-decorator {
   position: relative;
   z-index: 10;
-  bottom: 75px; }
+  bottom: 75px;
+  padding: 10px; }
+
+.onyx-menu.opensUp, .onyx.onyx-menu.opensUp {
+  bottom: 100%;
+  right: 0; }
 
 .folderFeedTitle.unreadCount {
   font-weight: bold; }
-
-.editPopup {
-  width: 300px; }
-  @media screen and (min-width: 650px) {
-    .editPopup {
-      width: 400px; } }
-  .editPopup .editPopupInputDecorator {
-    margin: 0;
-    width: 282px;
-    background-color: inherit; }
-    @media screen and (min-width: 650px) {
-      .editPopup .editPopupInputDecorator {
-        width: 382px; } }
 
 .onyx-popup input {
   color: white !important; }
@@ -141,9 +142,6 @@
 /* @TODO: Does this screw other stuff up?*/
 .enyo-children-inline > *, .enyo-tool-decorator > * {
   display: block; }
-
-.onyx-popup-decorator {
-  padding: 10px; }
 
 .groupItem {
   padding: 10px; }

@@ -17,7 +17,7 @@ enyo.kind({
 			{classes: "fixedWidthList", components: [
 				{kind: "onyx.Groupbox", components: [
 					{kind: "onyx.GroupboxHeader", content: "Name"},
-					{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", classes: "editPopupInputDecorator", onblur: "inputBlur", components: [
+					{kind: "onyx.InputDecorator", layoutKind: "FittableColumnsLayout", onblur: "inputBlur", components: [
 						{name: "title", kind: "onyx.Input", fit: true},
 					]},
 				]},
