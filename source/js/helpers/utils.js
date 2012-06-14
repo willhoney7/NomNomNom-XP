@@ -150,6 +150,49 @@ limitations under the License.
 
 HTML decoding functionality provided by: http://code.google.com/p/google-trekker/
 */
+function mobilizeText (html) {
+	var text = html
+		.replace(/(?:\n|\r\n|\r)/ig,"")
+		// Turn <br>'s into single line breaks. 
+		.replace(/<\s*br[^>]*>/ig,"\n") 
+		// Turn </li>'s into line breaks.
+ 		.replace(/<\s*\/li[^>]*>/ig,"\n") 
+		// Turn <p>'s into double line breaks.
+ 		.replace(/<\s*\/?p[^>]*>/ig,"\n") 
+		// Remove content in script tags.
+ 		.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig,"")
+		// Remove content in style tags.
+ 		.replace(/<\s*style[^>]*>[\s\S]*?<\/style>/mig,"")
+		// Remove content in comments.
+ 		.replace(/<!--.*?-->/mig,"")
+		//change images so we can add them again later
+ 		//.replace(/<\s*img[^>]*src=['"](.*?)['"][^>]*>([\s\S]*?)(?:<\/\s*img\s*>)?/i, "{{img:$1}}")// ($1)")
+ 		//change urls so we can add them again later
+ 		//.replace(/<\s*a[^>]*href=['"](.*?)['"][^>]*>([\s\S]*?)<\/\s*a\s*>/ig, "{{a:$1:$2}}")// ($1)")
+		// Remove all remaining tags. 
+
+		.replace(/<(?!(?:img(?!\w)|\/img(?!\w)|a(?!\w)|\/a(?!\w)))[^>]+>/ig, "")
+ 		//.replace(/(<([^>]+)>)/ig,"")
+ 		// Replace new lines with <br/>s
+ 		.replace(/\n/g, "<br/>")
+		// Make sure there are never more than two consecutive linebreaks.
+ 		.replace(/(?:<br\s*\/?>\s*){2,}/gi,"<br/><br/>")
+ 		// Make sure there are never mroe than one linebreak after imgs
+ 		.replace(/(<(?:img)[^>]+>(?:<\/a>)*)(?:\s*<br\s*\/?>\s*){2}/gmi,"$1<br/>")
+		// Remove tabs. 	
+ 		.replace(/\t/g,"")
+		// Remove newlines at the beginning of the text. 
+ 		.replace(/^\s*(?:<br\s*\/?>\s*)+/m,"") 	
+		// Replace multiple spaces with a single space.
+ 		.replace(/ {2,}/g," ");
+
+ 		console.log(text);
+
+ 		return text
+ 			//.replace(/\{\{img:(.+)\}\}/ig, "<img src='$1'/>")
+ 			//.replace(/\{\{a:(.+):(.+)\}\}/ig, "<a href='$1'>$2</a>")
+};
+
 function htmlToText(html) {
 	return html
 		// Remove line breaks

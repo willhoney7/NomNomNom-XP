@@ -6,12 +6,6 @@ enyo.kind({
 		onViewArticle: ""
 	},
 	components:[
-		{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{kind: "onyx.IconButton", src:AppUtils.getImagePath("menu-icon-home.png"), ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px; margin: auto;"},
-			{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
-		]},
-
-		/**/
 		{kind: "ArticlePanel", classes: "enyo-fit", onSetupItem: "setupItem"}
 	],
 	
@@ -58,7 +52,6 @@ enyo.kind({
 	articles: [],
 	loadArticles: function(sub, articles){
 		console.log("LOAD DEM ARTICLES");
-    	this.$.subTitle.setContent(sub.title);
     	this.$.articlePanel.loadArticles(sub, articles);
 
 	}
@@ -73,10 +66,15 @@ enyo.kind({
 	classes: "articlePanel enyo-unselectable",
 	arrangerKind: "CarouselArranger",
 	handlers: {
-		onSetupItem: ""
+		onSetupItem: "",
+		onShowGridPage: ""
 	},
 	components: [
 		{name: "left", classes: "articleList", layoutKind: "FittableRowsLayout", components: [
+			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
+				{kind: "onyx.IconButton", src:AppUtils.getImagePath("menu-icon-home.png"), ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px; margin: auto;"},
+				{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
+			]},
 			{name: "list", kind: "List", count: 0, multiSelect: false, fit: true, classes: "list", onSetupItem: "setupItem", components: [
 				{name: "divider", classes: "divider"},
 				{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
@@ -137,6 +135,9 @@ enyo.kind({
 		var b = this.$.left.getBounds();
 		this.$.body.applyStyle("width", (this.getBounds().width - b.width) + "px")
 	},
+	bubbleEvent: function(inSender, inEvent){
+		this.bubble(inSender.eventToBubble, inSender.opts);
+	},
 	refreshSettings: function(){
 		this.$.list.refresh();
 	},
@@ -153,6 +154,7 @@ enyo.kind({
 
     	this.previous();
 
+    	this.$.subTitle.setContent(sub.title);
 
 	},
 	orderAndShowArticles: function(){
@@ -202,7 +204,7 @@ enyo.kind({
 		var item = this.articles[this.articleIndex];
 
 		this.$.articleViewTitle.setContent(item.title);
-		this.$.articleViewContent.setContent(item.content);		
+		this.$.articleViewContent.setContent(mobilizeText(item.content));	
 		this.$.articleViewTime.setContent(moment.unix(item.updated).format("h:mm a"));
 		this.$.starredIcon.setSrc(reader.isStarred(item) ? AppUtils.getImagePath("menu-icon-starred.png") : AppUtils.getImagePath("menu-icon-starred-outline.png"));
 
@@ -215,6 +217,12 @@ enyo.kind({
 			});
 
 		} 
+
+		if (!document.querySelector) {
+			console.error("OH NOES NO QUERY SELECTOR");
+		} else {
+			document.querySelector(".articleContent img").className = "firstImage";
+		}
 
 		this.$.list.select(this.articleIndex, item);
 
