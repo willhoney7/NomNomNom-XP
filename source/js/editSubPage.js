@@ -77,7 +77,7 @@ enyo.kind({
 		this.inherited(arguments);
 
 		this.updateTitle(function(){
-			publish("refreshGrid");
+			publish("reloadGrid");
 			//onyx.scrim.hide();
 		});
 
@@ -120,7 +120,7 @@ enyo.kind({
 		//@TODO: confirm
 		reader.background.unsubscribeFeed(this.item.id, enyo.bind(this, function () {
 			this.unsubscribed = true;
-			this.hide();
+			this.bubble("onShowGridPage");
 		}));
 	},
 

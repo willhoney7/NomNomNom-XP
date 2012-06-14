@@ -32,8 +32,12 @@ enyo.kind({
 	create: function () {
 		this.inherited(arguments);
 
-		subscribe("refreshGrid", enyo.bind(this, function(arg){
+		subscribe("reloadGrid", enyo.bind(this, function(arg){
         	this.loadGrid();
+    	}));
+
+    	subscribe("refreshGrid", enyo.bind(this, function(arg){
+    		this.loadFeedsFromOnline();
     	}));
 	},
 	rendered: function () {
@@ -110,6 +114,7 @@ enyo.kind({
 	loadFeedsFromOnline: function(){
 		AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
+			humane.remove();humane.remove();humane.remove();
 			humane.log("Loading Subscriptions...", {timeout: 50000});
 
 			//console.log("LOADING FEEDS FROM ONLINE");
@@ -117,7 +122,8 @@ enyo.kind({
 			reader.loadFeeds(enyo.bind(this, function (subs){
 				//console.log("New Subs loaded from online");
 				
-				humane.remove();
+				humane.remove();humane.remove();humane.remove();
+				
 				humane.log("Loading Articles...", {timeout: 5000000});
 				
 				reader.getItems(subs[0].id, enyo.bind(this, 
@@ -131,7 +137,7 @@ enyo.kind({
 										//console.log(starredArticles);
 										databaseHelper.saveArticles({unread: unreadArticles, read: readArticles, starred: starredArticles}, enyo.bind(this, function(){
 											//console.log("articles saved! time to move on");
-											humane.remove();
+											humane.remove();humane.remove();humane.remove();
 
 											if(!_.isEqual(subs, this.gridItems)){
 												databaseHelper.saveSubs(subs);

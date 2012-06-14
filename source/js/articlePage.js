@@ -213,7 +213,7 @@ enyo.kind({
 			item.read = true;
 
 			reader.background.markRead(item, function(){
-				publish("refreshGrid");
+				publish("reloadGrid");
 			});
 
 		} 

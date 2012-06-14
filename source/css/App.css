@@ -157,6 +157,20 @@
   bottom: 5px;
   right: 2px; }
 
+.resultTitle {
+  font-size: 16px;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
+
+.resultUrl {
+  font-size: 14px;
+  color: #888; }
+
+.resultSnippet {
+  font-size: 12px; }
+
 /* Grid Page Stuff */
 .onyx-toolbar .onyx-icon-button {
   /* Might work */ }
