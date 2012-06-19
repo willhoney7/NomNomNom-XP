@@ -6,13 +6,16 @@ reader.background.markRead = function(item, callback){
 		databaseHelper.markArticlesRead([item], function(){
 			//console.log("read articles saved methinks");
 
-			reader.decrementUnreadCount(item.feed.id, 1);
+			/*if (reader.isRead(item)) {
+				reader.decrementUnreadCount(item.feed.id, 1);
+			}
 
-			databaseHelper.saveSubs(reader.getFeeds());
+			databaseHelper.saveSubs(reader.getFeeds());*/
 
 			if (callback)
 				callback();
-		});
+			
+		}, reader.isRead(item));
 	}
 
 	AppUtils.testInternetConnection(function(hasInternet){
@@ -61,11 +64,11 @@ reader.background.markAllRead = function(sub, articles, callback){
 		databaseHelper.markArticlesRead(articles, enyo.bind(this, function(){
 			console.log("read articles saved methinks");
 
-			_.each(articles, function(article){
+			/*_.each(articles, function(article){
 				reader.decrementUnreadCount(article.feed.id, 1);
 			});
 
-			databaseHelper.saveSubs(reader.getFeeds());
+			databaseHelper.saveSubs(reader.getFeeds());*/
 
 			if (callback)
 				callback();
@@ -354,8 +357,9 @@ reader.background.unsubscribeFeed = function(feedId, callback){
 			if(feeds[0].count){
 				feeds[0].count -= (item.count || 0);
 			}
-
 			databaseHelper.saveSubs(feeds);
+
+			//@TODO REMOVE THE ARTICLES FROM THE DB
 
 			if (callback)
 				callback();

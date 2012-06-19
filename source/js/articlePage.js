@@ -75,14 +75,12 @@ enyo.kind({
 				{kind: "onyx.IconButton", src:AppUtils.getImagePath("menu-icon-home.png"), ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px; margin: auto;"},
 				{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 			]},
-			{name: "list", kind: "List", count: 0, multiSelect: false, fit: true, classes: "list", onSetupItem: "setupItem", components: [
-				{name: "divider", classes: "divider"},
-				{name: "item", classes: "item enyo-border-box", ontap: "viewArticle", components: [
-					{name: "articleTime", classes: "articleTime"},
-					{name: "unreadIndicator", fit: true, classes: "unreadIndicator"},
-					{name: "articleTitle", classes: "articleTitle", allowHtml: true},
-					{name: "articleSubtitle", classes: "articleSubtitle", allowHtml: true},
-				]}
+			{kind: "enyo.Scroller", fit: true, horizontal: "hidden", components: [
+				{name: "list", kind: "Repeater", count: 0, multiSelect: false, fit: true, classes: "list", onSetupItem: "setupItem", components: [
+					{name: "divider", classes: "divider"},
+					{kind: "articleItem", onSwipedRight: "viewArticle", ontap: "viewArticle"}
+
+				]},
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 				{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-mark-read.png"), ontap: "markAllRead"},
@@ -139,7 +137,9 @@ enyo.kind({
 		this.bubble(inSender.eventToBubble, inSender.opts);
 	},
 	refreshSettings: function(){
-		this.$.list.refresh();
+		//this.$.list.refresh();
+		//if(this.articles)
+		this.$.list.build();
 	},
 
 	loadArticles: function(sub, articles){
@@ -168,36 +168,43 @@ enyo.kind({
 		});
 
 		this.$.list.setCount(this.articles.length);
-		this.$.list.reset();
+		//this.$.list.reset();
 	},
 	setupItem: function(inSender, inEvent) {
 		// this is the row we're setting up
-		var i = inEvent.index;
-		var item = this.articles[i];
+		//console.log(inEvent);
+
+		var i = inEvent.index,
+			item = this.articles[i],
+			listItem = inEvent.item.$.articleItem, // this.$.articleItem
+			divider = inEvent.item.$.divider; // this.$.articleItem
+
 		if(item){
+			listItem.setItem(item);
 			// apply selection style if inSender (the list) indicates that this row is selected.
-			this.$.item.addRemoveClass("article-selected", inSender.isSelected(i));//(this.articleIndex === i));
-			this.$.item.setClasses("item enyo-border-box " + AppPrefs.get("articleFontSize"));
-
-			this.$.articleTitle.setContent(item.title);
-			this.$.unreadIndicator.setShowing(!reader.isRead(item));
-			this.$.articleTime.setContent(moment.unix(item.updated).format("h:mm a"));
-
-			this.$.articleSubtitle.setContent("<b>" + item.feed.title + "</b>" + ((item.preview && item.preview.length > 0) ? " - " + item.preview : ""));
+			//this.$.articleItem.setClasses("item enyo-border-box " + AppPrefs.get("articleFontSize"));
+			//listItem.addRemoveClass("article-selected", inSender.isSelected(i));//(this.articleIndex === i));
 
 			if (!this.hideDivider) {
 				var date = moment.unix(item.updated).format("MMM Do");
 				var prev = this.articles[i-1];
-				this.$.divider.setContent(date);
-				this.$.divider.canGenerate = date != (prev &&  moment.unix(prev.updated).format("MMM Do"));
+				divider.setContent(date);
+				divider.canGenerate = date != (prev &&  moment.unix(prev.updated).format("MMM Do"));
 			}
+			return true;
 		}
 
 	},
 	viewArticle: function(inSender, inEvent){
-		this.articleIndex = inEvent.index;
-		this.showCurrentArticle();
-		this.next();
+		console.log("CLICK EVENT", this.handlingDrag);
+
+		if(!this.handlingDrag){
+			this.articleIndex = inEvent.index;
+			this.showCurrentArticle();
+			this.next();
+		} else {
+			return true;
+		}
 	},
 
 	showCurrentArticle: function(){
@@ -224,7 +231,7 @@ enyo.kind({
 			document.querySelector(".articleContent img").className = "firstImage";
 		}
 
-		this.$.list.select(this.articleIndex, item);
+		//this.$.list.select(this.articleIndex, item);
 
 	},
 	clearCurrentArticle: function () {
@@ -260,7 +267,10 @@ enyo.kind({
 	markAllRead: function () {
 		console.log(_.reject(this.articles, function(article) { return reader.isRead(article) }));
 		reader.background.markAllRead(this.sub, _.reject(this.articles, function(article) { return reader.isRead(article) }), enyo.bind(this, function(){
-			this.$.list.refresh();
+			_.each(this.articles, function(article) {
+				article.read = true;
+			});
+			this.refreshSettings();
 		}));
 		
 	},
@@ -292,3 +302,149 @@ enyo.kind({
 
 	}
 });
+
+
+enyo.kind({
+	name: "articleItem",
+	kind: "onyx.SwipeableItem",
+	published: {
+		item: {}
+	},
+	defaultContentClasses: "item onyx-swipeable-item-content",
+	components: [
+		{name: "client", kind: "SpecialSlideable", value: 0, min: 0, max: 50, unit: "px", ondragstart: "clientDragStart", ondragfinish: "clientDragFinish", onSwipedLeft: "toggleRead", components: [
+			{name: "unreadIndicator", classes: "itemUnreadIndicator"},
+			{name: "leftShadow", classes: "leftShadow"},
+			{name: "articleTime", classes: "articleTime"},
+			{name: "articleTitle", classes: "articleTitle", allowHtml: true},
+			{name: "articleSubtitle", classes: "articleSubtitle", allowHtml: true},
+		]},
+		{name: "confirm", classes: "onyx-swipeable-item-confirm enyo-fit unreadIndicatorContainer", components: [
+			{name: "secondUnreadIndicator", classes: "unreadIndicator"},
+		]},
+
+
+	],
+	itemChanged: function () {
+		this.$.articleTitle.setContent(this.getItem().title);
+		this.$.unreadIndicator.applyStyle("opacity", reader.isRead(this.getItem()) ? 0 : 1)
+		this.$.secondUnreadIndicator.applyStyle("opacity", reader.isRead(this.getItem()) ? 0 : 1)
+		this.$.leftShadow.applyStyle("opacity", reader.isRead(this.getItem()) ? 0 : 1)
+		//this.$.unreadIndicator.setShowing(!reader.isRead(this.getItem()));
+		this.$.articleTime.setContent(moment.unix(this.getItem().updated).format("h:mm a"));
+
+		this.$.articleSubtitle.setContent("<b>" + this.getItem().feed.title + "</b>" + ((this.getItem().preview && this.getItem().preview.length > 0) ? " - " + this.getItem().preview : ""));
+	},
+	toggleRead: function (inSender, inEvent) {
+		console.log("TOGGLE READ AT ITEM", this.getItem());
+		
+		var item = this.getItem();
+
+		console.log("toggleRead", item);
+
+		item.read = !AppUtils.stringToBool(item.read);
+
+		reader.background.markRead(item, function(){
+			publish("reloadGrid");
+		});
+
+		console.log("Set to", item.read);
+
+		this.$.unreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
+		this.$.secondUnreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
+		this.$.leftShadow.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
+		//this.$.unreadIndicator.setShowing(!reader.isRead(item));
+		//this.$.secondUnreadIndicator.setShowing(!reader.isRead(item));
+
+	},
+	clientDragStart: function(inSender, inEvent) {
+		if (inSender.dragging) {
+			var flyweight = inEvent.flyweight;
+			if (flyweight) {
+				flyweight.prepareRow(inEvent.index);
+				// if needed, render confirm.
+				// NOTE: position relative so can enyo-fit confirm; apply only when confirm needed
+				// because it's a known rendering slowdown.
+				this.applyStyle("position", "relative");
+				this.$.confirm.setShowing(true);
+				if (!this.$.confirm.hasNode()) {
+					// NOTE: prepend so Slideable will be on top.
+					this.$.confirm.prepend = true;
+					this.$.confirm.render();
+					this.$.confirm.prepend = false;
+				}
+				// note: can't teardown.
+			} else {
+				this.applyStyle("position", "relative");
+				this.$.confirm.setShowing(true);
+			}
+
+			clearTimeout(this.dragFinishTimeout);
+		}
+	},
+	clientDragFinish: function (inSender, inEvent) {
+		this.dragFinishTimeout = setTimeout(enyo.bind(this, function () {
+			this.applyStyle("position", null);
+			this.$.confirm.setShowing(false);
+		}), 500);
+
+	}
+});
+
+enyo.kind({
+	name: "SpecialSlideable",
+	kind: "Slideable",
+	handlers: {
+		onSwipedLeft: "",
+		onSwipedRight: ""
+	},
+	dragstart: function(inSender, inEvent) {
+
+		if (this.shouldDrag(inEvent)) {
+
+			if (inEvent.dx > 0) {
+				this.swipedLeftFunc = _.once(enyo.bind(this, function() {
+					this.bubble("onSwipedLeft", inEvent);
+				}));
+
+				inEvent.preventDefault();
+				this.$.animator.stop();
+				inEvent.dragInfo = {};
+				this.dragging = true;
+				this.drag0 = this.value;
+				this.dragd0 = 0;
+				return this.preventDragPropagation;
+			} else {
+				this.bubble("onSwipedRight", inEvent);
+			}
+		}
+	},
+	drag: function(inSender, inEvent) {
+		if (this.dragging) {
+			inEvent.preventDefault();
+			var d = inEvent[this.dragMoveProp] * this.kDragScalar;
+			var v = this.drag0 + d;
+			var dd = d - this.dragd0;
+			this.dragd0 = d;
+			if (dd) {
+				inEvent.dragInfo.minimizing = dd < 0;
+			}
+			if (v > 30) {
+				this.swipedLeftFunc();
+				v = 30;
+			}
+			this.setValue(v);
+			return this.preventDragPropagation;
+		}
+	},
+	dragfinish: function(inSender, inEvent) {
+		if (this.dragging) {
+			this.dragging = false;
+			inEvent.preventTap();
+
+			this.animateTo(0);
+
+			return this.preventDragPropagation;
+		}
+	},
+})

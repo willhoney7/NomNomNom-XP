@@ -30,7 +30,7 @@
 		}, databaseHelper.error, databaseHelper.success);
 	};
 
-	databaseHelper.saveSubs = function (subs) {
+	databaseHelper.saveSubs = function (subs, callback) {
 		//@TODO: we can reduce the subs object's size.
 		var data = Base64.encode(JSON.stringify(subs));
 		db.transaction(function(tx){
@@ -38,7 +38,7 @@
 			tx.executeSql('CREATE TABLE IF NOT EXISTS SUBS (data)');
 			tx.executeSql('DELETE FROM SUBS');
 			tx.executeSql('INSERT INTO SUBS (data) VALUES (\''+ data + '\')');
-		}, databaseHelper.error, databaseHelper.success);
+		}, databaseHelper.error, callback || databaseHelper.success);
 
     };
     databaseHelper.loadSubs = function (callback) {
@@ -273,15 +273,19 @@
 		}
     };
 
-    databaseHelper.markArticlesRead = function(array, callback) {
+    databaseHelper.markArticlesRead = function(array, callback, value) {
 
+    	var toModify = {};
     	db.transaction(function(tx){
 			
-			var string = "UPDATE ARTICLES SET read = 'true' WHERE";
-			var keyArray = [];
-				_(array).each(function(article){
-					keyArray.push(article.id);
-				});
+			var string = "UPDATE ARTICLES SET read = '" + ((value !== undefined) ? value: true) + "' WHERE",
+				keyArray = [];
+
+			_(array).each(function(article){
+				keyArray.push(article.id);
+				toModify[article.feed.id] = (toModify[article.feed.id] || 0) + (value !== undefined ? (value ? -1 : 1) : -1);
+			});
+			console.log("toModify",toModify);
 
 			string += buildOrString("id", keyArray);
  
@@ -289,23 +293,31 @@
 
 			tx.executeSql(string);
 
-		}, databaseHelper.error, callback);
+		}, databaseHelper.error, function () {
 
-    	/*databaseHelper.loadArticles(null, function(loadedArticles){
-    		//console.log(JSON.stringify(loadedArticles));
-    		var obj = _.groupBy(loadedArticles, function(item){ return item.read });
-    		var savedUnreadArticles = obj.false || [], savedReadArticles = obj.true || [];
+			databaseHelper.loadSubs(function(subs) {
 
-    		var arrayToAdd, arrayToRemove;
-    		
-    		arrayToAdd = getItemsNotInAnotherArray(readArticles, savedReadArticles);
-    		arrayToRemove = [].concat(getItemsNotInAnotherArray(savedReadArticles, readArticles), readArticles);
-    		
-    		removeArticlesFromDb(arrayToRemove, function(){
-    			addArticlesToDb(arrayToAdd, callback);
-    		});
-    	
-    	})*/
+				_.each(subs, function (subscription) {
+					if (toModify[subscription.id] !== undefined) {
+						subscription.count = (subscription.count || 0) + toModify[subscription.id];
+						subs[0].count = (subs[0].count || 0) + toModify[subscription.id];
+					} else if (subscription.feeds && subscription.feeds.length > 0) {
+						_.each(subscription.feeds, function (feed) {
+							if ((toModify[feed.id] !== undefined)) {
+								subscription.count = (subscription.count || 0) + toModify[feed.id];
+								feed.count = (feed.count || 0) + toModify[feed.id];
+								subs[0].count = (subs[0].count || 0) + toModify[feed.id];
+							}
+						});
+					}
+				});
+
+				console.log("SAVING THESE SUBS", subs);
+
+				databaseHelper.saveSubs(subs, callback);
+			});
+
+		});
     };
 
      databaseHelper.markArticleStarred = function(item, callback) {

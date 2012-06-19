@@ -186,8 +186,6 @@ function mobilizeText (html) {
 		// Replace multiple spaces with a single space.
  		.replace(/ {2,}/g," ");
 
- 		console.log(text);
-
  		return text
  			//.replace(/\{\{img:(.+)\}\}/ig, "<img src='$1'/>")
  			//.replace(/\{\{a:(.+):(.+)\}\}/ig, "<a href='$1'>$2</a>")

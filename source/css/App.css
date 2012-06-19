@@ -249,6 +249,44 @@
   width: 100%;
   margin: 5px 0; }
 
+.itemUnreadIndicator {
+  width: 10px;
+  height: 78px;
+  background-color: #ff7800;
+  position: absolute;
+  left: 0;
+  margin-top: -10px;
+  -webkit-transition: opacity 0.3s ease-out;
+  /* Saf3.2+, Chrome */
+  -moz-transition: opacity 0.3s ease-out;
+  /* FF4+ */
+  -o-transition: opacity 0.3s ease-out;
+  /* Opera 10.5+ */
+  transition: opacity 0.3s ease-out; }
+
+.leftShadow {
+  -webkit-box-shadow: -5px 0px 5px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: -5px 0px 5px 2px rgba(0, 0, 0, 0.1);
+  width: 10px;
+  height: 78px;
+  position: absolute;
+  left: 10px;
+  margin-top: -10px; }
+
+.unreadIndicatorContainer {
+  z-index: -10; }
+  .unreadIndicatorContainer .unreadIndicator {
+    width: 50px;
+    height: 100%;
+    background-color: #ff7800;
+    -webkit-transition: opacity 0.3s ease-out;
+    /* Saf3.2+, Chrome */
+    -moz-transition: opacity 0.3s ease-out;
+    /* FF4+ */
+    -o-transition: opacity 0.3s ease-out;
+    /* Opera 10.5+ */
+    transition: opacity 0.3s ease-out; }
+
 .articlePanel {
   /*z-index: -1;
   margin-top: 44px;*/
@@ -260,49 +298,44 @@
     .articlePanel .articleList .item, .articlePanel .articleList .item.Medium {
       font-size: 16px;
       max-height: 78px;
-      min-height: 62px; }
+      min-height: 62px;
+      /*.unreadIndicator {
+      	min-height: $baseFontSize * 2 + 12px;
+      }*/ }
       .articlePanel .articleList .item .articleTime, .articlePanel .articleList .item .articleSubtitle, .articlePanel .articleList .item.Medium .articleTime, .articlePanel .articleList .item.Medium .articleSubtitle {
         font-size: 14px; }
       .articlePanel .articleList .item .articleTitle, .articlePanel .articleList .item.Medium .articleTitle {
         max-height: 38px; }
-      .articlePanel .articleList .item .unreadIndicator, .articlePanel .articleList .item.Medium .unreadIndicator {
-        min-height: 44px; }
     .articlePanel .articleList .item.Small {
       font-size: 14px;
       max-height: 72px;
-      min-height: 58px; }
+      min-height: 58px;
+      /*.unreadIndicator {
+      	min-height: $baseFontSize * 2 + 12px;
+      }*/ }
       .articlePanel .articleList .item.Small .articleTime, .articlePanel .articleList .item.Small .articleSubtitle {
         font-size: 12px; }
       .articlePanel .articleList .item.Small .articleTitle {
         max-height: 32px; }
-      .articlePanel .articleList .item.Small .unreadIndicator {
-        min-height: 40px; }
     .articlePanel .articleList .item.Large {
       font-size: 18px;
       max-height: 84px;
-      min-height: 66px; }
+      min-height: 66px;
+      /*.unreadIndicator {
+      	min-height: $baseFontSize * 2 + 12px;
+      }*/ }
       .articlePanel .articleList .item.Large .articleTime, .articlePanel .articleList .item.Large .articleSubtitle {
         font-size: 16px; }
       .articlePanel .articleList .item.Large .articleTitle {
         max-height: 44px; }
-      .articlePanel .articleList .item.Large .unreadIndicator {
-        min-height: 48px; }
     .articlePanel .articleList .item {
       border-bottom: 1px solid silver;
+      border-right: 1px solid silver;
       padding: 10px 12px 5px 20px;
       /*background-color: #eee;*/
       font-size: 16px;
       max-height: 78px;
       min-height: 60px; }
-      .articlePanel .articleList .item .unreadIndicator {
-        width: 5px;
-        /*@TODO: work on this more. I want this to stretch.*/
-        height: 100%;
-        float: left;
-        position: relative;
-        bottom: 3px;
-        right: 10px;
-        background-color: #ff7800; }
       .articlePanel .articleList .item .articleTitle {
         text-overflow: ellipsis;
         overflow: hidden;

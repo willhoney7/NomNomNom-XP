@@ -356,11 +356,54 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 		max-height: $baseFontSize * 2 + ($baseFontSize - 10px)
 	}	
 
-	.unreadIndicator {
+	/*.unreadIndicator {
 		min-height: $baseFontSize * 2 + 12px;
-	}
+	}*/
 }
 
+@mixin opacityFade {
+	-webkit-transition: opacity 0.3s ease-out;  /* Saf3.2+, Chrome */
+    -moz-transition: opacity 0.3s ease-out;  /* FF4+ */
+    -o-transition: opacity 0.3s ease-out;  /* Opera 10.5+ */
+    transition: opacity 0.3s ease-out;
+}
+
+.itemUnreadIndicator {
+	width: 10px;	
+	height: 78px;
+	background-color: #ff7800;
+	position:absolute;
+	left:0;
+	margin-top: -10px;
+	//top:0;
+
+	@include opacityFade;
+}
+.leftShadow {
+	-webkit-box-shadow:  -5px 0px 5px 2px rgba(0, 0, 0, .1);
+    box-shadow:  -5px 0px 5px 2px rgba(0, 0, 0, .1);
+
+    width: 10px;	
+	height: 78px;
+	position:absolute;
+	left: 10px;
+	margin-top: -10px;
+
+
+}
+
+.unreadIndicatorContainer {
+	z-index: -10;
+
+	.unreadIndicator {
+		width: 50px;
+		height: 100%;
+		background-color: #ff7800;
+
+
+		@include opacityFade;
+	}
+}
 
 .articlePanel {
 	/*z-index: -1;
@@ -386,23 +429,13 @@ $iconDisplaceY: $unreadDisplaceY + 8px;
 
 		.item {
 			border-bottom: 1px solid silver;
+			border-right: 1px solid silver;
 			padding: 10px 12px 5px 20px;
 			/*background-color: #eee;*/
 			font-size: 16px;
 			max-height: 78px;
 			min-height: 60px;
 
-
-			.unreadIndicator {
-				width: 5px;
-				/*@TODO: work on this more. I want this to stretch.*/
-				height: 100%;
-				float: left;
-				position: relative;
-				bottom: 3px;
-				right: 10px;
-				background-color: #ff7800;
-			}
 
 			.articleTitle {
 				text-overflow: ellipsis;
