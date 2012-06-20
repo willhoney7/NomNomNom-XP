@@ -276,6 +276,26 @@ enyo.kind({
 					callback();
 				});
 				break;
+			case "sendToService":
+				var toService = data.data.service;
+				var item = data.data.item;
+
+				console.log("Saving", item, "to", toService);
+
+				if(AppPrefs.get(toService + "Authenticated")){
+					var service = new serviceWrapper(toService);
+					service.add({title: item.title, url: item.url}, enyo.bind(this, function (response) {
+						console.log("SENT ITEM", response);
+						databaseHelper.clearFromQueue(obj.id, callback);
+
+						//humane.log("Sent!");
+					}));
+				} else {
+					console.log("No longer authenticated...");
+					databaseHelper.clearFromQueue(obj.id, callback);
+				}
+				break;
+						
 		}
 	}
 

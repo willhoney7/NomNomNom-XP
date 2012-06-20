@@ -266,7 +266,7 @@ enyo.kind({
 
 	markAllRead: function () {
 		console.log(_.reject(this.articles, function(article) { return reader.isRead(article) }));
-		reader.background.markAllRead(this.sub, _.reject(this.articles, function(article) { return reader.isRead(article) }), enyo.bind(this, function(){
+		reader.background.markAllRead(_.reject(this.articles, function(article) { return reader.isRead(article) }), enyo.bind(this, function(){
 			_.each(this.articles, function(article) {
 				article.read = true;
 			});
@@ -291,10 +291,21 @@ enyo.kind({
 		var service = new serviceWrapper(inSender.service);
 
 		if(AppPrefs.get(inSender.service + "Authenticated")){
-			service.add({title: item.title, url: item.url}, enyo.bind(this, function (response) {
-				console.log(response);
-				humane.log("Sent!");
-			}));
+			AppUtils.testInternetConnection(function(hasInternet){
+				if (hasInternet) {
+					service.add({title: item.title, url: item.url}, enyo.bind(this, function (response) {
+						console.log(response);
+						humane.log("Sent!");
+					}));
+				} else {
+					console.log("QUEUE");
+
+					databaseHelper.queue({action: "sendToService", data: {item: item, service: inSender.service}});
+					humane.log("Queued!");
+				}
+
+			});
+	
 		} else {
 			humane.log("You need to log in first!");
 			//@TODO: go to preferences

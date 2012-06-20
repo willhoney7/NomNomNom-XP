@@ -14,7 +14,7 @@ reader.background.markRead = function(item, callback){
 
 			if (callback)
 				callback();
-			
+
 		}, reader.isRead(item));
 	}
 
@@ -57,18 +57,12 @@ reader.background.markStarred = function(item, callback){
 };
 
 
-reader.background.markAllRead = function(sub, articles, callback){
+reader.background.markAllRead = function(articles, callback){
 
 	function adjustDb () {
 
 		databaseHelper.markArticlesRead(articles, enyo.bind(this, function(){
 			console.log("read articles saved methinks");
-
-			/*_.each(articles, function(article){
-				reader.decrementUnreadCount(article.feed.id, 1);
-			});
-
-			databaseHelper.saveSubs(reader.getFeeds());*/
 
 			if (callback)
 				callback();
@@ -77,11 +71,47 @@ reader.background.markAllRead = function(sub, articles, callback){
 
 	AppUtils.testInternetConnection(function(hasInternet){
 		if(hasInternet){
-			reader.markAllAsRead(sub.id, enyo.bind(this, function(){
+			
+			//While we can markAllRead by labelId, this prevents marking as unread later on.
+			//So we are using our sets method.
+
+			var articleSets = _(articles).chain().groupBy(function(article, index){ 
+				return "set" + Math.floor(index/100); 
+			}).toArray().value();
+
+			var i = 0,
+				iterate = function() {
+					if (i < articleSets.length){
+						var subIds = [], articleIds = [];
+
+						_.each(articleSets[i], function(article, index){
+							subIds.push(article.feed.id);
+							articleIds.push(article.id);	
+						});
+
+						reader.setItemTag(subIds, articleIds, "read", true, function () {
+							console.log("WORKED?");
+							i++;
+							iterate();
+						
+						}, function () {
+							console.log("Mark all read from background.js failed");
+							callback();
+						})
+					} else {
+						console.log("Marked all read. DONE!");
+						adjustDb();
+						//databaseHelper.clearFromQueue(obj.id, callback);
+					}
+				}
+
+			iterate();
+
+			/*reader.markAllAsRead(sub.id, enyo.bind(this, function(){
 
 				//console.log("marked read", item);
 				adjustDb();
-			}));
+			}));*/
 		} else {
 			console.log("QUEUED");
 			databaseHelper.queue({action: "markAllRead", data: articles});
@@ -346,7 +376,7 @@ reader.background.unsubscribeFeed = function(feedId, callback){
 					for (var j = feeds[i].feeds.length - 1; j >= 0; j--) {
 						if(feeds[i].feeds[j].id === feedId){
 							if (feeds[i].count) {
-								feeds[i].count -= feeds[i].feeds[j].count;
+								feeds[i].count -= (feeds[i].feeds[j].count || 0);
 							}
 							item = feeds[i].feeds.splice(j, 1)[0]
 							break;
@@ -359,7 +389,9 @@ reader.background.unsubscribeFeed = function(feedId, callback){
 			}
 			databaseHelper.saveSubs(feeds);
 
-			//@TODO REMOVE THE ARTICLES FROM THE DB
+			databaseHelper.removeArticlesByFeed(feedId, function () {
+				console.log("REMOVED");
+			});
 
 			if (callback)
 				callback();

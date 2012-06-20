@@ -1,9 +1,5 @@
 TODO
 
-Slide article to side to do things
-	left to toggle read
-	right to view
-
 Graphics
 	Home --> Grid
 	Edit
@@ -16,10 +12,12 @@ Flesh Out Article View Page
 		Delicious X
 		Pinboard X (TEST)
 		Readability 
+		Facebook
+		Twitter
 		Email //WITH PHONEGAP
-
 		Gimmebar //update
-		QUEUE //on launch?
+
+		Test Queue
 
 	Scroll to next article
 	Make it look good!
@@ -27,10 +25,9 @@ Flesh Out Article View Page
 	Image viewer! //update or on launch?
 
 Mark All Read
-	MAKE IT USE SETS.	
+	Test	
 
 Spinners
-	Change the loading subs + articles to use the title bar
 	Canvas?
 
 Tooltips

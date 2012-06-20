@@ -273,6 +273,17 @@
 		}
     };
 
+    databaseHelper.removeArticlesByFeed = function (feedId, callback) {
+
+    	db.transaction(function(tx){
+			
+			var string = "DELETE FROM ARTICLES WHERE feed = '" + feedId + "'";
+
+			tx.executeSql(string);
+			
+		}, databaseHelper.error, callback);
+    };
+
     databaseHelper.markArticlesRead = function(array, callback, value) {
 
     	var toModify = {};

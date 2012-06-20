@@ -16,7 +16,7 @@ enyo.kind({
 		]},
 
 		{name: "normalToolbar", kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
-			{name: "titleBar", content: "NomNomNomXP", classes: "titleBarText truncating-text"},
+			{name: "titleBar", content: "NomNomNom XP", classes: "titleBarText truncating-text"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-edit-outline.png"), ontap: "enterEditMode"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},
@@ -39,6 +39,11 @@ enyo.kind({
     	subscribe("refreshGrid", enyo.bind(this, function(arg){
     		this.loadFeedsFromOnline();
     	}));
+
+    	subscribe("updateTitle", enyo.bind(this, function(arg){
+    		this.$.titleBar.setContent(arg);
+    	}));
+
 	},
 	rendered: function () {
 		this.inherited(arguments);
@@ -114,18 +119,20 @@ enyo.kind({
 	loadFeedsFromOnline: function(){
 		AppUtils.wrapWithInternetTest(enyo.bind(this, function(){
 
-			humane.remove();humane.remove();humane.remove();
-			humane.log("Loading Subscriptions...", {timeout: 50000});
+			//humane.remove();humane.remove();humane.remove();
+			publish("updateTitle", ["Loading Subscriptions..."]);
+			//humane.log("Loading Subscriptions...", {timeout: 50000});
 
 			//console.log("LOADING FEEDS FROM ONLINE");
 
 			reader.loadFeeds(enyo.bind(this, function (subs){
 				//console.log("New Subs loaded from online");
 				
-				humane.remove();humane.remove();humane.remove();
+				//humane.remove();humane.remove();humane.remove();
 				
-				humane.log("Loading Articles...", {timeout: 5000000});
-				
+				//humane.log("Loading Articles...", {timeout: 5000000});
+				publish("updateTitle", ["Loading Articles..."]);
+	
 				reader.getItems(subs[0].id, enyo.bind(this, 
 					function(unreadArticles){
 						//console.log("GOT ITEMS");
@@ -137,7 +144,8 @@ enyo.kind({
 										//console.log(starredArticles);
 										databaseHelper.saveArticles({unread: unreadArticles, read: readArticles, starred: starredArticles}, enyo.bind(this, function(){
 											//console.log("articles saved! time to move on");
-											humane.remove();humane.remove();humane.remove();
+											publish("updateTitle", ["NomNomNomXP"]);
+											//humane.remove();humane.remove();humane.remove();
 
 											if(!_.isEqual(subs, this.gridItems)){
 												databaseHelper.saveSubs(subs);
