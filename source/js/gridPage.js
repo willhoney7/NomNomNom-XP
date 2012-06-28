@@ -17,6 +17,7 @@ enyo.kind({
 
 		{name: "normalToolbar", kind: "onyx.Toolbar", classes: "onyx-toolbar-inline", components: [
 			{name: "titleBar", content: "NomNomNom XP", classes: "titleBarText truncating-text"},
+			
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-settings.png"), ontap: "bubbleEvent", eventToBubble: "onShowSettingsPage"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-edit-outline.png"), ontap: "enterEditMode"},
 			{kind: "onyx.IconButton", classes: "floatRight", src: AppUtils.getImagePath("menu-icon-refresh.png"), ontap: "loadFeedsFromOnline"},

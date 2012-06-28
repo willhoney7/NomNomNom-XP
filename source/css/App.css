@@ -22,11 +22,26 @@
   margin: 20px;
   text-align: center; }
 
+.enyo-scrolling-image {
+  position: relative; }
+
+.onyx-swipeable-item-content {
+  background-color: #f2ede9; }
+
+.onyx-toolbar {
+  background-color: #323232;
+  height: 50px; }
+
+.contentBackground {
+  background-color: #f2ede9; }
+
 /* 
  *	Login Stuff
  */
 .onyx-toolbar {
-  padding: 5px 8px 5px 8px; }
+  padding: 5px 8px 5px 8px;
+  border-left: none;
+  border-right: none; }
 
 /*.loginGroup {
 	@media screen and (min-width: 400px) {
@@ -189,7 +204,7 @@
 .grid {
   padding-left: 5px;
   padding-top: 5px;
-  background: #666666 url("../../assets/grid-background.png") repeat top left; }
+  background: #666666 url("../../assets/grid-background.png") repeat; }
 
 .iPad .grid-item .unread, .iPhone .grid-item .unread {
   bottom: 79px; }
@@ -351,14 +366,16 @@
         overflow: hidden;
         white-space: nowrap; }
     .articlePanel .articleList .divider {
-      background-color: #666;
+      background-color: #555;
       color: white;
       font-weight: normal;
       font-size: 14px;
       margin: 0;
       padding: 5px 25px; }
   .articlePanel .articleView {
-    border-left: 1px #3A3A3A solid; }
+    border-left: 1px #3A3A3A solid;
+    -webkit-box-shadow: -5px 0px 10px 2px rgba(30, 30, 30, 0.2);
+    box-shadow: -5px 0px 10px 2px rgba(30, 30, 30, 0.2); }
     .articlePanel .articleView .articleContent {
       font-size: 16px;
       margin: 15px; }

@@ -136,6 +136,7 @@ enyo.kind({
 	},
 	showAddFeedPage: function () {
 		this.changePage("addFeedPage");
+		this.changePage("tourPage");
 	},
 
 	nowOnline: function(){

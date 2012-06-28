@@ -75,7 +75,7 @@ enyo.kind({
 				{kind: "onyx.IconButton", src:AppUtils.getImagePath("menu-icon-home.png"), ontap: "bubbleEvent", eventToBubble: "onShowGridPage", opts: {refresh: true}, classes: "abs", style: "left: 10px; margin: auto;"},
 				{name: "subTitle", content: "", classes: "subTitle center", style: "text-align: center"},
 			]},
-			{kind: "enyo.Scroller", fit: true, horizontal: "hidden", components: [
+			{kind: "enyo.Scroller", fit: true, classes: "contentBackground", horizontal: "hidden", components: [
 				{name: "list", kind: "Repeater", count: 0, multiSelect: false, fit: true, classes: "list", onSetupItem: "setupItem", components: [
 					{name: "divider", classes: "divider"},
 					{kind: "articleItem", onSwipedRight: "viewArticle", ontap: "viewArticle"}
@@ -89,14 +89,14 @@ enyo.kind({
 			]},		
 		]},
 		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
-			{kind: "enyo.Scroller", fit: true, components: [
+			{kind: "enyo.Scroller", fit: true, classes: "contentBackground", components: [
 				{name: "articleViewTime", allowHtml: true, classes: "articleTime"},
 				{name: "articleViewTitle", allowHtml: true, classes: "articleTitle"},
 				{name: "articleViewContent", allowHtml: true, fit: true, classes: "articleContent"}
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", components: [
 				{kind: "onyx.Grabber", style: "position: absolute;"},
-				{classes: "center", style: "margin: inherit", components: [
+				{classes: "center", components: [
 					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-mark-read.png"), ontap: ""},
 					{name: "starredIcon", kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-starred-outline.png"), ontap: "toggleStarred"},
 					{kind: "onyx.IconButton", src: AppUtils.getImagePath("menu-icon-down.png"), ontap: "increaseIndex"},
@@ -228,11 +228,17 @@ enyo.kind({
 		if (!document.querySelector) {
 			console.error("OH NOES NO QUERY SELECTOR");
 		} else {
-			document.querySelector(".articleContent img").className = "firstImage";
+			try {
+				document.querySelector(".articleContent img").className = "firstImage";
+			} catch (e) {};
 		}
 
-		//this.$.list.select(this.articleIndex, item);
-
+		//this.$.list.renderRow(this.articleIndex);
+		setTimeout(enyo.bind(this, function () {
+			_.find(this.$.list.getClientControls(), enyo.bind(this, function (control) {
+				return (control.index === this.articleIndex);
+			})).controls[1].animateToRead();
+		}), 0);
 	},
 	clearCurrentArticle: function () {
 		this.$.articleViewTitle.setContent("");
@@ -321,6 +327,9 @@ enyo.kind({
 	published: {
 		item: {}
 	},
+	events: {
+		onAnimateToRead: "animateToRead"
+	},
 	defaultContentClasses: "item onyx-swipeable-item-content",
 	components: [
 		{name: "client", kind: "SpecialSlideable", value: 0, min: 0, max: 50, unit: "px", ondragstart: "clientDragStart", ondragfinish: "clientDragFinish", onSwipedLeft: "toggleRead", components: [
@@ -361,12 +370,22 @@ enyo.kind({
 
 		console.log("Set to", item.read);
 
-		this.$.unreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
-		this.$.secondUnreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
-		this.$.leftShadow.applyStyle("opacity", reader.isRead(item) ? 0 : 1)
+		this.$.unreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1);
+		this.$.secondUnreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1);
+		this.$.leftShadow.applyStyle("opacity", reader.isRead(item) ? 0 : 1);
 		//this.$.unreadIndicator.setShowing(!reader.isRead(item));
 		//this.$.secondUnreadIndicator.setShowing(!reader.isRead(item));
+	},
+	animateToRead: function (inSender, inItem) {
 
+		var item = this.getItem();
+
+		//if(inItem.id !== item.id)
+		//	return;
+
+		this.$.unreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1);
+		this.$.secondUnreadIndicator.applyStyle("opacity", reader.isRead(item) ? 0 : 1);
+		this.$.leftShadow.applyStyle("opacity", reader.isRead(item) ? 0 : 1);	
 	},
 	clientDragStart: function(inSender, inEvent) {
 		if (inSender.dragging) {
