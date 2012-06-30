@@ -257,7 +257,7 @@ GestureCallback.prototype.onGestureStart = function ( e ) {
 GestureCallback.prototype.onGestureChange = function ( e ) {
   this.scale = e.scale;
   this.rotation = e.rotation;
-  if( this.change_callback ) this.change_callback( this.scale, this.rotation );
+  if( this.change_callback ) this.change_callback( this.scale, this.rotation, e );
 };
 
 GestureCallback.prototype.onGestureEnd = function ( e ) {
@@ -266,7 +266,7 @@ GestureCallback.prototype.onGestureEnd = function ( e ) {
 
   this.scale = e.scale;
   this.rotation = e.rotation;
-  if( this.end_callback ) this.end_callback( this.scale, this.rotation );
+  if( this.end_callback ) this.end_callback( this.scale, this.rotation, e );
 };
 
 GestureCallback.prototype.dispose = function() {

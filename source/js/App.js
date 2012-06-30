@@ -40,7 +40,6 @@ enyo.kind({
 
 		//can't call this on create
 		this.checkLogin();
-
 	},
 	checkLogin: function(){
 		if (reader.hasAuth()) {
@@ -136,7 +135,7 @@ enyo.kind({
 	},
 	showAddFeedPage: function () {
 		this.changePage("addFeedPage");
-		this.changePage("tourPage");
+		//this.changePage("tourPage");
 	},
 
 	nowOnline: function(){

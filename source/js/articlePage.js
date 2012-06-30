@@ -89,10 +89,16 @@ enyo.kind({
 			]},		
 		]},
 		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
+			{name: "imageViewer", showing: false, classes: "imageView", components: [
+				{classes: "imageContainer", components: [
+					{name: "imageView", kind: "enyo.Image"},
+					{name: "imageCaption", classes: "imageCaption"}
+				]}
+			]},
 			{kind: "enyo.Scroller", fit: true, classes: "contentBackground", components: [
 				{name: "articleViewTime", allowHtml: true, classes: "articleTime"},
 				{name: "articleViewTitle", allowHtml: true, classes: "articleTitle"},
-				{name: "articleViewContent", allowHtml: true, fit: true, classes: "articleContent"}
+				{name: "articleViewContent", allowHtml: true, fit: true, onclick: "articleTap",classes: "articleContent"},
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", components: [
 				{kind: "onyx.Grabber", style: "position: absolute;"},
@@ -113,7 +119,8 @@ enyo.kind({
 				]}
 				
 			]},
-		]}
+		]},
+		
 	],
 	rendered: function() {
 		this.size();
@@ -122,6 +129,37 @@ enyo.kind({
 		var newHumane = humane.create();
 			newHumane.log(window.innerWidth + " " + AppUtils.getPixelRatio());
 
+		if(this.$.articleViewContent.hasNode()) {
+			console.log("HAS NODE?");
+			var pinchCallback = new GestureCallback(
+				this.$.articleViewContent.node, 
+				enyo.bind(this, function (scale, rotation, e) {
+					//humane.log("done", scale, rotation);
+				  	//console.log('done: '+scale+','+rotation);
+					//this.$.articleViewContent.setContent(JSON.stringify(e));
+				}), 
+				function (scale, rotation, e) {
+					//humane.log("changing " + scale, rotation);
+					if (scale > 1) {
+						if (/img/gi.test(inEvent.target.tagName)){
+							this.viewImage(inEvent.target);
+							console.log("VIEW THIS IMAGE. NOW");
+						}
+					}
+				}
+			);
+		}
+
+	},
+
+
+	articleTap: function (inSender, inEvent) {
+		if (/img/gi.test(inEvent.target.tagName)){
+			this.viewImage(inEvent.target);
+			console.log("VIEW THIS IMAGE. NOW");
+		}
+		inEvent.preventDefault();
+		return true;
 	},
 	resizeHandler: function() {
 		this.size();
@@ -205,6 +243,11 @@ enyo.kind({
 		} else {
 			return true;
 		}
+	},
+	viewImage: function (image) {
+		this.$.imageView.setSrc(image.src);
+		this.$.imageCaption.setContent(image.alt || "");
+		this.$.imageViewer.setShowing(true);
 	},
 
 	showCurrentArticle: function(){
