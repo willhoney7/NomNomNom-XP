@@ -310,8 +310,10 @@
   height: 100%;
   background-color: rgba(20, 20, 20, 0.8);
   z-index: 5000; }
+  .imageView img {
+    max-width: 100%; }
   .imageView .imageContainer {
-    margin: 20px;
+    margin-top: 20px;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -321,7 +323,15 @@
     .imageView .imageContainer .imageCaption {
       font-size: 14px;
       color: white;
-      padding: 15px; }
+      padding: 15px;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0px;
+      margin: 0;
+      background-color: black;
+      vertical-align: middle;
+      min-height: 20px; }
 
 .articlePanel {
   /*z-index: -1;

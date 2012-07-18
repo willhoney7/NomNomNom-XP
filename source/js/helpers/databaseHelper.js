@@ -77,11 +77,34 @@
 
     }
 
-    function addArticlesToDb(array, callback){
+    function addArticlesToDb(array, callback) {
     	if(array.length === 0){
     		callback();
     		return;
     	}
+
+		var articleSets = _(array).chain().groupBy(function(item, index){ 
+			return "set" + Math.floor(index/200); 
+		}).toArray().value();
+
+		var i = 0,
+			iterate = function() {
+				if (i < articleSets.length){
+					_addArticlesToDb(articleSets[i], function () {
+						console.log("WORKED?");
+						i++;
+						iterate();
+					});
+				} else {
+					callback();
+				}
+			}
+
+		iterate();
+   
+    }
+
+    function _addArticlesToDb(array, callback){
 
     	db.transaction(function(tx){
 			

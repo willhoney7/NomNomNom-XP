@@ -45,14 +45,18 @@ enyo.kind({
 	attemptLogin: function () {
 		this.$.errorMessage.setContent("");
 
+		console.log("ATTEMPTING LOGIN");
+
 		AppUtils.testInternetConnection(enyo.bind(this, function(hasInternet){
+			console.log("GOT INTERNET?" + hasInternet);
+
 			if(hasInternet){
 				reader.login(
 					this.$.username.getValue(), 
 					this.$.password.getValue(), 
 					enyo.bind(this, function(){
 					//success
-						console.log("succes 1");
+						console.log("success 1");
 						reader.getToken(
 							enyo.bind(this, function(){
 								//success

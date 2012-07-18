@@ -29,7 +29,7 @@ enyo.kind({
 	create: function () {
 		this.inherited(arguments);
 
-		window.document.getElementsByTagName("body")[0].className += " " + AppUtils.getPlatform();
+		window.document.body.className = "enyo-unselectable onyx " + AppUtils.getPlatform();
 
 		databaseHelper.loadDb();
 

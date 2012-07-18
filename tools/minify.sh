@@ -1,4 +1,5 @@
 #!/bin/bash
+rm ../build/*
 
 # build enyo
 pushd ../enyo/minify > /dev/null

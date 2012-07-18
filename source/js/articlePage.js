@@ -6,7 +6,13 @@ enyo.kind({
 		onViewArticle: ""
 	},
 	components:[
-		{kind: "ArticlePanel", classes: "enyo-fit", onSetupItem: "setupItem"}
+		{kind: "ArticlePanel", classes: "enyo-fit", onViewImage: "viewImage", onSetupItem: "setupItem"},
+		{name: "imageViewer", showing: false, classes: "imageView", components: [
+			{classes: "imageContainer", components: [
+				{name: "imageView", kind: "enyo.Image"},
+				{name: "imageCaption", classes: "imageCaption"}
+			]}
+		]},
 	],
 	
 		//for article card rendering
@@ -22,6 +28,32 @@ enyo.kind({
 		//} else {
 			//this.$.articleCards.show();
 		//}
+	},
+
+	rendered: function () {
+		this.inherited(arguments);
+
+		if(this.$.imageView.hasNode()) {
+			console.log("HAS NODE?");
+			var pinchCallback = new GestureCallback(
+				this.$.imageView.node, 
+				enyo.bind(this, function (scale, rotation, e) {
+					//humane.log("done", scale, rotation);
+				  	//console.log('done: '+scale+','+rotation);
+					//this.$.articleViewContent.setContent(JSON.stringify(e));
+				}), 
+				enyo.bind(this, function (scale, rotation, e) {
+					//humane.log("changing " + scale, rotation);
+					if (scale < 1) {
+						if (/img/gi.test(inEvent.target.tagName)){
+							this.closeImage();
+							//this.bubble("onViewImage", inEvent);//this.viewImage(inEvent.target);
+							console.log("CLOSE IMAGE. NOW");
+						}
+					}
+				})
+			);
+		}
 	},
 
 	showingChanged: function(previousValue) {
@@ -48,6 +80,19 @@ enyo.kind({
 		this.bubble(inSender.eventToBubble, inSender.opts);
 	},
 
+	viewImage: function (inSender, inEvent) {
+		var image = inEvent.target;
+
+		this.$.imageView.setSrc(image.src);
+		this.$.imageCaption.setContent(image.alt || "");
+		this.$.imageViewer.setShowing(true);
+	},
+	closeImage: function (inSender, inEvent) {
+		this.$.imageView.setSrc("");
+		this.$.imageCaption.setContent("");
+		this.$.imageViewer.setShowing(false);
+	},
+
 
 	articles: [],
 	loadArticles: function(sub, articles){
@@ -67,7 +112,8 @@ enyo.kind({
 	arrangerKind: "CarouselArranger",
 	handlers: {
 		onSetupItem: "",
-		onShowGridPage: ""
+		onShowGridPage: "",
+		onViewImage: ""
 	},
 	components: [
 		{name: "left", classes: "articleList", layoutKind: "FittableRowsLayout", components: [
@@ -89,16 +135,10 @@ enyo.kind({
 			]},		
 		]},
 		{name: "body", Xfit: true, style: "Xwidth: 100%;", layoutKind: "FittableRowsLayout", classes: "articleView", components: [
-			{name: "imageViewer", showing: false, classes: "imageView", components: [
-				{classes: "imageContainer", components: [
-					{name: "imageView", kind: "enyo.Image"},
-					{name: "imageCaption", classes: "imageCaption"}
-				]}
-			]},
 			{kind: "enyo.Scroller", fit: true, classes: "contentBackground", components: [
 				{name: "articleViewTime", allowHtml: true, classes: "articleTime"},
 				{name: "articleViewTitle", allowHtml: true, classes: "articleTitle"},
-				{name: "articleViewContent", allowHtml: true, fit: true, onclick: "articleTap",classes: "articleContent"},
+				{name: "articleViewContent", allowHtml: true, fit: true, onclick: "articleTap", classes: "articleContent"},
 			]},
 			{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", components: [
 				{kind: "onyx.Grabber", style: "position: absolute;"},
@@ -142,7 +182,7 @@ enyo.kind({
 					//humane.log("changing " + scale, rotation);
 					if (scale > 1) {
 						if (/img/gi.test(inEvent.target.tagName)){
-							this.viewImage(inEvent.target);
+							this.bubble("onViewImage", inEvent);//this.viewImage(inEvent.target);
 							console.log("VIEW THIS IMAGE. NOW");
 						}
 					}
@@ -155,7 +195,7 @@ enyo.kind({
 
 	articleTap: function (inSender, inEvent) {
 		if (/img/gi.test(inEvent.target.tagName)){
-			this.viewImage(inEvent.target);
+			//this.bubble("onViewImage", inEvent);//this.viewImage(inEvent.target);
 			console.log("VIEW THIS IMAGE. NOW");
 		}
 		inEvent.preventDefault();
@@ -243,11 +283,6 @@ enyo.kind({
 		} else {
 			return true;
 		}
-	},
-	viewImage: function (image) {
-		this.$.imageView.setSrc(image.src);
-		this.$.imageCaption.setContent(image.alt || "");
-		this.$.imageViewer.setShowing(true);
 	},
 
 	showCurrentArticle: function(){

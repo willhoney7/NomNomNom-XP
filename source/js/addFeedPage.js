@@ -59,7 +59,7 @@ enyo.kind({
 			reader.processFeedInput(input, enyo.bind(this, function (response) {
 				if (response.isFeed) {
 					humane.log("Adding Feed");
-					this.subscribeToUrl(input, title)
+					this.subscribeToUrl(input, response.title)
 				} else if (response.results) {
 					this.resultList = response.results;
 					this.$.resultsList.setCount(this.resultList.length);
